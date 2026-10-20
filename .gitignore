@@ -1,0 +1,15 @@
+# Dependencias y build
+node_modules/
+.next/
+out/
+*.tsbuildinfo
+next-env.d.ts
+
+# Secretos — regla anti-spaghetti #1. NUNCA quitar estas líneas.
+.env
+.env.local
+.env.*.local
+
+# Sistema
+.DS_Store
+Thumbs.db

@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,400;0,600;0,700;0,800;0,900&display=swap" rel="stylesheet">
+<style>
+  body { margin: 0; background: #E9E4FB; font-family: Nunito, system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+  * { box-sizing: border-box; }
+  a { color: #6C3BF4; text-decoration: none; }
+  a:hover { color: #5528DC; }
+  ::-webkit-scrollbar { width: 0; height: 0; }
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; margin: 0 auto; background: #F5F2FF; color: #1A1035; display: flex; flex-direction: column; overflow: hidden; font-family: Nunito, system-ui, sans-serif;">
+
+  <div style="flex: 1; overflow-y: auto; padding: 0 20px 20px;">
+
+    <div style="display: flex; align-items: center; justify-content: space-between; padding: 18px 0 4px;">
+      <span style="font-size: 22px; font-weight: 900; letter-spacing: -0.02em;">Reporte</span>
+      <span style="font-size: 12.5px; font-weight: 800; color: #8B83AD; letter-spacing: 0.04em; text-transform: uppercase;">Gastos</span>
+    </div>
+
+    <div style="display: flex; align-items: center; justify-content: space-between; background: #fff; border-radius: 18px; padding: 8px 10px; margin-top: 14px;">
+      <button type="button" onClick="{{ mesAnterior }}" style="width: 36px; height: 36px; border: none; border-radius: 13px; background: #F2EEFF; color: #6C3BF4; display: grid; place-items: center; cursor: pointer;" style-hover="background: #E3D9FF;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"></path></svg>
+      </button>
+      <span style="font-size: 15.5px; font-weight: 900; letter-spacing: -0.01em;">{{ mesTitulo }}</span>
+      <button type="button" onClick="{{ mesSiguiente }}" style="width: 36px; height: 36px; border: none; border-radius: 13px; background: #F2EEFF; color: #6C3BF4; display: grid; place-items: center; cursor: pointer;" style-hover="background: #E3D9FF;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"></path></svg>
+      </button>
+    </div>
+
+    <div style="padding: 24px 0 6px; display: flex; flex-direction: column; gap: 6px;">
+      <span style="font-size: 13px; font-weight: 800; letter-spacing: 0.07em; text-transform: uppercase; color: #8B83AD;">Total gastado</span>
+      <span style="font-size: 44px; font-weight: 900; letter-spacing: -0.04em; line-height: 1; font-variant-numeric: tabular-nums;">{{ totalTexto }}</span>
+      <span style="{{ estiloChip }}">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="{{ estiloFlecha }}"><path d="M7 10l5 5 5-5"></path></svg>
+        {{ comparacion }}
+      </span>
+    </div>
+
+    <div style="background: #fff; border-radius: 20px; padding: 18px; margin-top: 18px; display: flex; align-items: center; gap: 16px; box-shadow: 0 6px 18px rgba(26,16,53,0.05);">
+      <div style="position: relative; width: 148px; height: 148px; flex: none;">
+        <svg viewBox="0 0 140 140" width="148" height="148" style="transform: rotate(-90deg);">
+          <circle cx="70" cy="70" r="54" fill="none" stroke="#F2EEFF" stroke-width="20"></circle>
+          <sc-for list="{{ arcos }}" as="a" hint-placeholder-count="6">
+            <circle cx="70" cy="70" r="54" fill="none" stroke="{{ a.color }}" stroke-width="20" stroke-dasharray="{{ a.dash }}" stroke-dashoffset="{{ a.offset }}" stroke-linecap="butt"></circle>
+          </sc-for>
+        </svg>
+        <div style="position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px;">
+          <span style="font-size: 11px; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; color: #8B83AD;">Mayor</span>
+          <span style="font-size: 17px; font-weight: 900; letter-spacing: -0.02em;">{{ mayorNombre }}</span>
+          <span style="font-size: 12.5px; font-weight: 800; color: #6C3BF4;">{{ mayorPct }}</span>
+        </div>
+      </div>
+      <div style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 9px;">
+        <sc-for list="{{ leyenda }}" as="l" hint-placeholder-count="6">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span style="width: 10px; height: 10px; border-radius: 3px; flex: none; background: {{ l.color }};"></span>
+            <span style="font-size: 12.5px; font-weight: 700; color: #4B4370; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ l.nombre }}</span>
+            <span style="font-size: 12.5px; font-weight: 900; color: #1A1035; font-variant-numeric: tabular-nums;">{{ l.pct }}</span>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+
+    <div style="display: flex; align-items: baseline; justify-content: space-between; margin: 24px 0 12px;">
+      <span style="font-size: 18px; font-weight: 900; letter-spacing: -0.02em;">Por categoría</span>
+      <span style="font-size: 12.5px; font-weight: 800; color: #8B83AD;">De mayor a menor</span>
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: 10px;">
+      <sc-for list="{{ filas }}" as="f" hint-placeholder-count="6">
+        <div style="background: #fff; border-radius: 18px; padding: 13px 14px; box-shadow: 0 4px 14px rgba(26,16,53,0.04);">
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <span style="width: 34px; height: 34px; border-radius: 13px; flex: none; display: grid; place-items: center; background: {{ f.tinte }}; color: {{ f.color }};" dangerouslySetInnerHTML="{{ f.icono }}"></span>
+            <span style="flex: 1; font-size: 14.5px; font-weight: 800; letter-spacing: -0.01em;">{{ f.nombre }}</span>
+            <span style="font-size: 15px; font-weight: 900; font-variant-numeric: tabular-nums;">{{ f.monto }}</span>
+          </div>
+          <div style="display: flex; align-items: center; gap: 10px; margin-top: 10px;">
+            <div style="flex: 1; height: 6px; border-radius: 99px; background: #F2EEFF; overflow: hidden;">
+              <div style="height: 100%; width: {{ f.ancho }}; background: {{ f.color }};"></div>
+            </div>
+            <span style="font-size: 12.5px; font-weight: 800; color: #6F669B; font-variant-numeric: tabular-nums; width: 38px; text-align: right;">{{ f.pct }}</span>
+          </div>
+        </div>
+      </sc-for>
+    </div>
+
+    <div style="margin-top: 18px; border-radius: 20px; background: linear-gradient(160deg, #6C3BF4 0%, #4A21C4 100%); color: #fff; padding: 20px; position: relative; overflow: hidden;">
+      <div style="position: absolute; right: -30px; bottom: -50px; width: 140px; height: 140px; border-radius: 50%; background: rgba(255,255,255,0.07);"></div>
+      <div style="display: flex; align-items: center; gap: 8px; position: relative;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FFD166" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l2.3 5.6L20 9l-4 3.9.9 5.6L12 16l-4.9 2.5.9-5.6L4 9l5.7-.4Z"></path></svg>
+        <span style="font-size: 12.5px; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; color: rgba(255,255,255,0.75);">Tu resumen</span>
+      </div>
+      <div style="font-size: 21px; font-weight: 900; letter-spacing: -0.025em; line-height: 1.25; margin-top: 10px; position: relative; text-wrap: pretty;">Tu gasto más grande fue en {{ mayorNombre }}</div>
+      <div style="font-size: 13.5px; font-weight: 600; color: rgba(255,255,255,0.8); margin-top: 8px; line-height: 1.45; position: relative; text-wrap: pretty;">{{ mayorDetalle }}</div>
+    </div>
+  </div>
+
+  <div style="flex: none; background: #fff; border-top: 1px solid #EBE5FC; padding: 10px 14px 22px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px;">
+    <button type="button" style="border: none; background: transparent; display: flex; flex-direction: column; align-items: center; gap: 5px; padding: 8px 0; cursor: pointer; color: #A49CC4; font-family: inherit;" style-hover="color: #6C3BF4;">
+      <svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11l8-7 8 7"></path><path d="M6 10v10h12V10"></path></svg>
+      <span style="font-size: 11.5px; font-weight: 700;">Inicio</span>
+    </button>
+    <button type="button" style="border: none; background: transparent; display: flex; flex-direction: column; align-items: center; gap: 5px; padding: 8px 0; cursor: pointer; color: #6C3BF4; font-family: inherit;">
+      <svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="12"></rect><circle cx="12" cy="12" r="2.4"></circle></svg>
+      <span style="font-size: 11.5px; font-weight: 800;">Dinero</span>
+    </button>
+    <button type="button" style="border: none; background: transparent; display: flex; flex-direction: column; align-items: center; gap: 5px; padding: 8px 0; cursor: pointer; color: #A49CC4; font-family: inherit;" style-hover="color: #6C3BF4;">
+      <svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="15"></rect><path d="M3 11h18"></path><path d="M8 6V3"></path><path d="M16 6V3"></path></svg>
+      <span style="font-size: 11.5px; font-weight: 700;">Eventos</span>
+    </button>
+    <button type="button" style="border: none; background: transparent; display: flex; flex-direction: column; align-items: center; gap: 5px; padding: 8px 0; cursor: pointer; color: #A49CC4; font-family: inherit;" style-hover="color: #6C3BF4;">
+      <svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8.5" r="3.6"></circle><path d="M5 20c1.6-3.4 4-5 7-5s5.4 1.6 7 5"></path></svg>
+      <span style="font-size: 11.5px; font-weight: 700;">Perfil</span>
+    </button>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:390,&quot;height&quot;:844}}">
+const ICONOS = {
+  Comida: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3v8a3 3 0 0 0 6 0V3"></path><path d="M9 11v10"></path><path d="M17 3c1.5 1.5 2 3 2 5s-.8 3-2 3-2-1-2-3 .5-3.5 2-5Z"></path><path d="M17 11v10"></path></svg>',
+  Transporte: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 17V6h14v11"></path><path d="M5 12h14"></path><circle cx="8" cy="18" r="1.4"></circle><circle cx="16" cy="18" r="1.4"></circle></svg>',
+  Eventos: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="15"></rect><path d="M3 11h18"></path><path d="M8 6V3"></path><path d="M16 6V3"></path></svg>',
+  Estudio: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8l9-4 9 4-9 4-9-4Z"></path><path d="M7 10v5c0 1.7 2.2 3 5 3s5-1.3 5-3v-5"></path></svg>',
+  Salud: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20s-7-4.4-7-9.3A4 4 0 0 1 12 8a4 4 0 0 1 7 2.7C19 15.6 12 20 12 20Z"></path></svg>',
+  Otros: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><circle cx="5.5" cy="12" r="1.1"></circle><circle cx="12" cy="12" r="1.1"></circle><circle cx="18.5" cy="12" r="1.1"></circle></svg>'
+};
+const PALETA = {
+  Comida: ['#6C3BF4', 'rgba(108,59,244,0.12)'],
+  Transporte: ['#2EE6A8', 'rgba(46,230,168,0.16)'],
+  Eventos: ['#FFD166', 'rgba(255,209,102,0.2)'],
+  Estudio: ['#A98BFF', 'rgba(169,139,255,0.16)'],
+  Salud: ['#4CC9E0', 'rgba(76,201,224,0.16)'],
+  Otros: ['#C9C2E8', 'rgba(201,194,232,0.24)']
+};
+const MESES = [
+  { titulo: 'Junio 2026', previo: 'mayo', datos: { Comida: 1180, Transporte: 640, Eventos: 520, Estudio: 300, Salud: 180, Otros: 210 } },
+  { titulo: 'Julio 2026', previo: 'junio', datos: { Comida: 1420, Transporte: 720, Eventos: 880, Estudio: 380, Salud: 240, Otros: 330 } },
+  { titulo: 'Agosto 2026', previo: 'julio', datos: { Comida: 1285, Transporte: 690, Eventos: 745, Estudio: 340, Salud: 265, Otros: 304.5 } }
+];
+const C = 2 * Math.PI * 54;
+const q = (n) => 'Q' + n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const qCorto = (n) => 'Q' + Math.round(n).toLocaleString('en-US');
+
+class Component extends DCLogic {
+  state = { i: 2 };
+
+  renderVals() {
+    const i = this.state.i;
+    const mes = MESES[i];
+    const orden = Object.entries(mes.datos).sort((a, b) => b[1] - a[1]);
+    const total = orden.reduce((s, [, v]) => s + v, 0);
+    const prevTotal = i > 0 ? Object.values(MESES[i - 1].datos).reduce((s, v) => s + v, 0) : null;
+    const dif = prevTotal === null ? null : total - prevTotal;
+
+    let acum = 0;
+    const arcos = orden.map(([nombre, valor]) => {
+      const frac = valor / total;
+      const arco = { color: PALETA[nombre][0], dash: (C * frac - 2).toFixed(2) + ' ' + C.toFixed(2), offset: (-C * acum).toFixed(2) };
+      acum += frac;
+      return arco;
+    });
+
+    const pct = (v) => Math.round((v / total) * 100) + '%';
+    const mayor = orden[0];
+
+    return {
+      mesTitulo: mes.titulo,
+      mesAnterior: () => this.setState(s => ({ i: Math.max(0, s.i - 1) })),
+      mesSiguiente: () => this.setState(s => ({ i: Math.min(MESES.length - 1, s.i + 1) })),
+      totalTexto: q(total),
+      comparacion: dif === null
+        ? 'Primer mes con registro'
+        : dif < 0
+          ? 'Gastaste ' + qCorto(-dif) + ' menos que en ' + mes.previo
+          : 'Gastaste ' + qCorto(dif) + ' más que en ' + mes.previo,
+      estiloChip: {
+        display: 'inline-flex', alignItems: 'center', gap: '6px', alignSelf: 'flex-start',
+        fontSize: '13.5px', fontWeight: 800, padding: '7px 11px', borderRadius: '14px', marginTop: '8px',
+        background: dif !== null && dif > 0 ? 'rgba(255,209,102,0.28)' : '#E1FBF1',
+        color: dif !== null && dif > 0 ? '#8A6207' : '#0E8F63'
+      },
+      estiloFlecha: { transform: dif !== null && dif > 0 ? 'rotate(180deg)' : 'none' },
+      arcos,
+      leyenda: orden.map(([nombre, valor]) => ({ nombre, color: PALETA[nombre][0], pct: pct(valor) })),
+      filas: orden.map(([nombre, valor]) => ({
+        nombre,
+        monto: q(valor),
+        pct: pct(valor),
+        ancho: Math.round((valor / orden[0][1]) * 100) + '%',
+        color: PALETA[nombre][0],
+        tinte: PALETA[nombre][1],
+        icono: { __html: ICONOS[nombre] }
+      })),
+      mayorNombre: mayor[0],
+      mayorPct: pct(mayor[1]),
+      mayorDetalle: q(mayor[1]) + ' de ' + q(total) + ' — ' + pct(mayor[1]) + ' del mes. Un promedio de ' + qCorto(mayor[1] / 30) + ' al día.'
+    };
+  }
+}
+</script>
+</body>
+</html>

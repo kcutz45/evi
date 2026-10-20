@@ -1,0 +1,17 @@
+/*
+ * globals.css — mínimo a propósito: casi todo vive en Tailwind.
+ */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-light text-dark antialiased;
+  }
+
+  /* Los montos se alinean por dígito en listas y tarjetas. */
+  .tabular {
+    font-variant-numeric: tabular-nums;
+  }
+}
