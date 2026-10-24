@@ -13,7 +13,7 @@
  * USADO EN:   services/movementService.ts, app/(dashboard)/inicio
  * ---------------------------------------------------------------
  */
-import { addMonths, format, parseISO, subDays } from 'date-fns';
+import { addDays, addMonths, differenceInCalendarDays, format, nextSaturday, parseISO, subDays } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { APP_TIME_ZONE, HORA_INICIO_NOCHE, HORA_INICIO_TARDE } from './constants';
 
@@ -73,4 +73,29 @@ export function saludoGT(ahora: Date = new Date()): string {
   );
   if (hora < HORA_INICIO_TARDE) return 'Buen día,';
   return hora < HORA_INICIO_NOCHE ? 'Buenas tardes,' : 'Buenas noches,';
+}
+
+// Fecha de un evento: '2026-11-14' → 'Sáb 14 nov'.
+export function fechaDeEvento(fechaIso: string): string {
+  const texto = format(parseISO(fechaIso), 'EEE d MMM', { locale: es }).replace('.', '');
+  return texto.charAt(0).toUpperCase() + texto.slice(1);
+}
+
+// Cuenta regresiva en hora de Guatemala: 'faltan 9 días', 'es mañana',
+// 'es hoy', 'fue ayer', 'fue hace 3 días'.
+export function cuentaRegresiva(fechaIso: string, ahora: Date = new Date()): string {
+  const dias = differenceInCalendarDays(parseISO(fechaIso), parseISO(hoyGT(ahora)));
+  if (dias === 0) return 'es hoy';
+  if (dias === 1) return 'es mañana';
+  if (dias === -1) return 'fue ayer';
+  return dias > 1 ? `faltan ${dias} días` : `fue hace ${-dias} días`;
+}
+
+// Atajos de fecha al crear un evento (en hora de Guatemala).
+export function proximoSabadoGT(ahora: Date = new Date()): string {
+  return format(nextSaturday(parseISO(hoyGT(ahora))), 'yyyy-MM-dd');
+}
+
+export function enDiasGT(dias: number, ahora: Date = new Date()): string {
+  return format(addDays(parseISO(hoyGT(ahora)), dias), 'yyyy-MM-dd');
 }

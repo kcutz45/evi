@@ -48,6 +48,7 @@ import type {
   ReceivableUpdate,
   ReceivablesSummaryRow,
 } from './receivable';
+import type { EventBudgetRow } from './event';
 
 // Solo las llaves foráneas entre tablas de `public`: supabase-js las usa
 // para tipar selects anidados como select('*, categories(name, icon)').
@@ -129,8 +130,21 @@ export type Database = {
     Views: {
       vw_monthly_summary: { Row: MonthlySummaryRow; Relationships: [] };
       vw_receivables_summary: { Row: ReceivablesSummaryRow; Relationships: [] };
+      vw_event_budget: { Row: EventBudgetRow; Relationships: [] };
     };
     Functions: {
+      // schema.sql sección 6: cierra el evento y transfiere sus gastos (atómico).
+      close_event_and_transfer: {
+        Args: { p_event_id: string };
+        Returns: {
+          planned: number;
+          actual: number;
+          variance: number;
+          expenses_count: number;
+          total_amount: number;
+          target_month: string;
+        };
+      };
       // schema.sql sección 11: gasto (tu parte) + deudas en una transacción.
       create_split_expense: {
         Args: {

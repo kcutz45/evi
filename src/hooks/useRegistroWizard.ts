@@ -100,14 +100,16 @@ function useNavegacion(pasoInicial: PasoRegistro) {
   };
 }
 
-export function useRegistroWizard(inicial?: ValoresIniciales) {
+// eventoFijoId: se abrió desde un evento ("Agregar gasto"): ya es un gasto
+// de ese evento, así que arranca en "¿En qué gastaste?".
+export function useRegistroWizard(inicial?: ValoresIniciales, eventoFijoId?: string) {
   const calc = useCalculator(inicial?.monto);
-  const nav = useNavegacion(inicial ? 'monto' : 'tipo');
+  const nav = useNavegacion(inicial ? 'monto' : eventoFijoId ? 'categoria' : 'tipo');
   const { setPaso } = nav;
   const [tipo, setTipo] = useState<MovementType>(inicial?.tipo ?? 'egreso');
   const [categoriaId, setCategoriaId] = useState<string | null>(inicial?.categoriaId ?? null);
   const [nota, setNota] = useState(inicial?.nota ?? '');
-  const [eventoId, setEventoId] = useState<string | null>(inicial?.eventoId ?? null);
+  const [eventoId, setEventoId] = useState<string | null>(inicial?.eventoId ?? eventoFijoId ?? null);
   // useRef: el momento de inicio no debe provocar renders.
   const inicio = useRef(Date.now());
 

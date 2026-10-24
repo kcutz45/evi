@@ -1,7 +1,7 @@
 # EVI_SPEC.md — EVI
 
 > **Documento de arquitectura y especificación técnica del MVP**
-> Versión 1.5 · 24 de octubre de 2026
+> Versión 1.6 · 24 de octubre de 2026
 > Proyecto académico — Licenciatura en Informática e Inteligencia de Negocios, UMES
 > Equipo: 3 integrantes · Plazo: 8 semanas · Inversión de infraestructura: ≈ Q300
 
@@ -166,8 +166,10 @@ Prueba rápida: *¿puedo mover este componente a otro proyecto con otra base de 
 │   │                         # PasoNuevaCategoria, PasoMonto, PasoCalculadora, PasoDividir,
 │   │                         # PasoListo, CalculatorKeypad, DetallesOpcionales
 │   ├── /events               # EventCard, ClosedEventCard, EventsEmptyState, BudgetBar,
-│   │                         # BudgetAlert, Checklist, CloseEventModal, CloseEventSummary,
-│   │                         # TransferAnimation
+│   │   │                     # BudgetAlert, Checklist, CloseEventModal, CloseEventSummary,
+│   │   │                     # TransferAnimation
+│   │   ├── /nuevo            # EventoWizard, PasoNombreEvento, PasoFechaEvento, PasoPresupuesto
+│   │   └── /detalle          # EventoEncabezado, PestanasEvento, PanelTareas, PanelGastos
 │   ├── /finance/porCobrar    # TeDebenCard, DeudasList (TarjetaPersona, ListaCobradas)
 │   ├── /finance/dinero       # MonthHeader, MovementFilters, MovementDayGroups,
 │   │                         # MovementDetailSheet
@@ -176,10 +178,11 @@ Prueba rápida: *¿puedo mover este componente a otro proyecto con otra base de 
 │
 ├── /hooks                    # useAuth, useAsyncData, useMonthlySummary, useMovements,
 │                             # useCategories, useCategoryUsage, useActiveEvents,
-│                             # useRegistroWizard, useCalculator, useZodForm…
-│                             # (pendientes: useEvents completo, useMonthlyReport)
-├── /services                 # authService, movementService, eventService, categoryService,
-│                             # telemetryService
+│                             # useRegistroWizard, useCalculator, useZodForm, useEvents,
+│                             # useEvento, useEventTasks, useEventoWizard…
+│                             # (pendiente: useMonthlyReport)
+├── /services                 # authService, movementService, eventService, taskService,
+│                             # categoryService, receivableService, telemetryService
 ├── /lib                      # supabase, routes, constants, dates, calculator,
 │                             # categoryRanking, formatCurrency, budget, report, text, cn
 ├── /types                    # movement, event, category, user, auth, database, supabase,
@@ -783,13 +786,14 @@ END IF;
 | Repositorio en GitHub | ✅ github.com/kcutz45/evi · `main` protegida, verificación automática en cada PR |
 | Proyecto Next.js: configuración, tokens, ESLint con las reglas 2, 3, 4 y 6 | ✅ Instalado y compilando (build verificado en cada PR) |
 | Componentes visuales de las pantallas 3 y 4, registro y reporte | ✅ Escritos (§2.3) · revisables en `/demo` |
-| Hooks y servicios de datos | ✅ Dashboard: `movementService`, `eventService` (activos), `useMonthlySummary`, `useMovements`, `useActiveEvents` · pendientes: eventos completos, reporte, metas |
+| Hooks y servicios de datos | ✅ Dashboard: `movementService`, `eventService` (activos), `useMonthlySummary`, `useMovements`, `useActiveEvents` · Eventos: `eventService` completo, `taskService`, `useEvents`, `useEvento`, `useEventTasks` · pendientes: reporte, metas |
 | Autenticación y rutas protegidas | ✅ Registro, login, middleware y cierre de sesión (PR #2) |
-| Dashboard real (§3, pantalla 3) | ✅ Balance del mes, últimos movimientos y registro paso a paso con calculadora y frecuentes · Eventos y Reportes muestran "Próximamente" |
+| Dashboard real (§3, pantalla 3) | ✅ Balance del mes, últimos movimientos y registro paso a paso con calculadora y frecuentes · Reportes muestra "Próximamente" |
 | Pantalla Dinero (historial) | ✅ Mes a mes con totales, filtros por tipo y categoría, agrupado por día; tocar un movimiento abre su detalle para editarlo (mismo registro paso a paso) o eliminarlo con confirmación |
 | Dividir cuenta / Te deben | ✅ Paso "¿Con quién dividís?" en el registro, tarjeta en Inicio, pantalla `/por-cobrar` agrupada por persona, detalle del gasto con sus deudas. Probado en PostgreSQL (20 verificaciones) y en la demo |
+| Eventos y cierre (§3, pantalla 4) | ✅ `/eventos`: activos arriba y cerrados abajo; "Nuevo evento" paso a paso (nombre e ícono → fecha → presupuesto). `/eventos/[id]`: presupuesto con alerta al 80%, pestañas Tareas y Gastos, "Agregar gasto" (registro ya apuntado al evento) y "Cerrar evento" con la RPC atómica `close_event_and_transfer` |
 | Landing, metas y planes | Pendiente |
-| Servicio de telemetría | ✅ Conectado: `signup_*`, `login_succeeded`, `movement_created` (con `seconds_to_complete`) · pendientes: `onboarding_completed` y eventos de las pantallas por construir |
+| Servicio de telemetría | ✅ Conectado: `signup_*`, `login_succeeded`, `movement_created` (con `seconds_to_complete`), `event_created`, `event_task_completed`, `budget_alert_shown`, `budget_exceeded`, `event_closed`, `expenses_transferred` · pendientes: `onboarding_completed` y eventos de las pantallas por construir |
 | Configuración de PWA y despliegue en Vercel | Pendiente |
 
 ### 5.5 Correcciones de seguridad v1.2 — cómo aplicarlas
@@ -899,6 +903,7 @@ Una funcionalidad está lista cuando cumple **todo** lo siguiente:
 | 2026-10-24 | 1.3.1 | Pantalla Dinero: historial mensual con filtros, detalle, edición y eliminación (`movement_deleted`). "Cerrar sesión" pasa al menú del avatar. Propuestas "Dividir cuenta / Por cobrar" y "Mis categorías" registradas en §0, pendientes del acuerdo del equipo |
 | 2026-10-24 | 1.4 | **Alcance:** se aprueba y construye "Dividir cuenta / Por cobrar" (§0). Tabla `receivables`, RPC `create_split_expense`, vista `vw_receivables_summary` (§11 de schema.sql). Telemetría `expense_split_created` y `receivable_collected` (§4.3) |
 | 2026-10-24 | 1.5 | **Alcance:** se aprueba y construye "Mis categorías" (§0): crear categorías propias desde el registro. La calculadora pasa a ser una pantalla aparte (§3). Telemetría `category_created` |
+| 2026-10-24 | 1.6 | Eventos y cierre (§3, pantalla 4): lista de eventos, "Nuevo evento" paso a paso, detalle con tareas y gastos, "Agregar gasto" desde el evento y cierre con `close_event_and_transfer`. Telemetría de eventos conectada (§4.3) |
 
 ---
 
