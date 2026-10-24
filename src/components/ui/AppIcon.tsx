@@ -14,9 +14,14 @@ import {
   Briefcase,
   Bus,
   Cake,
+  Car,
   Circle,
+  Coffee,
+  Dumbbell,
   Ellipsis,
   Film,
+  Fuel,
+  Gamepad2,
   Gift,
   Globe,
   GraduationCap,
@@ -24,8 +29,11 @@ import {
   House,
   Laptop,
   PartyPopper,
+  PawPrint,
+  Plane,
   Shirt,
   ShoppingBasket,
+  Smartphone,
   Tag,
   TreePalm,
   Trophy,
@@ -41,8 +49,13 @@ const ICONS: Record<string, LucideIcon> = {
   briefcase: Briefcase,
   bus: Bus,
   cake: Cake,
+  car: Car,
+  coffee: Coffee,
+  dumbbell: Dumbbell,
   ellipsis: Ellipsis,
   film: Film,
+  fuel: Fuel,
+  'gamepad-2': Gamepad2,
   gift: Gift,
   globe: Globe,
   'graduation-cap': GraduationCap,
@@ -50,8 +63,11 @@ const ICONS: Record<string, LucideIcon> = {
   house: House,
   laptop: Laptop,
   'party-popper': PartyPopper,
+  'paw-print': PawPrint,
+  plane: Plane,
   shirt: Shirt,
   'shopping-basket': ShoppingBasket,
+  smartphone: Smartphone,
   tag: Tag,
   'tree-palm': TreePalm,
   trophy: Trophy,
@@ -59,6 +75,13 @@ const ICONS: Record<string, LucideIcon> = {
   utensils: Utensils,
   wallet: Wallet,
 };
+
+// Íconos que se ofrecen al crear una categoría propia (orden de la cuadrícula).
+export const ICONOS_CATEGORIA = [
+  'utensils', 'coffee', 'shopping-basket', 'bus', 'car', 'fuel', 'house', 'graduation-cap',
+  'heart-pulse', 'dumbbell', 'party-popper', 'film', 'gamepad-2', 'tv', 'smartphone', 'shirt',
+  'gift', 'paw-print', 'plane', 'briefcase', 'laptop', 'tag', 'globe', 'wallet', 'banknote', 'ellipsis',
+];
 
 // Nombres disponibles para el selector de ícono al crear un evento.
 export const EVENT_ICON_NAMES = ['party-popper', 'cake', 'utensils', 'tree-palm', 'trophy', 'film'];

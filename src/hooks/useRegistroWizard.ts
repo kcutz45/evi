@@ -23,9 +23,17 @@ import { useRef, useState } from 'react';
 import { movementDraftSchema, type MovementDraft, type MovementType } from '@/types/movement';
 import { useCalculator } from './useCalculator';
 
-// 'dividir' y 'calculadora' son pantallas opcionales que se abren desde
-// el paso del monto y vuelven a él.
-export type PasoRegistro = 'tipo' | 'categoria' | 'monto' | 'dividir' | 'calculadora' | 'listo';
+// Pantallas opcionales: 'nuevaCategoria' sale de "¿En qué?"; 'dividir' y
+// 'calculadora' salen de "¿Cuánto?". Todas vuelven a su paso.
+export type PasoRegistro =
+  | 'tipo' | 'categoria' | 'nuevaCategoria' | 'monto' | 'dividir' | 'calculadora' | 'listo';
+
+// A qué paso numerado pertenece cada pantalla (para "Paso X de 3" y ←).
+const PASO_PADRE: Partial<Record<PasoRegistro, PasoRegistro>> = {
+  nuevaCategoria: 'categoria',
+  dividir: 'monto',
+  calculadora: 'monto',
+};
 
 // Los pasos que cuentan en "Paso 2 de 3" (el "¡Listo!" no se numera).
 export const PASOS_NUMERADOS: PasoRegistro[] = ['tipo', 'categoria', 'monto'];
@@ -77,17 +85,15 @@ function useNavegacion(pasoInicial: PasoRegistro) {
 
   // El monto escrito se conserva al volver: nadie quiere teclearlo dos veces.
   const volver = () =>
-    setPaso((actual) => {
-      if (actual === 'dividir' || actual === 'calculadora') return 'monto';
-      return actual === 'monto' ? 'categoria' : 'tipo';
-    });
+    setPaso((actual) => PASO_PADRE[actual] ?? (actual === 'monto' ? 'categoria' : 'tipo'));
 
   return {
     paso,
     setPaso,
     volver,
-    // Dividir y Calculadora son parte del paso 3 ("¿Cuánto?"): no suman número.
-    numeroDePaso: PASOS_NUMERADOS.indexOf(paso === 'dividir' || paso === 'calculadora' ? 'monto' : paso),
+    // Las pantallas opcionales no suman número: cuentan como su paso padre.
+    numeroDePaso: PASOS_NUMERADOS.indexOf(PASO_PADRE[paso] ?? paso),
+    irANuevaCategoria: () => setPaso('nuevaCategoria'),
     irADividir: () => setPaso('dividir'),
     irACalculadora: () => setPaso('calculadora'),
     terminar: () => setPaso('listo'),

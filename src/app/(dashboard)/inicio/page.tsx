@@ -46,7 +46,8 @@ export default function InicioPage() {
   const movimientos = useMovements();
   const usos = useCategoryUsage();
   const teDeben = useReceivablesSummary();
-  const { data: categorias } = useCategories();
+  const cats = useCategories();
+  const categorias = cats.data;
   const { data: eventos } = useActiveEvents();
   const [isHidden, setIsHidden] = useState(false);
   const registro = useRegistroEnDashboard(movimientos, categorias, [resumen.recargar, usos.recargar, teDeben.recargar]);
@@ -63,7 +64,8 @@ export default function InicioPage() {
       <RecentMovementsSection movements={movimientos.data} isLoading={movimientos.isLoading}
         error={movimientos.error} onRetry={movimientos.recargar} />
       {registro.abierto && (
-        <RegistroWizard categorias={categorias} usos={usos.data} eventosActivos={eventos}
+        <RegistroWizard categorias={categorias} onCrearCategoria={cats.crear} creandoCategoria={cats.creando}
+          errorCategoria={cats.errorCrear} usos={usos.data} eventosActivos={eventos}
           guardando={movimientos.isSaving} errorGuardado={movimientos.saveError}
           onGuardar={registro.guardar} onCerrar={registro.cerrar} />
       )}

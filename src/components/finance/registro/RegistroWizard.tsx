@@ -21,9 +21,11 @@
 
 import { useState } from 'react';
 import { useDivision, type Division } from '@/hooks/useDivision';
-import { PASOS_NUMERADOS, useRegistroWizard, type ValoresIniciales } from '@/hooks/useRegistroWizard';
+import {
+  PASOS_NUMERADOS, useRegistroWizard, type PasoRegistro, type ValoresIniciales,
+} from '@/hooks/useRegistroWizard';
 import { formatCurrency } from '@/lib/formatCurrency';
-import type { Category } from '@/types/category';
+import type { Category, NuevaCategoria } from '@/types/category';
 import type { MovementDraft } from '@/types/movement';
 import type { Deudor } from '@/types/receivable';
 import { PasoCalculadora } from './PasoCalculadora';
@@ -31,6 +33,7 @@ import { PasoCategoria } from './PasoCategoria';
 import { PasoDividir } from './PasoDividir';
 import { PasoListo } from './PasoListo';
 import { PasoMonto } from './PasoMonto';
+import { PasoNuevaCategoria } from './PasoNuevaCategoria';
 import { PasoTipo } from './PasoTipo';
 import { WizardHeader } from './WizardHeader';
 
@@ -43,6 +46,10 @@ interface RegistroWizardProps {
   // Devuelve true si se guardó. deudores vacío = gasto normal.
   onGuardar: (draft: MovementDraft, segundos: number, deudores: Deudor[]) => Promise<boolean>;
   onCerrar: () => void;
+  // Crear una categoría propia desde el registro. Devuelve la creada o null.
+  onCrearCategoria: (datos: NuevaCategoria) => Promise<Category | null>;
+  creandoCategoria: boolean;
+  errorCategoria: string | null;
   // Si viene, es una EDICIÓN: arranca en el monto con todo cargado.
   inicial?: ValoresIniciales;
 }
@@ -104,7 +111,18 @@ function CuerpoDelPaso({ w, g, division, props, esEdicion }: PiezaProps) {
   if (w.paso === 'categoria') {
     return (
       <PasoCategoria categorias={props.categorias.filter((c) => c.kind === w.tipo)} usos={props.usos}
-        seleccionadaId={w.categoriaId} onElegir={w.elegirCategoria} />
+        seleccionadaId={w.categoriaId} onElegir={w.elegirCategoria} onNueva={w.irANuevaCategoria} />
+    );
+  }
+  if (w.paso === 'nuevaCategoria') {
+    // Al crearla, queda elegida y se pasa directo al monto.
+    const crear = async (nombre: string, icono: string) => {
+      const nueva = await props.onCrearCategoria({ name: nombre, icon: icono, kind: w.tipo });
+      if (nueva) w.elegirCategoria(nueva.id);
+    };
+    return (
+      <PasoNuevaCategoria esIngreso={w.tipo === 'ingreso'} creando={props.creandoCategoria}
+        error={props.errorCategoria} onCrear={crear} />
     );
   }
   if (w.paso === 'calculadora') return <PasoCalculadora montoInicial={w.calc.valor} onUsar={w.usarResultado} />;
@@ -143,6 +161,10 @@ const TEXTOS = {
     egreso: { titulo: '¿En qué gastaste?', sub: 'Elegí la categoría que mejor lo describa.' },
     ingreso: { titulo: '¿De dónde vino el dinero?', sub: 'Elegí la categoría que mejor lo describa.' },
   },
+  nuevaCategoria: {
+    egreso: { titulo: 'Nueva categoría', sub: 'Para tus gastos. Elegí un nombre y un ícono.' },
+    ingreso: { titulo: 'Nueva categoría', sub: 'Para tus ingresos. Elegí un nombre y un ícono.' },
+  },
   monto: {
     egreso: { titulo: '¿Cuánto gastaste?', sub: 'Escribí el monto. Para hacer una cuenta, usá la Calculadora.' },
     ingreso: { titulo: '¿Cuánto recibiste?', sub: 'Escribí el monto. Para hacer una cuenta, usá la Calculadora.' },
@@ -151,10 +173,10 @@ const TEXTOS = {
   dividir: { titulo: '¿Con quién dividís?', sub: 'Tu parte queda como gasto; lo demás, en «Te deben».' },
 };
 
-type PasoConTexto = 'tipo' | 'categoria' | 'monto' | 'dividir' | 'calculadora';
+type PasoConTexto = Exclude<PasoRegistro, 'listo'>;
 
 function textosDelPaso(paso: PasoConTexto, tipo: 'egreso' | 'ingreso', esEdicion: boolean) {
-  const t = paso === 'categoria' || paso === 'monto' ? TEXTOS[paso][tipo] : TEXTOS[paso];
+  const t = paso === 'categoria' || paso === 'monto' || paso === 'nuevaCategoria' ? TEXTOS[paso][tipo] : TEXTOS[paso];
   const subtitulo = esEdicion && paso === 'monto' ? 'Corregí lo que haga falta y tocá Guardar.' : t.sub;
   return { titulo: t.titulo, subtitulo };
 }

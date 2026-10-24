@@ -1,7 +1,7 @@
 # EVI_SPEC.md — EVI
 
 > **Documento de arquitectura y especificación técnica del MVP**
-> Versión 1.4 · 24 de octubre de 2026
+> Versión 1.5 · 24 de octubre de 2026
 > Proyecto académico — Licenciatura en Informática e Inteligencia de Negocios, UMES
 > Equipo: 3 integrantes · Plazo: 8 semanas · Inversión de infraestructura: ≈ Q300
 
@@ -41,7 +41,7 @@ Surgieron en las pruebas del 24/10/2026. **No se construyen hasta que los tres i
 | Propuesta | Qué resuelve | Diseño elegido |
 |---|---|---|
 | **Dividir cuenta / Por cobrar** · ✅ **aprobada y construida (24/10/2026)** | Pagar una cuenta de varios y que otros te deban su parte ("dinero flotante") | Al registrar un gasto, *Dividir esta cuenta*: se guarda como gasto **solo tu parte** y el resto queda **Por cobrar** a nombre de cada persona (partes iguales por defecto, editables; el centavo sobrante queda en tu parte). Tarjeta "Te deben" en Inicio y pantalla `/por-cobrar` con **Cobrar** / **Deshacer**. **Cobrar no es un ingreso**: el balance ya contaba solo tu parte. Tabla `receivables` con RLS, RPC atómica `create_split_expense` y vista `vw_receivables_summary` (schema.sql §11, `migrations/20261024b_por_cobrar.sql`) |
-| **Mis categorías** | Categorías propias de gasto o ingreso además de las 18 del sistema | Crear, editar y borrar desde el menú del avatar; aparecen en el registro junto a las del sistema. La tabla `categories` ya lo soporta (`user_id` propio + RLS) |
+| **Mis categorías** · ✅ **aprobada y construida (24/10/2026)** | Categorías propias de gasto o ingreso además de las 18 del sistema | Mosaico **"＋ Nueva categoría"** al final de "¿En qué?" → pantalla aparte con nombre e ícono (26 íconos) → **Crear y usar**: queda elegida y se pasa al monto. No permite nombres repetidos del mismo tipo. Sin cambios en la base: `categories` ya lo soportaba (`user_id` propio + RLS; verificado en PostgreSQL) |
 
 ---
 
@@ -162,9 +162,9 @@ Prueba rápida: *¿puedo mover este componente a otro proyecto con otra base de 
 │   ├── /ui                   # Button, Card, Input, Badge, AppIcon
 │   ├── /finance              # BalanceCard, MovementItem, MovementList, AddMovementButton,
 │   │   │                     # DashboardSections, EventPicker, MonthlyChart
-│   │   └── /registro         # RegistroWizard, WizardHeader, PasoTipo, PasoCategoria, PasoCalculadora,
-│   │                         # PasoDividir,
-│   │                         # PasoMonto, CalculatorKeypad, DetallesOpcionales, PasoListo
+│   │   └── /registro         # RegistroWizard, WizardHeader, PasoTipo, PasoCategoria,
+│   │                         # PasoNuevaCategoria, PasoMonto, PasoCalculadora, PasoDividir,
+│   │                         # PasoListo, CalculatorKeypad, DetallesOpcionales
 │   ├── /events               # EventCard, ClosedEventCard, EventsEmptyState, BudgetBar,
 │   │                         # BudgetAlert, Checklist, CloseEventModal, CloseEventSummary,
 │   │                         # TransferAnimation
@@ -410,6 +410,7 @@ Radio de borde: 16–20 px. Tipografía sans-serif redondeada. Moneda siempre `Q
 |---|---|---|
 | 1 de 3 | ¿Qué querés registrar? | Dos tarjetas grandes con ejemplo: *Un gasto* / *Un ingreso*. Un toque y avanza |
 | 2 de 3 | ¿En qué gastaste? / ¿De dónde vino el dinero? | Cuadrícula de categorías grandes. **"Tus frecuentes"** arriba: las que el usuario más usa (≥ 2 veces en sus últimos 100 movimientos, máximo 3). Un toque y avanza |
+| 2 de 3 (opcional) | Nueva categoría | Pantalla aparte desde el mosaico *＋ Nueva categoría*: nombre + ícono → *Crear y usar* (queda elegida y pasa al monto). Del mismo tipo que el registro en curso |
 | 3 de 3 | ¿Cuánto gastaste? / ¿Cuánto recibiste? | Monto enorme y **solo teclado numérico**: la mayoría solo escribe un monto. Botones *Calculadora* y *Dividir esta cuenta*. Nota y evento plegados como *opcional*. Botón Guardar |
 | 3 de 3 (opcional) | Calculadora | **Pantalla aparte**, a pantalla completa: visor con la cuenta y el resultado, + − × ÷ con precedencia ("3 × 35 + 10" → Q115.00). *Usar este resultado* vuelve al monto con el total cargado; ← vuelve sin cambiar nada |
 | 3 de 3 (opcional) | ¿Con quién dividís? | Solo gastos. Personas y su parte (iguales por defecto). "Tu parte" grande: es lo que se guarda como gasto; lo demás queda en «Te deben» |
@@ -603,6 +604,7 @@ CREATE POLICY analytics_insert_self ON public.analytics_events
 | `category_suggested` | Gemini propone una categoría | `{ suggested_category, latency_ms }` |
 | `category_suggestion_accepted` | El usuario conserva la sugerencia | `{ category }` |
 | `category_suggestion_rejected` | El usuario la cambia | `{ suggested, chosen }` |
+| `category_created` | Se crea una categoría propia | `{ kind }` |
 | `monthly_report_viewed` | Se abre el reporte | `{ month, total_spent, categories_count }` |
 | `savings_goal_created` | Se crea una meta | `{ target_amount }` |
 | `expense_split_created` | Se guarda un gasto dividido | `{ total, my_share, debtors_count }` |
@@ -896,6 +898,7 @@ Una funcionalidad está lista cuando cumple **todo** lo siguiente:
 | 2026-10-24 | 1.3 | Registro de movimiento paso a paso (§3): tipo → categoría → monto con calculadora → ¡Listo!, "Tus frecuentes" según el uso de cada usuario, móvil primero. Categorías del sistema ampliadas a 11 de gasto y 7 de ingreso (`migrations/20261024_categorias_ampliadas.sql`). Dashboard con datos reales |
 | 2026-10-24 | 1.3.1 | Pantalla Dinero: historial mensual con filtros, detalle, edición y eliminación (`movement_deleted`). "Cerrar sesión" pasa al menú del avatar. Propuestas "Dividir cuenta / Por cobrar" y "Mis categorías" registradas en §0, pendientes del acuerdo del equipo |
 | 2026-10-24 | 1.4 | **Alcance:** se aprueba y construye "Dividir cuenta / Por cobrar" (§0). Tabla `receivables`, RPC `create_split_expense`, vista `vw_receivables_summary` (§11 de schema.sql). Telemetría `expense_split_created` y `receivable_collected` (§4.3) |
+| 2026-10-24 | 1.5 | **Alcance:** se aprueba y construye "Mis categorías" (§0): crear categorías propias desde el registro. La calculadora pasa a ser una pantalla aparte (§3). Telemetría `category_created` |
 
 ---
 

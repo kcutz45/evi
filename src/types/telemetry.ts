@@ -31,6 +31,7 @@ export type AnalyticsEvent =
   | 'category_suggestion_rejected'
   | 'monthly_report_viewed'
   | 'savings_goal_created'
+  | 'category_created'
   // Dividir cuenta / Por cobrar (aprobado 24/10/2026)
   | 'expense_split_created'
   | 'receivable_collected'

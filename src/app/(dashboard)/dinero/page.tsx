@@ -49,9 +49,9 @@ export default function DineroPage() {
   const lista = useMonthMovements(mes);
   const resumen = useMonthlySummary(mes);
   const usos = useCategoryUsage();
-  const { data: categorias } = useCategories();
+  const cats = useCategories();
   const { data: eventos } = useActiveEvents();
-  const a = useAccionesDinero(categorias, [lista.recargar, resumen.recargar, usos.recargar]);
+  const a = useAccionesDinero(cats.data, [lista.recargar, resumen.recargar, usos.recargar]);
 
   const cambiarMes = (delta: number) => {
     setMes((actual) => moverMes(actual, delta));
@@ -76,7 +76,8 @@ export default function DineroPage() {
           onEditar={a.abrirEditar} onEliminar={a.eliminar} onCerrar={a.cerrarDetalle} />
       )}
       {a.wizard && (
-        <RegistroWizard categorias={categorias} usos={usos.data} eventosActivos={eventos}
+        <RegistroWizard categorias={cats.data} onCrearCategoria={cats.crear} creandoCategoria={cats.creando}
+          errorCategoria={cats.errorCrear} usos={usos.data} eventosActivos={eventos}
           guardando={a.ocupado} errorGuardado={a.error} onGuardar={a.guardar} onCerrar={a.cerrarWizard}
           inicial={a.wizard.inicial} />
       )}

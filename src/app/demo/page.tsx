@@ -24,6 +24,7 @@ import { UserMenu } from '@/components/layout/UserMenu';
 import { PageContainer } from '@/components/layout/PageContainer';
 import { Button } from '@/components/ui/Button';
 import { TeDebenCard } from '@/components/finance/porCobrar/TeDebenCard';
+import type { NuevaCategoria } from '@/types/category';
 import { DemoDinero } from './DemoDinero';
 import { DemoTeDeben } from './DemoTeDeben';
 import { demoCategories, demoEvents, demoMovements, demoSlices, demoTasks, demoUsos } from './mockData';
@@ -37,6 +38,7 @@ export default function DemoPage() {
   const toggleTask = (taskId: string, isDone: boolean) =>
     setTasks((current) => current.map((t) => (t.id === taskId ? { ...t, isDone } : t)));
 
+  const { demoCategorias, crearCategoriaDemo } = useCategoriasDemo();
   // En la demo no hay sesión: cerrar sesión no hace nada.
   const logoutDemo = async () => ({ ok: false as const, error: 'Demo sin sesión' });
   // Simula el guardado: espera un poco y "sale bien" para ver el ¡Listo!.
@@ -62,7 +64,8 @@ export default function DemoPage() {
         expensesCount={12} targetMonthLabel="octubre" isClosing={false}
         onConfirm={() => setIsCloseOpen(false)} onCancel={() => setIsCloseOpen(false)} />
       {isFormOpen && (
-        <RegistroWizard categorias={demoCategories} usos={demoUsos} eventosActivos={active}
+        <RegistroWizard categorias={demoCategorias} onCrearCategoria={crearCategoriaDemo} creandoCategoria={false}
+          errorCategoria={null} usos={demoUsos} eventosActivos={active}
           guardando={false} errorGuardado={null} onGuardar={guardarDemo} onCerrar={() => setIsFormOpen(false)} />
       )}
     </PageContainer>
@@ -76,4 +79,15 @@ function DemoSection({ title, children }: { title: string; children: ReactNode }
       {children}
     </section>
   );
+}
+
+// En la demo, crear una categoría solo la agrega a la lista en memoria.
+function useCategoriasDemo() {
+  const [demoCategorias, setDemoCategorias] = useState(demoCategories);
+  const crearCategoriaDemo = async (datos: NuevaCategoria) => {
+    const nueva = { id: crypto.randomUUID(), ...datos, name: datos.name.trim() };
+    setDemoCategorias((actual) => [...actual, nueva]);
+    return nueva;
+  };
+  return { demoCategorias, crearCategoriaDemo };
 }

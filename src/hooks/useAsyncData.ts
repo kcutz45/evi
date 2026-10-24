@@ -51,5 +51,7 @@ export function useAsyncData<T>(cargar: () => Promise<T>, inicial: T, clave = ''
 
   const recargar = useCallback(() => setVersion((v) => v + 1), []);
 
-  return { data, isLoading, error, recargar };
+  // establecer: cambiar el dato sin volver a consultar (ej. agregar a la
+  // lista la categoría recién creada, sin esperar otra carga).
+  return { data, isLoading, error, recargar, establecer: setData };
 }

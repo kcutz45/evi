@@ -11,7 +11,7 @@
  * ---------------------------------------------------------------
  */
 import type { ReactNode } from 'react';
-import { Sparkles } from 'lucide-react';
+import { Plus, Sparkles } from 'lucide-react';
 import { AppIcon } from '@/components/ui/AppIcon';
 import { ordenarPorFrecuencia } from '@/lib/categoryRanking';
 import { cn } from '@/lib/cn';
@@ -22,9 +22,11 @@ interface PasoCategoriaProps {
   usos: string[];
   seleccionadaId: string | null;
   onElegir: (id: string) => void;
+  // Abre la pantalla "Nueva categoría".
+  onNueva: () => void;
 }
 
-export function PasoCategoria({ categorias, usos, seleccionadaId, onElegir }: PasoCategoriaProps) {
+export function PasoCategoria({ categorias, usos, seleccionadaId, onElegir, onNueva }: PasoCategoriaProps) {
   const { frecuentes, resto } = ordenarPorFrecuencia(categorias, usos);
 
   if (categorias.length === 0) {
@@ -44,6 +46,7 @@ export function PasoCategoria({ categorias, usos, seleccionadaId, onElegir }: Pa
         {resto.map((c) => (
           <Mosaico key={c.id} categoria={c} activa={c.id === seleccionadaId} onElegir={onElegir} />
         ))}
+        <MosaicoNueva onClick={onNueva} />
       </Grupo>
     </div>
   );
@@ -79,6 +82,20 @@ function Mosaico({ categoria, activa, onElegir }: MosaicoProps) {
         <AppIcon name={categoria.icon} size={22} strokeWidth={2} />
       </span>
       <span className="text-center text-[13px] font-extrabold leading-tight tracking-tight">{categoria.name}</span>
+    </button>
+  );
+}
+
+// Último mosaico: crear una categoría propia. Borde punteado para que se
+// vea como "agregar" y no como una categoría más.
+function MosaicoNueva({ onClick }: { onClick: () => void }) {
+  return (
+    <button type="button" onClick={onClick}
+      className="flex min-h-[96px] flex-col items-center justify-center gap-2 rounded-[18px] border-2 border-dashed border-primary/40 px-1 py-3 text-primary transition hover:bg-primary-soft active:scale-95">
+      <span className="grid h-11 w-11 place-items-center rounded-full bg-primary-soft">
+        <Plus size={22} strokeWidth={2.4} aria-hidden />
+      </span>
+      <span className="text-center text-[13px] font-extrabold leading-tight">Nueva categoría</span>
     </button>
   );
 }
