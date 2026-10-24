@@ -1,0 +1,54 @@
+# ---------------------------------------------------------------
+# ci.yml — verificación automática de cada pull request (§1.3)
+# ---------------------------------------------------------------
+# POR QUÉ EXISTE: Con 3 personas y sin pruebas automatizadas (deuda
+#   técnica consciente, §1.3), esto es la red mínima: si el código no
+#   pasa lint, tipos o build, el PR no se puede unir a main.
+#
+# QUÉ REVISA:
+#   - ESLint: reglas 2 (style), 3 (200 líneas), 4 (40 líneas), 6 (any).
+#   - TypeScript estricto.
+#   - next build: que la app compile como en Vercel.
+#
+# SIN SECRETOS: el build usa valores de relleno para Supabase. Compilar
+#   no se conecta a la base; así no hay que guardar claves en GitHub.
+# ---------------------------------------------------------------
+name: Verificación
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+jobs:
+  verificar:
+    name: Lint, tipos y build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Descargar el código
+        uses: actions/checkout@v4
+
+      - name: Instalar Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Instalar dependencias
+        run: npm ci
+
+      - name: Lint (reglas anti-spaghetti)
+        run: npm run lint
+
+      - name: Tipos (TypeScript estricto)
+        run: npx tsc --noEmit
+
+      - name: Build
+        run: npm run build
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: https://relleno-ci.supabase.co
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: sb_publishable_relleno_ci
+          NEXT_TELEMETRY_DISABLED: 1

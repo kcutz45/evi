@@ -222,7 +222,13 @@ const isNearLimit = usage >= BUDGET_ALERT_THRESHOLD;
 - Rama `main` siempre desplegable. Nadie hace commit directo a `main`.
 - Una rama por funcionalidad: `feat/registro-movimiento`, `fix/barra-presupuesto`.
 - Todo pull request lo revisa otro integrante. Revisión mínima: ¿cumple las 10 reglas anti-spaghetti?
-- Commits en español con prefijo: `feat:`, `fix:`, `refactor:`, `docs:`.
+- Commits en español con prefijo: `feat:`, `fix:`, `refactor:`, `docs:`, `chore:`.
+- **Herramientas que lo hacen cumplir** (desde v1.2):
+  - `CONTRIBUTING.md`: los comandos exactos del flujo, paso a paso.
+  - `.github/pull_request_template.md`: cada PR trae la lista de las 10 reglas y la Definición de Terminado.
+  - `.github/workflows/ci.yml`: GitHub Actions corre lint, tipos y build en cada PR; si falla, no se une.
+  - Protección de `main` en GitHub: exige PR, 1 aprobación y la verificación en verde.
+  - `.gitattributes`: saltos de línea LF para todos, sin cambios fantasma entre Windows y Mac.
 
 ---
 
