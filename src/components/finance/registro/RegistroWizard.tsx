@@ -26,6 +26,7 @@ import { formatCurrency } from '@/lib/formatCurrency';
 import type { Category } from '@/types/category';
 import type { MovementDraft } from '@/types/movement';
 import type { Deudor } from '@/types/receivable';
+import { PasoCalculadora } from './PasoCalculadora';
 import { PasoCategoria } from './PasoCategoria';
 import { PasoDividir } from './PasoDividir';
 import { PasoListo } from './PasoListo';
@@ -106,6 +107,7 @@ function CuerpoDelPaso({ w, g, division, props, esEdicion }: PiezaProps) {
         seleccionadaId={w.categoriaId} onElegir={w.elegirCategoria} />
     );
   }
+  if (w.paso === 'calculadora') return <PasoCalculadora montoInicial={w.calc.valor} onUsar={w.usarResultado} />;
   if (w.paso === 'dividir') {
     return (
       <PasoDividir total={w.calc.valor ?? 0} division={division} errorServidor={props.errorGuardado}
@@ -118,7 +120,7 @@ function CuerpoDelPaso({ w, g, division, props, esEdicion }: PiezaProps) {
       detalles={{ nota: w.nota, onNota: w.setNota, eventoId: w.eventoId, onEvento: w.setEventoId,
         eventos: w.tipo === 'egreso' ? props.eventosActivos : null }}
       onCambiarCategoria={w.volver} onGuardar={() => g.guardar()}
-      onDividir={esEdicion ? undefined : w.irADividir} />
+      onCalculadora={w.irACalculadora} onDividir={esEdicion ? undefined : w.irADividir} />
   );
 }
 
@@ -142,16 +144,17 @@ const TEXTOS = {
     ingreso: { titulo: '¿De dónde vino el dinero?', sub: 'Elegí la categoría que mejor lo describa.' },
   },
   monto: {
-    egreso: { titulo: '¿Cuánto gastaste?', sub: 'Escribí el monto. ¿Necesitás una cuenta? Abrí la calculadora.' },
-    ingreso: { titulo: '¿Cuánto recibiste?', sub: 'Escribí el monto. ¿Necesitás una cuenta? Abrí la calculadora.' },
+    egreso: { titulo: '¿Cuánto gastaste?', sub: 'Escribí el monto. Para hacer una cuenta, usá la Calculadora.' },
+    ingreso: { titulo: '¿Cuánto recibiste?', sub: 'Escribí el monto. Para hacer una cuenta, usá la Calculadora.' },
   },
+  calculadora: { titulo: 'Calculadora', sub: 'Hacé tu cuenta y tocá «Usar este resultado».' },
   dividir: { titulo: '¿Con quién dividís?', sub: 'Tu parte queda como gasto; lo demás, en «Te deben».' },
 };
 
-type PasoConTexto = 'tipo' | 'categoria' | 'monto' | 'dividir';
+type PasoConTexto = 'tipo' | 'categoria' | 'monto' | 'dividir' | 'calculadora';
 
 function textosDelPaso(paso: PasoConTexto, tipo: 'egreso' | 'ingreso', esEdicion: boolean) {
-  const t = paso === 'tipo' || paso === 'dividir' ? TEXTOS[paso] : TEXTOS[paso][tipo];
+  const t = paso === 'categoria' || paso === 'monto' ? TEXTOS[paso][tipo] : TEXTOS[paso];
   const subtitulo = esEdicion && paso === 'monto' ? 'Corregí lo que haga falta y tocá Guardar.' : t.sub;
   return { titulo: t.titulo, subtitulo };
 }

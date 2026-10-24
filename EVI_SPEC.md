@@ -162,7 +162,8 @@ Prueba rápida: *¿puedo mover este componente a otro proyecto con otra base de 
 │   ├── /ui                   # Button, Card, Input, Badge, AppIcon
 │   ├── /finance              # BalanceCard, MovementItem, MovementList, AddMovementButton,
 │   │   │                     # DashboardSections, EventPicker, MonthlyChart
-│   │   └── /registro         # RegistroWizard, WizardHeader, PasoTipo, PasoCategoria,
+│   │   └── /registro         # RegistroWizard, WizardHeader, PasoTipo, PasoCategoria, PasoCalculadora,
+│   │                         # PasoDividir,
 │   │                         # PasoMonto, CalculatorKeypad, DetallesOpcionales, PasoListo
 │   ├── /events               # EventCard, ClosedEventCard, EventsEmptyState, BudgetBar,
 │   │                         # BudgetAlert, Checklist, CloseEventModal, CloseEventSummary,
@@ -409,7 +410,8 @@ Radio de borde: 16–20 px. Tipografía sans-serif redondeada. Moneda siempre `Q
 |---|---|---|
 | 1 de 3 | ¿Qué querés registrar? | Dos tarjetas grandes con ejemplo: *Un gasto* / *Un ingreso*. Un toque y avanza |
 | 2 de 3 | ¿En qué gastaste? / ¿De dónde vino el dinero? | Cuadrícula de categorías grandes. **"Tus frecuentes"** arriba: las que el usuario más usa (≥ 2 veces en sus últimos 100 movimientos, máximo 3). Un toque y avanza |
-| 3 de 3 | ¿Cuánto gastaste? / ¿Cuánto recibiste? | Monto enorme y teclado numérico. La **calculadora** (+ − × ÷, con precedencia: "3 × 35" → Q105.00) está **plegada por defecto** tras el botón *Calculadora*: la mayoría solo escribe un monto. Se recuerda abierta/cerrada en el teléfono y no se oculta si ya hay una cuenta escrita. Nota y evento plegados como *opcional*. Botón Guardar |
+| 3 de 3 | ¿Cuánto gastaste? / ¿Cuánto recibiste? | Monto enorme y **solo teclado numérico**: la mayoría solo escribe un monto. Botones *Calculadora* y *Dividir esta cuenta*. Nota y evento plegados como *opcional*. Botón Guardar |
+| 3 de 3 (opcional) | Calculadora | **Pantalla aparte**, a pantalla completa: visor con la cuenta y el resultado, + − × ÷ con precedencia ("3 × 35 + 10" → Q115.00). *Usar este resultado* vuelve al monto con el total cargado; ← vuelve sin cambiar nada |
 | 3 de 3 (opcional) | ¿Con quién dividís? | Solo gastos. Personas y su parte (iguales por defecto). "Tu parte" grande: es lo que se guarda como gasto; lo demás queda en «Te deben» |
 | ¡Listo! | — | Pantalla completa en menta con ✓, monto y categoría. Si el gasto quedó pendiente en un evento, lo explica (regla 4d). Vuelve sola al inicio |
 

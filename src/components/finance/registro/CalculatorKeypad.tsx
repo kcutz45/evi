@@ -1,24 +1,19 @@
 /**
  * CalculatorKeypad.tsx
  * ---------------------------------------------------------------
- * PROPÓSITO: Teclado del paso "¿Cuánto?": números grandes y, solo si se
- *            pide, la fila de operaciones (+ − × ÷) para cuentas como
- *            "3 × Q35".
+ * PROPÓSITO: Teclado numérico grande. Con `conOperaciones` agrega la
+ *            fila + − × ÷ (solo en la pantalla Calculadora).
  *
- * POR QUÉ EXISTE: La mayoría solo escribe un monto. Mostrar la
- *            calculadora siempre hacía la pantalla más cargada (pruebas
- *            del 24/10/2026), así que queda plegada tras el botón
- *            "Calculadora". La elección se recuerda en el teléfono
- *            (usePreferencia) y no se oculta a mitad de una cuenta.
+ * POR QUÉ EXISTE: El paso "¿Cuánto?" muestra solo números: la mayoría
+ *            solo escribe un monto y las operaciones cargaban la pantalla
+ *            (pruebas del 24/10/2026). La calculadora vive en su propia
+ *            pantalla (PasoCalculadora) y comparte este mismo teclado.
  *
  * NOTA:      Solo emite la tecla. Qué significa cada una lo decide
  *            lib/calculator.ts.
  * ---------------------------------------------------------------
  */
-'use client';
-
-import { Calculator, ChevronDown, Delete } from 'lucide-react';
-import { usePreferencia } from '@/hooks/usePreferencia';
+import { Delete } from 'lucide-react';
 import { OPERADORES, type Digito, type TeclaCalc } from '@/lib/calculator';
 import { cn } from '@/lib/cn';
 
@@ -30,24 +25,22 @@ const NOMBRE_ACCESIBLE: Record<string, string> = {
 
 interface CalculatorKeypadProps {
   onTecla: (tecla: TeclaCalc) => void;
-  // Si ya hay una cuenta escrita ("3 × 35"), la calculadora no se oculta.
-  hayOperacion: boolean;
+  conOperaciones?: boolean;
 }
 
-export function CalculatorKeypad({ onTecla, hayOperacion }: CalculatorKeypadProps) {
-  const [abierta, setAbierta] = usePreferencia('calculadora_abierta', false);
-  const visible = abierta || hayOperacion;
-
+export function CalculatorKeypad({ onTecla, conOperaciones = false }: CalculatorKeypadProps) {
   return (
     <div className="flex flex-col gap-2">
-      <button type="button" onClick={() => setAbierta(!abierta)} disabled={hayOperacion}
-        aria-expanded={visible} aria-controls="fila-operaciones"
-        className="flex items-center justify-center gap-1.5 self-center rounded-full px-3 py-1 text-xs font-extrabold text-primary hover:bg-primary-soft disabled:opacity-60">
-        <Calculator size={15} aria-hidden />
-        {visible ? 'Ocultar calculadora' : 'Calculadora'}
-        <ChevronDown size={14} className={cn('transition-transform', visible && 'rotate-180')} aria-hidden />
-      </button>
-      {visible && <FilaOperaciones onTecla={onTecla} />}
+      {conOperaciones && (
+        <div className="grid grid-cols-4 gap-2">
+          {OPERADORES.map((op) => (
+            <button key={op} type="button" onClick={() => onTecla(op)} aria-label={NOMBRE_ACCESIBLE[op]}
+              className="h-12 rounded-[14px] bg-primary text-2xl font-black text-white transition active:scale-95 hover:bg-primary-dark">
+              {op}
+            </button>
+          ))}
+        </div>
+      )}
       <div className="grid grid-cols-3 gap-2">
         {DIGITOS.map((tecla) => {
           const esAccion = tecla === '.' || tecla === 'del';
@@ -61,19 +54,6 @@ export function CalculatorKeypad({ onTecla, hayOperacion }: CalculatorKeypadProp
           );
         })}
       </div>
-    </div>
-  );
-}
-
-function FilaOperaciones({ onTecla }: { onTecla: (tecla: TeclaCalc) => void }) {
-  return (
-    <div id="fila-operaciones" className="grid animate-step-in grid-cols-4 gap-2 motion-reduce:animate-none">
-      {OPERADORES.map((op) => (
-        <button key={op} type="button" onClick={() => onTecla(op)} aria-label={NOMBRE_ACCESIBLE[op]}
-          className="h-10 rounded-[14px] bg-primary-soft text-xl font-black text-primary transition active:scale-95 hover:bg-line">
-          {op}
-        </button>
-      ))}
     </div>
   );
 }

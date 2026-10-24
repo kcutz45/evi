@@ -11,7 +11,8 @@
  * DEPENDE DE: CalculatorKeypad.tsx, DetallesOpcionales.tsx
  * ---------------------------------------------------------------
  */
-import { Check, Users } from 'lucide-react';
+import type { ReactNode } from 'react';
+import { Calculator, Check, Users } from 'lucide-react';
 import { AppIcon } from '@/components/ui/AppIcon';
 import { Button } from '@/components/ui/Button';
 import type { useCalculator } from '@/hooks/useCalculator';
@@ -29,6 +30,8 @@ interface PasoMontoProps {
   guardando: boolean;
   onCambiarCategoria: () => void;
   onGuardar: () => void;
+  // Abre la pantalla Calculadora (aparte del registro).
+  onCalculadora: () => void;
   // Si viene, se ofrece "Dividir esta cuenta" (solo gastos, al crear).
   onDividir?: () => void;
 }
@@ -46,17 +49,17 @@ export function PasoMonto(props: PasoMontoProps) {
             {calc.total}
           </output>
         </div>
-        {props.onDividir && !props.esIngreso && calc.esValido && (
-          <button type="button" onClick={props.onDividir}
-            className="flex items-center justify-center gap-2 self-center rounded-full bg-primary-soft px-4 py-2 text-[13px] font-extrabold text-primary hover:bg-line">
-            <Users size={16} aria-hidden /> Dividir esta cuenta
-          </button>
-        )}
+        <div className="flex flex-wrap justify-center gap-2">
+          <Atajo onClick={props.onCalculadora} icono={<Calculator size={16} aria-hidden />}>Calculadora</Atajo>
+          {props.onDividir && !props.esIngreso && calc.esValido && (
+            <Atajo onClick={props.onDividir} icono={<Users size={16} aria-hidden />}>Dividir esta cuenta</Atajo>
+          )}
+        </div>
         <DetallesOpcionales {...props.detalles} />
         {props.error && <p role="alert" className="text-center text-xs font-bold text-gold-dark">{props.error}</p>}
       </div>
       <div className="flex flex-col gap-3 px-4 pb-5 pt-3">
-        <CalculatorKeypad onTecla={calc.presionar} hayOperacion={calc.operacion !== null} />
+        <CalculatorKeypad onTecla={calc.presionar} />
         <Button variant="mint" size="lg" fullWidth disabled={!calc.esValido || props.guardando}
           onClick={props.onGuardar} icon={<Check size={21} strokeWidth={2.6} />}>
           {props.guardando ? 'Guardando…' : 'Guardar'}
@@ -78,5 +81,15 @@ function ChipCategoria({ categoria, onCambiar }: { categoria: Category; onCambia
         <span className="text-xs font-bold text-primary">Cambiar</span>
       </button>
     </div>
+  );
+}
+
+// Botón redondo secundario del paso: abre otra pantalla (Calculadora, Dividir).
+function Atajo({ onClick, icono, children }: { onClick: () => void; icono: ReactNode; children: ReactNode }) {
+  return (
+    <button type="button" onClick={onClick}
+      className="flex items-center gap-2 rounded-full bg-primary-soft px-4 py-2 text-[13px] font-extrabold text-primary hover:bg-line">
+      {icono} {children}
+    </button>
   );
 }
