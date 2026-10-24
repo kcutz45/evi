@@ -1,7 +1,7 @@
 # EVI_SPEC.md — EVI
 
 > **Documento de arquitectura y especificación técnica del MVP**
-> Versión 1.2 · 3 de octubre de 2026
+> Versión 1.2.1 · 23 de octubre de 2026
 > Proyecto académico — Licenciatura en Informática e Inteligencia de Negocios, UMES
 > Equipo: 3 integrantes · Plazo: 8 semanas · Inversión de infraestructura: ≈ Q300
 
@@ -751,7 +751,7 @@ END IF;
 
 ### 5.5 Correcciones de seguridad v1.2 — cómo aplicarlas
 
-Revisión del 03/10/2026. Ninguna está aplicada todavía en la base "Evi charger".
+Revisión del 03/10/2026, ajustada el 23/10/2026 tras inventariar la base real. Ninguna está aplicada todavía en la base "Evi charger".
 
 | # | Hallazgo | Corrección en `schema.sql` |
 |---|---|---|
@@ -761,7 +761,23 @@ Revisión del 03/10/2026. Ninguna está aplicada todavía en la base "Evi charge
 | 4 | Un cliente podía escribir `status` de movimientos o eventos directamente, saltándose la RPC de cierre | `REVOKE` general + `GRANT` por columna (sección 5) |
 | 5 | Indefinición contable de los gastos de eventos abiertos | Regla 4d: columna `accounting_date` + trigger `movements_accounting` |
 
-**Cómo aplicarlas.** La base solo tiene datos semilla (§5.1), así que lo más simple y seguro es recrearla: en el SQL Editor, descomentar la sección 0 de `schema.sql` y ejecutar el archivo completo. Después volver a registrar a `andrea@evi.test` desde la app y cargar los datos de prueba.
+**Inventario de la base real (23/10/2026).** Antes de aplicar, se comparó "Evi charger" contra `schema.sql` columna por columna. Se confirmaron los hallazgos 1, 4 y 5 en producción (`authenticated` podía hacer `UPDATE` de `movements.status`; vistas de BI en `public` sin `security_invoker`; sin `accounting_date`). La base original tenía decisiones de diseño que este spec no documentaba; se decidió:
+
+| En la base v1.1 | Decisión en `schema.sql` |
+|---|---|
+| `updated_at` + trigger `set_updated_at` en las 8 tablas | Se conserva en 7; se quita de `analytics_events` (append-only) |
+| `metadata jsonb` en todas las tablas | Se conserva |
+| `categories.color`, `event_tasks.completed_at`, `profiles.onboarded_at` | Se conservan; `completed_at` lo llena un trigger y `onboarded_at` solo el servidor |
+| `savings_goals.status`, `waitlist.source`, `waitlist.status` | Se conservan, con valores en español |
+| `events.transferred_at` | Se reemplaza por `closed_at`: cierre y transferencia son la misma transacción |
+| `movements.kind`, `savings_goals.target_date` | Se reemplazan por `type` y `deadline`, que ya usa el código |
+| Función `rls_auto_enable` (event trigger) | Se conserva: activa RLS en cada tabla nueva |
+
+Además, al revisar los privilegios se cerró un hueco: el `INSERT` de `events` era completo y permitía crear un evento ya `cerrado`. Ahora todas las tablas usan `GRANT` por columna.
+
+**Prueba antes de aplicar.** El script se ejecutó en PostgreSQL real (PGlite) con una simulación mínima de Supabase: 31 verificaciones en verde, entre ellas la regla contable, los privilegios por columna, el aislamiento entre dos usuarios, el cierre atómico, el acceso anónimo y las tres consultas de abajo. También se probó correrlo dos veces con el reset activo.
+
+**Cómo aplicarlas.** La base solo tiene cuentas de prueba, así que lo más simple y seguro es recrearla: en el SQL Editor, descomentar la sección 0 de `schema.sql` y ejecutar el archivo completo. **Las cuentas de `auth.users` se conservan:** la sección 10 les recrea el perfil con su nombre, así que no hace falta registrarse de nuevo. Se pierden los eventos, movimientos y metas de prueba.
 
 **Verificación posterior** (las tres deben cumplirse):
 
@@ -821,6 +837,7 @@ Una funcionalidad está lista cuando cumple **todo** lo siguiente:
 | 2026-09-05 | 1.0 | Documento inicial: visión, stack, estándares, pantallas y telemetría |
 | 2026-09-17 | 1.1 | Base de datos construida y verificada; hallazgo y corrección de la validación de propietario; regla anti-spaghetti #8; sección de estado de implementación; riesgo de falta de respaldos |
 | 2026-10-03 | 1.2 | Revisión de seguridad: vistas con `security_invoker` y esquema `analytics` (regla 9), privilegios por columna (regla 10), `user_id` por defecto en telemetría y eliminación de `updated_at`; regla contable de eventos (4d); metas y planes entran al alcance congelado e *Invitados* sale; pestaña Reportes en la navegación; `schema.sql` completo; proyecto Next.js y componentes visuales |
+| 2026-10-23 | 1.2.1 | Inventario de la base real: `schema.sql` conserva `updated_at`, `metadata` y otras columnas del diseño original; `GRANT` por columna en todas las tablas (cierra INSERT de eventos ya cerrados); sección 10 de respaldo de perfiles; script probado en PostgreSQL (31 verificaciones). Flujo de trabajo: `CONTRIBUTING.md`, plantilla de PR, GitHub Actions y protección de `main` |
 
 ---
 

@@ -17,9 +17,17 @@
 --            Si la base ya tiene la versión anterior y SOLO contiene
 --            datos semilla, ejecutar antes la sección 0 (descomentada).
 --
+-- AJUSTE 23/10/2026: tras inventariar la base real ("Evi charger") se
+--            conservan decisiones del diseño original que el spec no
+--            documentaba: updated_at + trigger set_updated_at, metadata
+--            jsonb, categories.color, event_tasks.completed_at,
+--            profiles.onboarded_at, savings_goals.status y
+--            waitlist.source/status. Ver §5.5 del spec.
+--
 -- ORDEN:     0 reset · 1 utilidades · 2 tablas · 3 triggers · 4 RLS
 --            5 privilegios · 6 funciones RPC · 7 vistas de la app
 --            8 esquema analytics (Looker) · 9 datos del sistema
+--            10 respaldo de perfiles
 -- =====================================================================
 
 
@@ -33,13 +41,21 @@
 --   public.vw_daily_activity, public.vw_event_lifecycle,
 --   public.vw_category_distribution cascade;
 -- drop trigger if exists on_auth_user_created on auth.users;
+-- drop trigger if exists trg_on_auth_user_created on auth.users;  -- nombre de v1.1
 -- drop table if exists public.analytics_events, public.waitlist,
 --   public.savings_goals, public.movements, public.event_tasks,
 --   public.events, public.categories, public.profiles cascade;
 -- drop function if exists public.handle_new_user() cascade;
 -- drop function if exists public.close_event_and_transfer(uuid) cascade;
 -- drop function if exists public.set_movement_accounting() cascade;
+-- drop function if exists public.set_task_completed_at() cascade;
+-- drop function if exists public.set_updated_at() cascade;
 -- drop function if exists public.gt_today() cascade;
+--
+-- NO se borra public.rls_auto_enable(): es un event trigger que activa
+-- RLS en cada tabla nueva. Es una red de seguridad extra y se conserva.
+-- Las cuentas de auth.users tampoco se borran: la sección 10 les
+-- recrea el perfil al final.
 
 
 -- =====================================================================
@@ -58,6 +74,20 @@ as $$
   select (now() at time zone 'America/Guatemala')::date;
 $$;
 
+-- Mantiene updated_at al día en cada UPDATE. Lo hace la base y no el
+-- cliente: así la fecha es confiable aunque el cliente la olvide o la
+-- falsee (regla 10). Viene del diseño original de la base (v1.1).
+create or replace function public.set_updated_at()
+returns trigger
+language plpgsql
+set search_path = ''
+as $$
+begin
+  new.updated_at := now();
+  return new;
+end;
+$$;
+
 
 -- =====================================================================
 -- 2. TABLAS
@@ -72,7 +102,12 @@ create table public.profiles (
   full_name   text not null default '',
   plan        text not null default 'gratis'
               check (plan in ('gratis', 'personal', 'organizador')),
-  created_at  timestamptz not null default now()
+  -- Momento del primer movimiento (evento onboarding_completed, §4.3).
+  -- Lo escribe el servidor, nunca el cliente.
+  onboarded_at  timestamptz,
+  metadata      jsonb not null default '{}'::jsonb,
+  created_at    timestamptz not null default now(),
+  updated_at    timestamptz not null default now()
 );
 
 -- ---------------------------------------------------------------------
@@ -84,8 +119,13 @@ create table public.categories (
   user_id     uuid references auth.users(id) on delete cascade,
   name        text not null check (char_length(name) between 1 and 40),
   icon        text not null default 'circle',
+  -- Color de la categoría en gráficas y chips. Por defecto, el primario.
+  color       text not null default '#6C3BF4'
+              check (color ~ '^#[0-9A-Fa-f]{6}$'),
   kind        text not null check (kind in ('ingreso', 'egreso')),
-  created_at  timestamptz not null default now()
+  metadata    jsonb not null default '{}'::jsonb,
+  created_at  timestamptz not null default now(),
+  updated_at  timestamptz not null default now()
 );
 
 -- ---------------------------------------------------------------------
@@ -102,8 +142,12 @@ create table public.events (
   planned_budget  numeric(12,2) not null check (planned_budget > 0),
   status          text not null default 'activo'
                   check (status in ('activo', 'cerrado')),
+  -- closed_at reemplaza al transferred_at de v1.1: cerrar y transferir
+  -- ocurren en la MISMA transacción, así que son un solo momento.
   closed_at       timestamptz,
+  metadata        jsonb not null default '{}'::jsonb,
   created_at      timestamptz not null default now(),
+  updated_at      timestamptz not null default now(),
   -- Un evento cerrado siempre sabe cuándo se cerró, y uno activo no.
   constraint events_closed_consistency
     check ((status = 'cerrado') = (closed_at is not null))
@@ -118,8 +162,12 @@ create table public.event_tasks (
   event_id    uuid not null references public.events(id) on delete cascade,
   title       text not null check (char_length(title) between 1 and 120),
   is_done     boolean not null default false,
-  position    integer not null default 0,
-  created_at  timestamptz not null default now()
+  -- Lo llena el trigger event_tasks_completed_at al marcar la tarea.
+  completed_at  timestamptz,
+  position      integer not null default 0,
+  metadata      jsonb not null default '{}'::jsonb,
+  created_at    timestamptz not null default now(),
+  updated_at    timestamptz not null default now()
 );
 
 -- ---------------------------------------------------------------------
@@ -149,7 +197,9 @@ create table public.movements (
   status           text not null default 'confirmado'
                    check (status in ('pendiente', 'confirmado')),
   accounting_date  date,
+  metadata         jsonb not null default '{}'::jsonb,
   created_at       timestamptz not null default now(),
+  updated_at       timestamptz not null default now(),
   constraint movements_accounting_consistency
     check ((status = 'confirmado') = (accounting_date is not null))
 );
@@ -165,7 +215,11 @@ create table public.savings_goals (
   target_amount  numeric(12,2) not null check (target_amount > 0),
   saved_amount   numeric(12,2) not null default 0 check (saved_amount >= 0),
   deadline       date,
-  created_at     timestamptz not null default now()
+  status         text not null default 'activa'
+                 check (status in ('activa', 'completada', 'archivada')),
+  metadata       jsonb not null default '{}'::jsonb,
+  created_at     timestamptz not null default now(),
+  updated_at     timestamptz not null default now()
 );
 
 -- ---------------------------------------------------------------------
@@ -176,7 +230,14 @@ create table public.waitlist (
   email          text not null unique
                  check (email = lower(email) and email like '%_@_%._%'),
   plan_interest  text check (plan_interest in ('gratis', 'personal', 'organizador')),
-  created_at     timestamptz not null default now()
+  -- De dónde llegó el correo (utm_source o referrer): mide el smoke test.
+  source         text check (char_length(source) <= 100),
+  -- Seguimiento de la beta. Solo lo cambia el equipo desde el panel.
+  status         text not null default 'pendiente'
+                 check (status in ('pendiente', 'invitado', 'registrado')),
+  metadata       jsonb not null default '{}'::jsonb,
+  created_at     timestamptz not null default now(),
+  updated_at     timestamptz not null default now()
 );
 
 -- ---------------------------------------------------------------------
@@ -292,6 +353,49 @@ create trigger movements_accounting
   before insert or update of event_id, occurred_on on public.movements
   for each row execute function public.set_movement_accounting();
 
+-- ---------------------------------------------------------------------
+-- set_task_completed_at: marca CUÁNDO se completó una tarea. Si se
+-- desmarca, la fecha se borra. Así la columna nunca contradice a is_done.
+-- ---------------------------------------------------------------------
+create or replace function public.set_task_completed_at()
+returns trigger
+language plpgsql
+set search_path = ''
+as $$
+begin
+  if not new.is_done then
+    new.completed_at := null;
+  elsif tg_op = 'INSERT' or not old.is_done then
+    new.completed_at := now();
+  else
+    -- Seguía completada: se conserva la fecha original.
+    new.completed_at := old.completed_at;
+  end if;
+  return new;
+end;
+$$;
+
+create trigger event_tasks_completed_at
+  before insert or update of is_done on public.event_tasks
+  for each row execute function public.set_task_completed_at();
+
+-- updated_at en todas las tablas que cambian. analytics_events no lo
+-- lleva: es append-only y una fila nunca se actualiza (§4.2).
+create trigger profiles_updated_at before update on public.profiles
+  for each row execute function public.set_updated_at();
+create trigger categories_updated_at before update on public.categories
+  for each row execute function public.set_updated_at();
+create trigger events_updated_at before update on public.events
+  for each row execute function public.set_updated_at();
+create trigger event_tasks_updated_at before update on public.event_tasks
+  for each row execute function public.set_updated_at();
+create trigger movements_updated_at before update on public.movements
+  for each row execute function public.set_updated_at();
+create trigger savings_goals_updated_at before update on public.savings_goals
+  for each row execute function public.set_updated_at();
+create trigger waitlist_updated_at before update on public.waitlist
+  for each row execute function public.set_updated_at();
+
 
 -- =====================================================================
 -- 4. ROW LEVEL SECURITY — toda tabla, sin excepción (regla 7)
@@ -358,31 +462,57 @@ create policy analytics_insert_self on public.analytics_events
 -- =====================================================================
 revoke all on all tables in schema public from anon, authenticated;
 
-grant select, update (full_name) on public.profiles to authenticated;
-grant select, insert, update, delete on public.categories to authenticated;
-grant select, insert, update, delete on public.events to authenticated;
-grant select, insert, update, delete on public.event_tasks to authenticated;
-grant select, insert, update, delete on public.savings_goals to authenticated;
+-- Patrón: SELECT y DELETE completos; INSERT y UPDATE solo en las
+-- columnas que el usuario decide. Nunca id, user_id (DEFAULT
+-- auth.uid()), created_at, updated_at ni las que decide el servidor.
 
--- events: el estado y la fecha de cierre solo los cambia la RPC.
-revoke update on public.events from authenticated;
-grant update (name, icon, event_date, location, planned_budget)
+-- profiles: plan y onboarded_at los decide el servidor.
+grant select on public.profiles to authenticated;
+grant update (full_name, metadata) on public.profiles to authenticated;
+
+-- categories: user_id sí se envía (no tiene DEFAULT; RLS exige que sea
+-- el de la sesión).
+grant select, delete on public.categories to authenticated;
+grant insert (user_id, name, icon, color, kind, metadata) on public.categories to authenticated;
+grant update (name, icon, color, kind, metadata) on public.categories to authenticated;
+
+-- events: status y closed_at solo los cambia la RPC de cierre. En v1.2
+-- inicial el INSERT era completo y permitía crear un evento ya
+-- "cerrado"; ahora tampoco se puede.
+grant select, delete on public.events to authenticated;
+grant insert (name, icon, event_date, location, planned_budget, metadata)
   on public.events to authenticated;
+grant update (name, icon, event_date, location, planned_budget, metadata)
+  on public.events to authenticated;
+
+-- event_tasks: completed_at lo llena el trigger.
+grant select, delete on public.event_tasks to authenticated;
+grant insert (event_id, title, is_done, position, metadata) on public.event_tasks to authenticated;
+grant update (title, is_done, position, metadata) on public.event_tasks to authenticated;
 
 -- movements: status y accounting_date nunca vienen del cliente.
 grant select, delete on public.movements to authenticated;
-grant insert (type, amount, category_id, event_id, note, occurred_on)
+grant insert (type, amount, category_id, event_id, note, occurred_on, metadata)
   on public.movements to authenticated;
-grant update (type, amount, category_id, event_id, note, occurred_on)
+grant update (type, amount, category_id, event_id, note, occurred_on, metadata)
   on public.movements to authenticated;
 
-grant insert (email, plan_interest) on public.waitlist to anon, authenticated;
+grant select, delete on public.savings_goals to authenticated;
+grant insert (name, target_amount, saved_amount, deadline, status, metadata)
+  on public.savings_goals to authenticated;
+grant update (name, target_amount, saved_amount, deadline, status, metadata)
+  on public.savings_goals to authenticated;
+
+-- waitlist: status lo cambia el equipo desde el panel, no el visitante.
+grant insert (email, plan_interest, source) on public.waitlist to anon, authenticated;
 grant insert (session_id, event_name, device_type, properties, metadata)
   on public.analytics_events to anon, authenticated;
 
 -- Las funciones trigger no deben poder ejecutarse por RPC.
 revoke execute on function public.handle_new_user() from public, anon, authenticated;
 revoke execute on function public.set_movement_accounting() from public, anon, authenticated;
+revoke execute on function public.set_task_completed_at() from public, anon, authenticated;
+revoke execute on function public.set_updated_at() from public, anon, authenticated;
 
 
 -- =====================================================================
@@ -586,3 +716,17 @@ insert into public.categories (user_id, name, icon, kind) values
   (null, 'Salud',      'heart-pulse',     'egreso'),
   (null, 'Otros',      'ellipsis',        'egreso'),
   (null, 'Ingresos',   'banknote',        'ingreso');
+
+
+-- =====================================================================
+-- 10. RESPALDO DE PERFILES
+-- Si se recrea la base en un proyecto que YA tiene cuentas (sección 0),
+-- auth.users conserva a los usuarios pero profiles quedó vacía: sin
+-- esto, la app diría "no encontramos tu perfil". Recrea el perfil de
+-- cada cuenta con el nombre que dio al registrarse.
+-- En un proyecto nuevo no hace nada (no hay cuentas todavía).
+-- =====================================================================
+insert into public.profiles (id, full_name)
+select u.id, coalesce(u.raw_user_meta_data ->> 'full_name', '')
+from auth.users u
+on conflict (id) do nothing;
