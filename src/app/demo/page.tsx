@@ -24,6 +24,9 @@ import { UserMenu } from '@/components/layout/UserMenu';
 import { PageContainer } from '@/components/layout/PageContainer';
 import { Button } from '@/components/ui/Button';
 import { TeDebenCard } from '@/components/finance/porCobrar/TeDebenCard';
+import { DesgloseCategorias } from '@/components/report/DesgloseCategorias';
+import { ResumenDelMes } from '@/components/report/ResumenDelMes';
+import { TotalGastado } from '@/components/report/TotalGastado';
 import type { NuevaCategoria } from '@/types/category';
 import { DemoDinero } from './DemoDinero';
 import { DemoEvento } from './DemoEvento';
@@ -60,7 +63,12 @@ export default function DemoPage() {
       <DemoSection title="Dinero (pantalla)"><DemoDinero /></DemoSection>
       <DemoSection title="Te deben (pantalla)"><DemoTeDeben /></DemoSection>
       <DemoSection title="Tareas"><Checklist tasks={tasks} onToggle={toggleTask} /></DemoSection>
-      <DemoSection title="Reporte"><MonthlyChart slices={demoSlices} /></DemoSection>
+      <DemoSection title="Reporte">
+        <TotalGastado total={3629.5} comparacion={{ diferencia: 412, subio: false }} nombreMesAnterior="septiembre" />
+        <MonthlyChart slices={demoSlices} />
+        <DesgloseCategorias slices={demoSlices} />
+        {demoSlices[0] && <ResumenDelMes mayor={demoSlices[0]} total={3629.5} promedioDiario={62.5} desdeEventos={1240} />}
+      </DemoSection>
       <Button variant="soft" fullWidth className="mt-6" onClick={() => setIsCloseOpen(true)}>Probar cierre de evento</Button>
       <CloseEventModal isOpen={isCloseOpen} eventName="Cumpleaños de Sofía" planned={2000} actual={1700}
         expensesCount={12} targetMonthLabel="octubre" isClosing={false}
