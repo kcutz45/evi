@@ -41,24 +41,35 @@ type Optional<T, K extends keyof T> = Partial<Pick<T, K>>;
 // Filas (SELECT)
 // ---------------------------------------------------------------
 
-export type ProfileRow = {
+export type SavingsGoalStatus = 'activa' | 'completada' | 'archivada';
+
+// Columnas comunes a todas las tablas que cambian (ajuste 23/10/2026,
+// heredado del diseño original). updated_at lo pone un trigger.
+type Auditoria = {
+  metadata: Record<string, unknown>;
+  created_at: string;
+  updated_at: string;
+};
+
+export type ProfileRow = Auditoria & {
   id: string;
   full_name: string;
   plan: PlanName;
-  created_at: string;
+  // Primer movimiento registrado. Lo escribe el servidor.
+  onboarded_at: string | null;
 };
 
 // user_id NULL = categoría del sistema, visible para todos.
-export type CategoryRow = {
+export type CategoryRow = Auditoria & {
   id: string;
   user_id: string | null;
   name: string;
   icon: string;
+  color: string;
   kind: MovementType;
-  created_at: string;
 };
 
-export type EventRow = {
+export type EventRow = Auditoria & {
   id: string;
   user_id: string;
   name: string;
@@ -68,21 +79,21 @@ export type EventRow = {
   planned_budget: number;
   status: EventStatus;
   closed_at: string | null;
-  created_at: string;
 };
 
 // Sin user_id: la pertenencia se hereda del evento (RLS con EXISTS).
-export type EventTaskRow = {
+export type EventTaskRow = Auditoria & {
   id: string;
   event_id: string;
   title: string;
   is_done: boolean;
+  // Lo llena el trigger event_tasks_completed_at.
+  completed_at: string | null;
   position: number;
-  created_at: string;
 };
 
 // accounting_date es NULL mientras el movimiento está 'pendiente'.
-export type MovementRow = {
+export type MovementRow = Auditoria & {
   id: string;
   user_id: string;
   type: MovementType;
@@ -93,52 +104,55 @@ export type MovementRow = {
   occurred_on: string;
   status: MovementStatus;
   accounting_date: string | null;
-  created_at: string;
 };
 
-export type SavingsGoalRow = {
+export type SavingsGoalRow = Auditoria & {
   id: string;
   user_id: string;
   name: string;
   target_amount: number;
   saved_amount: number;
   deadline: string | null;
-  created_at: string;
+  status: SavingsGoalStatus;
 };
 
 // ---------------------------------------------------------------
 // Escritura (INSERT / UPDATE)
 // Regla 10: lo que decide el servidor (status, accounting_date,
-// closed_at, plan, y user_id con DEFAULT auth.uid()) NO aparece aquí.
-// Así el compilador impide intentarlo antes de que la base lo rechace.
+// closed_at, completed_at, plan, onboarded_at, updated_at y user_id con
+// DEFAULT auth.uid()) NO aparece aquí. Espeja los GRANT por columna de
+// schema.sql (sección 5): el compilador lo impide antes que la base.
 // ---------------------------------------------------------------
 
 // profiles no tiene Insert: lo crea el trigger handle_new_user.
-export type ProfileUpdate = Optional<ProfileRow, 'full_name'>;
+export type ProfileUpdate = Optional<ProfileRow, 'full_name' | 'metadata'>;
 
 // categories.user_id NO tiene DEFAULT en la base: hay que enviarlo y
 // la política RLS exige que sea el de la sesión.
+type CategoryWritable = 'name' | 'icon' | 'color' | 'kind' | 'metadata';
 export type CategoryInsert = Pick<CategoryRow, 'user_id' | 'name' | 'kind'> &
-  Optional<CategoryRow, 'icon'>;
-export type CategoryUpdate = Optional<CategoryRow, 'name' | 'icon' | 'kind'>;
+  Optional<CategoryRow, 'icon' | 'color' | 'metadata'>;
+export type CategoryUpdate = Optional<CategoryRow, CategoryWritable>;
 
-type EventWritable = 'name' | 'icon' | 'event_date' | 'location' | 'planned_budget';
+type EventWritable = 'name' | 'icon' | 'event_date' | 'location' | 'planned_budget' | 'metadata';
 export type EventInsert = Pick<EventRow, 'name' | 'event_date' | 'planned_budget'> &
-  Optional<EventRow, 'icon' | 'location'>;
+  Optional<EventRow, 'icon' | 'location' | 'metadata'>;
 export type EventUpdate = Optional<EventRow, EventWritable>;
 
 export type EventTaskInsert = Pick<EventTaskRow, 'event_id' | 'title'> &
-  Optional<EventTaskRow, 'is_done' | 'position'>;
-export type EventTaskUpdate = Optional<EventTaskRow, 'title' | 'is_done' | 'position'>;
+  Optional<EventTaskRow, 'is_done' | 'position' | 'metadata'>;
+export type EventTaskUpdate = Optional<EventTaskRow, 'title' | 'is_done' | 'position' | 'metadata'>;
 
-type MovementWritable = 'type' | 'amount' | 'category_id' | 'event_id' | 'note' | 'occurred_on';
+type MovementWritable =
+  | 'type' | 'amount' | 'category_id' | 'event_id' | 'note' | 'occurred_on' | 'metadata';
 export type MovementInsert = Pick<MovementRow, 'type' | 'amount'> &
-  Optional<MovementRow, 'category_id' | 'event_id' | 'note' | 'occurred_on'>;
+  Optional<MovementRow, 'category_id' | 'event_id' | 'note' | 'occurred_on' | 'metadata'>;
 export type MovementUpdate = Optional<MovementRow, MovementWritable>;
 
-type SavingsGoalWritable = 'name' | 'target_amount' | 'saved_amount' | 'deadline';
+type SavingsGoalWritable =
+  | 'name' | 'target_amount' | 'saved_amount' | 'deadline' | 'status' | 'metadata';
 export type SavingsGoalInsert = Pick<SavingsGoalRow, 'name' | 'target_amount'> &
-  Optional<SavingsGoalRow, 'saved_amount' | 'deadline'>;
+  Optional<SavingsGoalRow, 'saved_amount' | 'deadline' | 'status' | 'metadata'>;
 export type SavingsGoalUpdate = Optional<SavingsGoalRow, SavingsGoalWritable>;
 
 // ---------------------------------------------------------------
