@@ -29,7 +29,7 @@ interface EstadoWizard {
 }
 
 function valoresDe(m: MovementDetalle): ValoresIniciales {
-  return { tipo: m.type, monto: m.amount, categoriaId: m.categoryId, nota: m.note, eventoId: m.eventId };
+  return { tipo: m.type, monto: m.amount, categoriaId: m.categoryId, nota: m.note, eventoId: m.eventId, cuentaId: m.accountId };
 }
 
 export function useAccionesDinero(categorias: Category[], recargar: Array<() => void>) {

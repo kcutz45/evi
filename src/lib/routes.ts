@@ -18,9 +18,11 @@ export const RUTA_INICIO = '/inicio';
 export const RUTA_LOGIN = '/login';
 export const RUTA_REGISTRO = '/registro';
 export const RUTA_POR_COBRAR = '/por-cobrar';
+export const RUTA_CUENTAS = '/cuentas';
+export const RUTA_METAS = '/metas';
 
 // Carpetas de app/(dashboard) definidas en §2.3.
-export const RUTAS_PROTEGIDAS = [RUTA_INICIO, '/dinero', '/eventos', '/reportes', RUTA_POR_COBRAR];
+export const RUTAS_PROTEGIDAS = [RUTA_INICIO, '/dinero', '/eventos', '/reportes', RUTA_POR_COBRAR, RUTA_CUENTAS, RUTA_METAS];
 
 // Quien ya tiene sesión no necesita ver estas: se le manda a /inicio.
 export const RUTAS_DE_AUTH = [RUTA_LOGIN, RUTA_REGISTRO];

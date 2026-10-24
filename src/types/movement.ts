@@ -38,6 +38,8 @@ export const movementDraftSchema = z.object({
   categoryId: z.string().uuid().nullable(),
   eventId: z.string().uuid().nullable(),
   note: z.string().max(140, 'Máximo 140 caracteres').nullable(),
+  // De qué cuenta salió / a cuál entró. Opcional (§12 de schema.sql).
+  accountId: z.string().uuid().nullable(),
 });
 
 export type MovementDraft = z.infer<typeof movementDraftSchema>;
@@ -62,6 +64,8 @@ export interface MovementDetalle extends MovementView {
   eventId: string | null;
   note: string | null;
   occurredOn: string;
+  accountId: string | null;
+  accountName: string | null;
   // Si se dividió la cuenta: quién te debe su parte (vacío si no).
   porCobrar: Array<{ nombre: string; monto: number; cobrado: boolean }>;
 }

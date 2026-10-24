@@ -9,6 +9,7 @@
  */
 import { etiquetaDeDia } from '@/lib/dates';
 import { buildCategorySlices } from '@/lib/report';
+import type { Cuenta } from '@/types/account';
 import type { Category } from '@/types/category';
 import type { EventSummary, EventTask } from '@/types/event';
 import type { MovementDetalle, MovementView } from '@/types/movement';
@@ -62,6 +63,13 @@ export const demoSlices = buildCategorySlices([
   { categoryId: id(5), name: 'Estudio', icon: 'graduation-cap', amount: 199.5 },
 ]);
 
+// Cuentas de ejemplo (Mis cuentas).
+export const demoCuentas: Cuenta[] = [
+  { id: id(30), nombre: 'Efectivo', tipo: 'efectivo', icono: 'wallet', saldo: 640, saldoInicial: 500 },
+  { id: id(31), nombre: 'Banco Industrial', tipo: 'banco', icono: 'landmark', saldo: 4250.5, saldoInicial: 3000 },
+  { id: id(32), nombre: 'Zigi', tipo: 'digital', icono: 'smartphone', saldo: 185, saldoInicial: 0 },
+];
+
 // Mes de ejemplo para la sección "Dinero" de la demo.
 const det = (n: number, title: string, cat: number, fecha: string, type: 'ingreso' | 'egreso', amount: number,
   extra: Partial<MovementDetalle> = {}): MovementDetalle => {
@@ -69,7 +77,7 @@ const det = (n: number, title: string, cat: number, fecha: string, type: 'ingres
   return {
     id: `d${n}`, title, categoryName: c?.name ?? 'Sin categoría', categoryIcon: c?.icon ?? 'circle',
     dateLabel: etiquetaDeDia(fecha), type, amount, eventName: null, isPending: false, categoryId: c?.id ?? null,
-    eventId: null, note: title, occurredOn: fecha, porCobrar: [], ...extra,
+    eventId: null, note: title, occurredOn: fecha, accountId: null, accountName: null, porCobrar: [], ...extra,
   };
 };
 

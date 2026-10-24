@@ -36,13 +36,14 @@ export function useReceivables() {
   const { recargar } = estado;
 
   // Alterna cobrado/pendiente: "Deshacer" sirve si se tocó por error.
+  // cuentaId: en qué cuenta te pagaron (solo al cobrar).
   const alternarCobro = useCallback(
-    async (deuda: PorCobrar) => {
+    async (deuda: PorCobrar, cuentaId: string | null = null) => {
       setOcupadoId(deuda.id);
       setErrorAccion(null);
       try {
-        await marcarCobrado(supabase, deuda.id, !deuda.cobrado);
-        if (!deuda.cobrado) void track('receivable_collected', { amount: deuda.monto });
+        await marcarCobrado(supabase, deuda.id, !deuda.cobrado, cuentaId);
+        if (!deuda.cobrado) void track('receivable_collected', { amount: deuda.monto, to_account: cuentaId !== null });
         recargar();
       } catch (err) {
         setErrorAccion(err instanceof Error ? err.message : 'Ocurrió un error inesperado.');

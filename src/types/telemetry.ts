@@ -35,6 +35,10 @@ export type AnalyticsEvent =
   // Dividir cuenta / Por cobrar (aprobado 24/10/2026)
   | 'expense_split_created'
   | 'receivable_collected'
+  // Cuentas y metas (aprobado 24/10/2026)
+  | 'account_created'
+  | 'transfer_created'
+  | 'savings_contribution_added'
   // Uso central — eventos
   | 'event_created'
   | 'event_task_completed'

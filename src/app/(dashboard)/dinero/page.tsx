@@ -31,6 +31,7 @@ import { MovementFilters } from '@/components/finance/dinero/MovementFilters';
 import { RegistroWizard } from '@/components/finance/registro/RegistroWizard';
 import { Header } from '@/components/layout/Header';
 import { PageContainer } from '@/components/layout/PageContainer';
+import { useAccounts } from '@/hooks/useAccounts';
 import { useActiveEvents } from '@/hooks/useActiveEvents';
 import { useCategories } from '@/hooks/useCategories';
 import { useCategoryUsage } from '@/hooks/useCategoryUsage';
@@ -50,14 +51,14 @@ export default function DineroPage() {
   const resumen = useMonthlySummary(mes);
   const usos = useCategoryUsage();
   const cats = useCategories();
+  const cuentas = useAccounts();
   const { data: eventos } = useActiveEvents();
-  const a = useAccionesDinero(cats.data, [lista.recargar, resumen.recargar, usos.recargar]);
+  const a = useAccionesDinero(cats.data, [lista.recargar, resumen.recargar, usos.recargar, cuentas.recargar]);
 
   const cambiarMes = (delta: number) => {
     setMes((actual) => moverMes(actual, delta));
     setFiltro(SIN_FILTRO);
   };
-  const hayFiltro = filtro.tipo !== null || filtro.categoriaId !== null;
 
   return (
     <PageContainer floatingAction={<AddMovementButton onClick={a.abrirCrear} />}>
@@ -69,7 +70,7 @@ export default function DineroPage() {
         <MovementFilters filtro={filtro} categorias={categoriasPresentes(lista.data)} onCambiar={setFiltro} />
         {lista.error && <p role="alert" className="text-sm font-bold text-gold-dark">{lista.error}</p>}
         <MovementDayGroups grupos={agruparPorDia(filtrarMovimientos(lista.data, filtro))}
-          isLoading={lista.isLoading} hayFiltro={hayFiltro} onElegir={a.setSeleccionado} />
+          isLoading={lista.isLoading} hayFiltro={filtro.tipo !== null || filtro.categoriaId !== null} onElegir={a.setSeleccionado} />
       </div>
       {a.seleccionado && !a.wizard && (
         <MovementDetailSheet movimiento={a.seleccionado} ocupado={a.ocupado} error={a.error}
@@ -78,7 +79,7 @@ export default function DineroPage() {
       {a.wizard && (
         <RegistroWizard categorias={cats.data} onCrearCategoria={cats.crear} creandoCategoria={cats.creando}
           errorCategoria={cats.errorCrear} usos={usos.data} eventosActivos={eventos}
-          guardando={a.ocupado} errorGuardado={a.error} onGuardar={a.guardar} onCerrar={a.cerrarWizard}
+          cuentas={cuentas.data} cuentaPorDefecto={cuentas.cuentaPorDefecto} guardando={a.ocupado} errorGuardado={a.error} onGuardar={a.guardar} onCerrar={a.cerrarWizard}
           inicial={a.wizard.inicial} />
       )}
     </PageContainer>

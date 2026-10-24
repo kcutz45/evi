@@ -23,16 +23,17 @@ import { useRef, useState } from 'react';
 import { movementDraftSchema, type MovementDraft, type MovementType } from '@/types/movement';
 import { useCalculator } from './useCalculator';
 
-// Pantallas opcionales: 'nuevaCategoria' sale de "¿En qué?"; 'dividir' y
-// 'calculadora' salen de "¿Cuánto?". Todas vuelven a su paso.
+// Pantallas opcionales: 'nuevaCategoria' sale de "¿En qué?"; 'dividir',
+// 'calculadora' y 'cuenta' salen de "¿Cuánto?". Todas vuelven a su paso.
 export type PasoRegistro =
-  | 'tipo' | 'categoria' | 'nuevaCategoria' | 'monto' | 'dividir' | 'calculadora' | 'listo';
+  | 'tipo' | 'categoria' | 'nuevaCategoria' | 'monto' | 'dividir' | 'calculadora' | 'cuenta' | 'listo';
 
 // A qué paso numerado pertenece cada pantalla (para "Paso X de 3" y ←).
 const PASO_PADRE: Partial<Record<PasoRegistro, PasoRegistro>> = {
   nuevaCategoria: 'categoria',
   dividir: 'monto',
   calculadora: 'monto',
+  cuenta: 'monto',
 };
 
 // Los pasos que cuentan en "Paso 2 de 3" (el "¡Listo!" no se numera).
@@ -49,6 +50,7 @@ interface DatosDelBorrador {
   monto: number | null;
   categoriaId: string | null;
   eventoId: string | null;
+  cuentaId: string | null;
   nota: string;
   inicio: number;
 }
@@ -61,6 +63,7 @@ function validarBorrador(d: DatosDelBorrador): BorradorResultado {
     categoryId: d.categoriaId,
     eventId: d.eventoId,
     note: d.nota.trim() || null,
+    accountId: d.cuentaId,
   });
   if (!parsed.success) {
     return { ok: false, error: parsed.error.issues[0]?.message ?? 'Revisá los datos' };
@@ -77,6 +80,7 @@ export interface ValoresIniciales {
   categoriaId: string | null;
   nota: string | null;
   eventoId: string | null;
+  cuentaId: string | null;
 }
 
 // Qué pantalla se ve y cómo se va de una a otra.
@@ -96,6 +100,7 @@ function useNavegacion(pasoInicial: PasoRegistro) {
     irANuevaCategoria: () => setPaso('nuevaCategoria'),
     irADividir: () => setPaso('dividir'),
     irACalculadora: () => setPaso('calculadora'),
+    irACuenta: () => setPaso('cuenta'),
     terminar: () => setPaso('listo'),
   };
 }
@@ -110,6 +115,8 @@ export function useRegistroWizard(inicial?: ValoresIniciales, eventoFijoId?: str
   const [categoriaId, setCategoriaId] = useState<string | null>(inicial?.categoriaId ?? null);
   const [nota, setNota] = useState(inicial?.nota ?? '');
   const [eventoId, setEventoId] = useState<string | null>(inicial?.eventoId ?? eventoFijoId ?? null);
+  // undefined = el usuario no tocó la cuenta: se usa la de por defecto.
+  const [cuentaId, setCuentaId] = useState<string | null | undefined>(inicial ? inicial.cuentaId : undefined);
   // useRef: el momento de inicio no debe provocar renders.
   const inicio = useRef(Date.now());
 
@@ -122,31 +129,29 @@ export function useRegistroWizard(inicial?: ValoresIniciales, eventoFijoId?: str
     setPaso('categoria');
   };
 
-  const elegirCategoria = (id: string) => {
-    setCategoriaId(id);
+  // Elegir categoría, cuenta o el resultado de la calculadora: guarda el
+  // valor y vuelve (o avanza) al paso del monto.
+  const yAlMonto = <T,>(guardar: (valor: T) => void) => (valor: T) => {
+    guardar(valor);
     setPaso('monto');
   };
 
   // monto: al dividir, se guarda TU parte en vez del total de la cuenta.
-  const construirBorrador = (monto: number | null = calc.valor) =>
-    validarBorrador({ tipo, monto, categoriaId, eventoId, nota, inicio: inicio.current });
+  // cuentaPorDefecto: la última usada (la decide la página).
+  const construirBorrador = (monto: number | null, cuentaPorDefecto: string | null) =>
+    validarBorrador({
+      tipo, monto, categoriaId, eventoId, nota, inicio: inicio.current,
+      cuentaId: cuentaId === undefined ? cuentaPorDefecto : cuentaId,
+    });
 
   return {
     ...nav,
-    tipo,
-    categoriaId,
-    nota,
-    setNota,
-    eventoId,
-    setEventoId,
+    tipo, categoriaId, nota, setNota, eventoId, setEventoId, cuentaId,
+    elegirCuenta: yAlMonto(setCuentaId),
     calc,
     elegirTipo,
-    elegirCategoria,
-    // Vuelve al monto con el resultado de la calculadora ya cargado.
-    usarResultado: (monto: number) => {
-      calc.establecer(monto);
-      setPaso('monto');
-    },
+    elegirCategoria: yAlMonto(setCategoriaId),
+    usarResultado: yAlMonto(calc.establecer),
     construirBorrador,
   };
 }

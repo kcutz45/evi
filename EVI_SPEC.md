@@ -1,7 +1,7 @@
 # EVI_SPEC.md — EVI
 
 > **Documento de arquitectura y especificación técnica del MVP**
-> Versión 1.7 · 24 de octubre de 2026
+> Versión 1.8 · 24 de octubre de 2026
 > Proyecto académico — Licenciatura en Informática e Inteligencia de Negocios, UMES
 > Equipo: 3 integrantes · Plazo: 8 semanas · Inversión de infraestructura: ≈ Q300
 
@@ -42,6 +42,8 @@ Surgieron en las pruebas del 24/10/2026. **No se construyen hasta que los tres i
 |---|---|---|
 | **Dividir cuenta / Por cobrar** · ✅ **aprobada y construida (24/10/2026)** | Pagar una cuenta de varios y que otros te deban su parte ("dinero flotante") | Al registrar un gasto, *Dividir esta cuenta*: se guarda como gasto **solo tu parte** y el resto queda **Por cobrar** a nombre de cada persona (partes iguales por defecto, editables; el centavo sobrante queda en tu parte). Tarjeta "Te deben" en Inicio y pantalla `/por-cobrar` con **Cobrar** / **Deshacer**. **Cobrar no es un ingreso**: el balance ya contaba solo tu parte. Tabla `receivables` con RLS, RPC atómica `create_split_expense` y vista `vw_receivables_summary` (schema.sql §11, `migrations/20261024b_por_cobrar.sql`) |
 | **Mis categorías** · ✅ **aprobada y construida (24/10/2026)** | Categorías propias de gasto o ingreso además de las 18 del sistema | Mosaico **"＋ Nueva categoría"** al final de "¿En qué?" → pantalla aparte con nombre e ícono (26 íconos) → **Crear y usar**: queda elegida y se pasa al monto. No permite nombres repetidos del mismo tipo. Sin cambios en la base: `categories` ya lo soportaba (`user_id` propio + RLS; verificado en PostgreSQL) |
+| **Mis cuentas** · ✅ **aprobada (24/10/2026)** | La gente tiene su dinero en varios lados (efectivo, bancos, billeteras) y quería ver que un cobro de "Te deben" sí aumenta su dinero | Aparece un segundo número: **Tu dinero hoy** (suma de tus cuentas), distinto del **balance del mes** (ingresos − gastos). Cada usuario arranca con "Efectivo". En el registro, la cuenta es **opcional** y viene elegida la última usada; se cambia en una pantalla aparte ("¿De dónde salió?" / "¿A dónde entró?"). **Saldo inicial** al crear una cuenta (no es ingreso), **transferencias** entre cuentas (no son gasto ni ingreso), **ajustar saldo** (corrige sin inventar gastos) y **cobrar a una cuenta** (sube su saldo, no el balance). Al dividir, de la cuenta sale el total pagado. Pantalla `/cuentas` y tarjeta en Inicio. Tablas `accounts` y `account_transfers`, vista `vw_account_balances` (schema.sql §12, `migrations/20261024c_cuentas_y_metas.sql`) |
+| **Metas conectadas a cuentas** · ✅ **aprobada (24/10/2026)** | Que ahorrar se refleje en el dinero real | Cada abono a una meta **sale de una cuenta**: baja el saldo disponible y sube lo ahorrado. Un retiro devuelve el dinero a una cuenta. `saved_amount` lo calcula un trigger con la suma de `savings_contributions`; al llegar al objetivo la meta pasa a "completada" |
 
 ---
 
@@ -159,7 +161,7 @@ Prueba rápida: *¿puedo mover este componente a otro proyecto con otra base de 
 │       └── /categorizar      # Único punto que habla con Gemini
 │
 ├── /components
-│   ├── /ui                   # Button, Card, Input, Badge, AppIcon
+│   ├── /ui                   # Button, Card, Input, Badge, AppIcon, Hoja, CampoMonto
 │   ├── /finance              # BalanceCard, MovementItem, MovementList, AddMovementButton,
 │   │   │                     # DashboardSections, EventPicker, MonthlyChart
 │   │   └── /registro         # RegistroWizard, WizardHeader, PasoTipo, PasoCategoria,
@@ -171,6 +173,8 @@ Prueba rápida: *¿puedo mover este componente a otro proyecto con otra base de 
 │   │   ├── /nuevo            # EventoWizard, PasoNombreEvento, PasoFechaEvento, PasoPresupuesto
 │   │   └── /detalle          # EventoEncabezado, PestanasEvento, PanelTareas, PanelGastos
 │   ├── /report               # TotalGastado, DesgloseCategorias, ResumenDelMes
+│   ├── /finance/cuentas      # TuDineroCard, ListaCuentas, HojaNuevaCuenta, HojaTransferir,
+│   │                         # HojaAjustarSaldo, HojaElegirCuenta
 │   ├── /finance/porCobrar    # TeDebenCard, DeudasList (TarjetaPersona, ListaCobradas)
 │   ├── /finance/dinero       # MonthHeader, MovementFilters, MovementDayGroups,
 │   │                         # MovementDetailSheet
@@ -181,9 +185,9 @@ Prueba rápida: *¿puedo mover este componente a otro proyecto con otra base de 
 │                             # useCategories, useCategoryUsage, useActiveEvents,
 │                             # useRegistroWizard, useCalculator, useZodForm, useEvents,
 │                             # useEvento, useEventTasks, useEventoWizard…
-│                             # useMonthlyReport…
+│                             # useMonthlyReport, useAccounts…
 ├── /services                 # authService, movementService, eventService, taskService,
-│                             # categoryService, receivableService, reportService,
+│                             # categoryService, receivableService, reportService, accountService,
 │                             # telemetryService
 ├── /lib                      # supabase, routes, constants, dates, calculator,
 │                             # categoryRanking, formatCurrency, budget, report, text, cn
@@ -613,7 +617,10 @@ CREATE POLICY analytics_insert_self ON public.analytics_events
 | `monthly_report_viewed` | Se abre el reporte | `{ month, total_spent, categories_count }` |
 | `savings_goal_created` | Se crea una meta | `{ target_amount }` |
 | `expense_split_created` | Se guarda un gasto dividido | `{ total, my_share, debtors_count }` |
-| `receivable_collected` | Se marca una deuda como cobrada | `{ amount }` |
+| `receivable_collected` | Se marca una deuda como cobrada | `{ amount, to_account }` |
+| `account_created` | Se crea una cuenta | `{ kind, has_opening_balance }` |
+| `transfer_created` | Se transfiere entre cuentas | `{ amount }` |
+| `savings_contribution_added` | Se abona o retira de una meta | `{ amount, goal_progress }` |
 
 > `seconds_to_complete` en `movement_created` es la métrica más importante del producto: mide directamente la promesa de "3 toques". Si la mediana sube de 8 segundos, hay que rediseñar la pantalla.
 
@@ -733,7 +740,10 @@ Proyecto en Supabase: **"Evi charger"** · instancia `t3.nano` en `us-west-2` ·
 | `events` | Eventos del usuario (transaccional, con `status`) | ✅ |
 | `event_tasks` | Checklist; pertenencia heredada del evento vía `EXISTS` | ✅ |
 | `movements` | Ingresos y egresos (transaccional, con `status` y, desde v1.2, `accounting_date`) | ✅ |
-| `savings_goals` | Metas de ahorro | ✅ |
+| `savings_goals` | Metas de ahorro (`saved_amount` lo calcula un trigger desde v1.8) | ✅ |
+| `accounts` | Cuentas del usuario (Efectivo, bancos, billeteras) con saldo inicial · v1.8 | ✅ |
+| `account_transfers` | Transferencias entre cuentas propias · v1.8 | ✅ |
+| `savings_contributions` | Abonos (+) y retiros (−) a metas, desde una cuenta · v1.8 | ✅ |
 | `waitlist` | Captura pública: solo INSERT, sin SELECT | ✅ |
 | `analytics_events` | Telemetría: solo INSERT, sin SELECT | ✅ |
 
@@ -795,7 +805,8 @@ END IF;
 | Dividir cuenta / Te deben | ✅ Paso "¿Con quién dividís?" en el registro, tarjeta en Inicio, pantalla `/por-cobrar` agrupada por persona, detalle del gasto con sus deudas. Probado en PostgreSQL (20 verificaciones) y en la demo |
 | Eventos y cierre (§3, pantalla 4) | ✅ `/eventos`: activos arriba y cerrados abajo; "Nuevo evento" paso a paso (nombre e ícono → fecha → presupuesto). `/eventos/[id]`: presupuesto con alerta al 80%, pestañas Tareas y Gastos, "Agregar gasto" (registro ya apuntado al evento) y "Cerrar evento" con la RPC atómica `close_event_and_transfer` |
 | Reporte mensual | ✅ Mes a mes: total gastado y comparación con el mes anterior (dorado si subió, nunca rojo), dona por categoría, desglose con barras, "Tu resumen" con promedio diario y cuánto vino de eventos cerrados. Solo gastos confirmados por `accounting_date` (§4d), igual que el balance |
-| Landing, metas y planes | Pendiente |
+| Mis cuentas | ✅ `/cuentas` (total, lista, nueva cuenta, transferir, ajustar saldo, quitar), tarjeta "Tu dinero hoy" en Inicio, cuenta en el registro y en el detalle de Dinero, cobro a una cuenta. Migración probada en PostgreSQL (26 verificaciones, incluida la seguridad entre usuarios). **Requiere aplicar** `migrations/20261024c_cuentas_y_metas.sql` |
+| Landing, metas y planes | Pendiente (la base de las metas ya está en la migración de cuentas) |
 | Servicio de telemetría | ✅ Conectado: `signup_*`, `login_succeeded`, `movement_created` (con `seconds_to_complete`), `event_created`, `event_task_completed`, `budget_alert_shown`, `budget_exceeded`, `event_closed`, `expenses_transferred`, `monthly_report_viewed` · pendientes: `onboarding_completed` y eventos de las pantallas por construir |
 | Configuración de PWA y despliegue en Vercel | Pendiente |
 
@@ -908,6 +919,7 @@ Una funcionalidad está lista cuando cumple **todo** lo siguiente:
 | 2026-10-24 | 1.5 | **Alcance:** se aprueba y construye "Mis categorías" (§0): crear categorías propias desde el registro. La calculadora pasa a ser una pantalla aparte (§3). Telemetría `category_created` |
 | 2026-10-24 | 1.6 | Eventos y cierre (§3, pantalla 4): lista de eventos, "Nuevo evento" paso a paso, detalle con tareas y gastos, "Agregar gasto" desde el evento y cierre con `close_event_and_transfer`. Telemetría de eventos conectada (§4.3) |
 | 2026-10-24 | 1.7 | Reporte mensual (§3, pantallas complementarias): total y comparación, dona, desglose por categoría y resumen; cuenta solo lo confirmado por `accounting_date` (§4d). Telemetría `monthly_report_viewed`. En Inicio, la tarjeta del balance muestra "Tenés Q… prestados" (lo pendiente de cobrar, que no es ingreso al cobrarse) |
+| 2026-10-24 | 1.8 | **Alcance:** se aprueban "Mis cuentas" y "Metas conectadas a cuentas" (§0). Tablas `accounts`, `account_transfers`, `savings_contributions`; columnas `movements.account_id`, `receivables.collected_account_id`, `savings_goals.icon`; vista `vw_account_balances`; `create_split_expense` recibe la cuenta; "Efectivo" automático para cada usuario (schema.sql §12). Pantalla `/cuentas`. Telemetría `account_created`, `transfer_created`, `savings_contribution_added` |
 
 ---
 

@@ -21,6 +21,7 @@
 import { useCallback, useState } from 'react';
 import { LIMITE_MOVIMIENTOS_RECIENTES } from '@/lib/constants';
 import { supabase } from '@/lib/supabase';
+import { guardarUltimaCuenta } from '@/lib/ultimaCuenta';
 import { crearMovimiento, listarRecientes } from '@/services/movementService';
 import { crearGastoDividido } from '@/services/receivableService';
 import { track } from '@/services/telemetryService';
@@ -53,6 +54,8 @@ export function useMovements(limite: number = LIMITE_MOVIMIENTOS_RECIENTES) {
         if (deudores.length > 0) await crearGastoDividido(supabase, draft, deudores);
         else await crearMovimiento(supabase, draft);
         if (deudores.length > 0) registrarDivision(draft.amount, deudores);
+        // La próxima vez el registro trae esta cuenta ya elegida.
+        if (draft.accountId) guardarUltimaCuenta(draft.accountId);
         void track('movement_created', {
           type: draft.type,
           category: nombreCategoria,

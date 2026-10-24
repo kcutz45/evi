@@ -27,6 +27,7 @@ import { PestanasEvento, type Pestana } from '@/components/events/detalle/Pestan
 import { RegistroWizard } from '@/components/finance/registro/RegistroWizard';
 import { PageContainer } from '@/components/layout/PageContainer';
 import { Button } from '@/components/ui/Button';
+import { useAccounts } from '@/hooks/useAccounts';
 import { useCategories } from '@/hooks/useCategories';
 import { useCategoryUsage } from '@/hooks/useCategoryUsage';
 import { useEventTasks } from '@/hooks/useEventTasks';
@@ -116,6 +117,7 @@ function useGastoDelEvento(recargarEvento: () => void) {
   const movimientos = useMovements(1);
   const cats = useCategories();
   const usos = useCategoryUsage();
+  const cuentas = useAccounts();
   const [abierto, setAbierto] = useState(false);
   const { limpiarError } = movimientos;
 
@@ -128,18 +130,19 @@ function useGastoDelEvento(recargarEvento: () => void) {
   const guardar = async (draft: MovementDraft, segundos: number, deudores: Deudor[]) => {
     const categoria = cats.data.find((c) => c.id === draft.categoryId)?.name ?? null;
     const ok = await movimientos.crear(draft, segundos, categoria, deudores);
-    if (ok) [recargarEvento, usos.recargar].forEach((recargar) => recargar());
+    if (ok) [recargarEvento, usos.recargar, cuentas.recargar].forEach((recargar) => recargar());
     return ok;
   };
 
-  return { abierto, abrir: () => setAbierto(true), cerrar, guardar, movimientos, cats, usos: usos.data };
+  return { abierto, abrir: () => setAbierto(true), cerrar, guardar, movimientos, cats, cuentas, usos: usos.data };
 }
 
 function RegistroDelEvento({ evento, registro }: { evento: EventoDetalle; registro: ReturnType<typeof useGastoDelEvento> }) {
-  const { cats, movimientos } = registro;
+  const { cats, movimientos, cuentas } = registro;
   const fijo = { id: evento.id, name: evento.name };
   return (
     <RegistroWizard eventoFijo={fijo} eventosActivos={[fijo]} categorias={cats.data} usos={registro.usos}
+      cuentas={cuentas.data} cuentaPorDefecto={cuentas.cuentaPorDefecto}
       onCrearCategoria={cats.crear} creandoCategoria={cats.creando} errorCategoria={cats.errorCrear}
       guardando={movimientos.isSaving} errorGuardado={movimientos.saveError}
       onGuardar={registro.guardar} onCerrar={registro.cerrar} />

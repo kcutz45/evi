@@ -32,6 +32,7 @@ export async function crearGastoDividido(client: Cliente, draft: MovementDraft, 
     p_event_id: draft.eventId,
     p_note: draft.note,
     p_debtors: deudores.map((d) => ({ name: d.nombre.trim(), amount: d.monto })),
+    p_account_id: draft.accountId,
   });
   if (error) {
     const mensaje = error.message.includes('El evento está cerrado')
@@ -69,10 +70,12 @@ export async function listarPorCobrar(client: Cliente): Promise<PorCobrar[]> {
 }
 
 // Cobrar NO crea un ingreso: solo marca la deuda (regla de la sección 11).
-export async function marcarCobrado(client: Cliente, id: string, cobrado: boolean): Promise<void> {
+// cuentaId: dónde te pagaron; sube el saldo de esa cuenta (sección 12).
+// Al deshacer, el trigger borra la cuenta del cobro.
+export async function marcarCobrado(client: Cliente, id: string, cobrado: boolean, cuentaId: string | null = null): Promise<void> {
   const { error } = await client
     .from('receivables')
-    .update({ status: cobrado ? 'cobrado' : 'pendiente' })
+    .update(cobrado ? { status: 'cobrado', collected_account_id: cuentaId } : { status: 'pendiente' })
     .eq('id', id);
   if (error) throw new Error('No pudimos actualizar la deuda. Intentá de nuevo.', { cause: error });
 }

@@ -24,11 +24,17 @@ import { PageContainer } from '@/components/layout/PageContainer';
 import { Button } from '@/components/ui/Button';
 import { TeDebenCard } from '@/components/finance/porCobrar/TeDebenCard';
 import type { NuevaCategoria } from '@/types/category';
+import { DemoCuentas } from './DemoCuentas';
 import { DemoDinero } from './DemoDinero';
 import { DemoEvento } from './DemoEvento';
 import { DemoReporte } from './DemoReporte';
 import { DemoTeDeben } from './DemoTeDeben';
-import { demoCategories, demoEvents, demoMovements, demoTasks, demoUsos } from './mockData';
+import { demoCategories, demoCuentas, demoEvents, demoMovements, demoTasks, demoUsos } from './mockData';
+
+// En la demo no hay sesión: cerrar sesión no hace nada.
+const logoutDemo = async () => ({ ok: false as const, error: 'Demo sin sesión' });
+// Simula el guardado: espera un poco y "sale bien" para ver el ¡Listo!.
+const guardarDemo = () => new Promise<boolean>((resolve) => setTimeout(() => resolve(true), 500));
 
 export default function DemoPage() {
   const [isHidden, setIsHidden] = useState(false);
@@ -40,10 +46,6 @@ export default function DemoPage() {
     setTasks((current) => current.map((t) => (t.id === taskId ? { ...t, isDone } : t)));
 
   const { demoCategorias, crearCategoriaDemo } = useCategoriasDemo();
-  // En la demo no hay sesión: cerrar sesión no hace nada.
-  const logoutDemo = async () => ({ ok: false as const, error: 'Demo sin sesión' });
-  // Simula el guardado: espera un poco y "sale bien" para ver el ¡Listo!.
-  const guardarDemo = () => new Promise<boolean>((resolve) => setTimeout(() => resolve(true), 500));
 
   return (
     <PageContainer floatingAction={<AddMovementButton onClick={() => setIsFormOpen(true)} />}>
@@ -56,6 +58,7 @@ export default function DemoPage() {
         {active.map((e) => <EventCard key={e.id} event={e} />)}
         {demoEvents.filter((e) => e.status === 'cerrado').map((e) => <ClosedEventCard key={e.id} event={e} />)}
       </DemoSection>
+      <DemoSection title="Mis cuentas (pantalla)"><DemoCuentas /></DemoSection>
       <DemoSection title="Evento (pantalla)"><DemoEvento /></DemoSection>
       <DemoSection title="Dinero (pantalla)"><DemoDinero /></DemoSection>
       <DemoSection title="Te deben (pantalla)"><DemoTeDeben /></DemoSection>
@@ -67,7 +70,8 @@ export default function DemoPage() {
         onConfirm={() => setIsCloseOpen(false)} onCancel={() => setIsCloseOpen(false)} />
       {isFormOpen && (
         <RegistroWizard categorias={demoCategorias} onCrearCategoria={crearCategoriaDemo} creandoCategoria={false}
-          errorCategoria={null} usos={demoUsos} eventosActivos={active}
+          errorCategoria={null} usos={demoUsos} eventosActivos={active} cuentas={demoCuentas}
+          cuentaPorDefecto={demoCuentas[0]?.id ?? null}
           guardando={false} errorGuardado={null} onGuardar={guardarDemo} onCerrar={() => setIsFormOpen(false)} />
       )}
     </PageContainer>

@@ -48,6 +48,14 @@ import type {
   ReceivableUpdate,
   ReceivablesSummaryRow,
 } from './receivable';
+import type {
+  AccountBalanceRow,
+  AccountInsert,
+  AccountRow,
+  AccountTransferInsert,
+  AccountTransferRow,
+  AccountUpdate,
+} from './account';
 import type { EventBudgetRow } from './event';
 
 // Solo las llaves foráneas entre tablas de `public`: supabase-js las usa
@@ -97,6 +105,13 @@ export type Database = {
             referencedRelation: 'events';
             referencedColumns: ['id'];
           },
+          {
+            foreignKeyName: 'movements_account_id_fkey';
+            columns: ['account_id'];
+            isOneToOne: false;
+            referencedRelation: 'accounts';
+            referencedColumns: ['id'];
+          },
         ];
       };
       savings_goals: {
@@ -119,6 +134,13 @@ export type Database = {
           },
         ];
       };
+      accounts: { Row: AccountRow; Insert: AccountInsert; Update: AccountUpdate; Relationships: [] };
+      account_transfers: {
+        Row: AccountTransferRow;
+        Insert: AccountTransferInsert;
+        Update: never;
+        Relationships: [];
+      };
       // Sin SELECT por API: Row vacía para que nadie intente leerla.
       analytics_events: {
         Row: Record<string, never>;
@@ -131,6 +153,7 @@ export type Database = {
       vw_monthly_summary: { Row: MonthlySummaryRow; Relationships: [] };
       vw_receivables_summary: { Row: ReceivablesSummaryRow; Relationships: [] };
       vw_event_budget: { Row: EventBudgetRow; Relationships: [] };
+      vw_account_balances: { Row: AccountBalanceRow; Relationships: [] };
     };
     Functions: {
       // schema.sql sección 6: cierra el evento y transfiere sus gastos (atómico).
@@ -145,7 +168,7 @@ export type Database = {
           target_month: string;
         };
       };
-      // schema.sql sección 11: gasto (tu parte) + deudas en una transacción.
+      // schema.sql secciones 11 y 12: gasto (tu parte) + deudas en una transacción.
       create_split_expense: {
         Args: {
           p_amount: number;
@@ -153,6 +176,7 @@ export type Database = {
           p_event_id: string | null;
           p_note: string | null;
           p_debtors: Array<{ name: string; amount: number }>;
+          p_account_id?: string | null;
         };
         Returns: string;
       };

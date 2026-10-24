@@ -22,25 +22,31 @@
 import { useState } from 'react';
 import { useDivision, type Division } from '@/hooks/useDivision';
 import {
-  PASOS_NUMERADOS, useRegistroWizard, type PasoRegistro, type ValoresIniciales,
+  PASOS_NUMERADOS, useRegistroWizard, type ValoresIniciales,
 } from '@/hooks/useRegistroWizard';
 import { formatCurrency } from '@/lib/formatCurrency';
+import type { Cuenta } from '@/types/account';
 import type { Category, NuevaCategoria } from '@/types/category';
 import type { MovementDraft } from '@/types/movement';
 import type { Deudor } from '@/types/receivable';
 import { PasoCalculadora } from './PasoCalculadora';
 import { PasoCategoria } from './PasoCategoria';
+import { PasoCuenta } from './PasoCuenta';
 import { PasoDividir } from './PasoDividir';
 import { PasoListo } from './PasoListo';
 import { PasoMonto } from './PasoMonto';
 import { PasoNuevaCategoria } from './PasoNuevaCategoria';
 import { PasoTipo } from './PasoTipo';
+import { textosDelPaso } from './textosRegistro';
 import { WizardHeader } from './WizardHeader';
 
 interface RegistroWizardProps {
   categorias: Category[];
   usos: string[];
   eventosActivos: Array<{ id: string; name: string }>;
+  // Tus cuentas y la que viene elegida (la última usada).
+  cuentas: Cuenta[];
+  cuentaPorDefecto: string | null;
   guardando: boolean;
   errorGuardado: string | null;
   // Devuelve true si se guardó. deudores vacío = gasto normal.
@@ -62,7 +68,7 @@ type Guardado = ReturnType<typeof useGuardado>;
 export function RegistroWizard(props: RegistroWizardProps) {
   const w = useRegistroWizard(props.inicial, props.eventoFijo?.id);
   const division = useDivision(w.calc.valor ?? 0);
-  const g = useGuardado(w, division, props.onGuardar);
+  const g = useGuardado(w, division, props.onGuardar, props.cuentaPorDefecto);
   const esEdicion = props.inicial !== undefined;
   // El primer paso no tiene "volver": es 'tipo', o 'categoria' si viene de un evento.
   const esPrimero = w.paso === (props.eventoFijo ? 'categoria' : 'tipo');
@@ -86,12 +92,12 @@ export function RegistroWizard(props: RegistroWizardProps) {
 }
 
 // Guarda normal o dividido. Al dividir, el monto del gasto es TU parte.
-function useGuardado(w: Wizard, division: Division, onGuardar: RegistroWizardProps['onGuardar']) {
+function useGuardado(w: Wizard, division: Division, onGuardar: RegistroWizardProps['onGuardar'], cuentaPorDefecto: string | null) {
   const [errorLocal, setErrorLocal] = useState<string | null>(null);
   const [dividido, setDividido] = useState(false);
 
   const guardar = async (deudores: Deudor[] = []) => {
-    const borrador = w.construirBorrador(deudores.length > 0 ? division.miParte : w.calc.valor);
+    const borrador = w.construirBorrador(deudores.length > 0 ? division.miParte : w.calc.valor, cuentaPorDefecto);
     if (!borrador.ok) return setErrorLocal(borrador.error);
     setErrorLocal(null);
     if (await onGuardar(borrador.draft, borrador.segundos, deudores)) {
@@ -130,6 +136,9 @@ function CuerpoDelPaso({ w, g, division, props, esEdicion }: PiezaProps) {
     );
   }
   if (w.paso === 'calculadora') return <PasoCalculadora montoInicial={w.calc.valor} onUsar={w.usarResultado} />;
+  if (w.paso === 'cuenta') {
+    return <PasoCuenta cuentas={props.cuentas} elegidaId={cuentaActual(w, props)} onElegir={w.elegirCuenta} />;
+  }
   if (w.paso === 'dividir') {
     return (
       <PasoDividir total={w.calc.valor ?? 0} division={division} errorServidor={props.errorGuardado}
@@ -141,9 +150,15 @@ function CuerpoDelPaso({ w, g, division, props, esEdicion }: PiezaProps) {
       calc={w.calc} error={g.errorLocal ?? props.errorGuardado} guardando={props.guardando}
       detalles={{ nota: w.nota, onNota: w.setNota, eventoId: w.eventoId, onEvento: w.setEventoId,
         eventos: w.tipo === 'egreso' ? props.eventosActivos : null }}
-      onCambiarCategoria={w.volver} onGuardar={() => g.guardar()}
+      cuenta={props.cuentas.length > 0 ? props.cuentas.find((c) => c.id === cuentaActual(w, props)) ?? null : undefined}
+      onCuenta={w.irACuenta} onCambiarCategoria={w.volver} onGuardar={() => g.guardar()}
       onCalculadora={w.irACalculadora} onDividir={esEdicion ? undefined : w.irADividir} />
   );
+}
+
+// La que eligió el usuario, o la de por defecto si no tocó nada.
+function cuentaActual(w: Wizard, props: RegistroWizardProps) {
+  return w.cuentaId === undefined ? props.cuentaPorDefecto : w.cuentaId;
 }
 
 function Exito({ w, g, division, props, esEdicion }: PiezaProps) {
@@ -157,30 +172,4 @@ function Exito({ w, g, division, props, esEdicion }: PiezaProps) {
         total: formatCurrency(prestado), nombres: division.deudores.map((d) => d.nombre.trim()).join(', '),
       } : null} />
   );
-}
-
-const TEXTOS = {
-  tipo: { titulo: '¿Qué querés registrar?', sub: 'Tocá una opción para empezar.' },
-  categoria: {
-    egreso: { titulo: '¿En qué gastaste?', sub: 'Elegí la categoría que mejor lo describa.' },
-    ingreso: { titulo: '¿De dónde vino el dinero?', sub: 'Elegí la categoría que mejor lo describa.' },
-  },
-  nuevaCategoria: {
-    egreso: { titulo: 'Nueva categoría', sub: 'Para tus gastos. Elegí un nombre y un ícono.' },
-    ingreso: { titulo: 'Nueva categoría', sub: 'Para tus ingresos. Elegí un nombre y un ícono.' },
-  },
-  monto: {
-    egreso: { titulo: '¿Cuánto gastaste?', sub: 'Escribí el monto. Para hacer una cuenta, usá la Calculadora.' },
-    ingreso: { titulo: '¿Cuánto recibiste?', sub: 'Escribí el monto. Para hacer una cuenta, usá la Calculadora.' },
-  },
-  calculadora: { titulo: 'Calculadora', sub: 'Hacé tu cuenta y tocá «Usar este resultado».' },
-  dividir: { titulo: '¿Con quién dividís?', sub: 'Tu parte queda como gasto; lo demás, en «Te deben».' },
-};
-
-type PasoConTexto = Exclude<PasoRegistro, 'listo'>;
-
-function textosDelPaso(paso: PasoConTexto, tipo: 'egreso' | 'ingreso', esEdicion: boolean) {
-  const t = paso === 'categoria' || paso === 'monto' || paso === 'nuevaCategoria' ? TEXTOS[paso][tipo] : TEXTOS[paso];
-  const subtitulo = esEdicion && paso === 'monto' ? 'Corregí lo que haga falta y tocá Guardar.' : t.sub;
-  return { titulo: t.titulo, subtitulo };
 }

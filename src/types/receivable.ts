@@ -24,6 +24,8 @@ export type ReceivableRow = {
   amount: number;
   status: ReceivableStatus;
   collected_at: string | null;
+  // En qué cuenta te pagaron (§12). Se borra al deshacer el cobro.
+  collected_account_id: string | null;
   metadata: Record<string, unknown>;
   created_at: string;
   updated_at: string;
@@ -32,7 +34,9 @@ export type ReceivableRow = {
 // Regla 10: collected_at lo pone el trigger; user_id viene de auth.uid().
 export type ReceivableInsert = Pick<ReceivableRow, 'movement_id' | 'debtor_name' | 'amount'> &
   Partial<Pick<ReceivableRow, 'metadata'>>;
-export type ReceivableUpdate = Partial<Pick<ReceivableRow, 'debtor_name' | 'amount' | 'status' | 'metadata'>>;
+export type ReceivableUpdate = Partial<
+  Pick<ReceivableRow, 'debtor_name' | 'amount' | 'status' | 'collected_account_id' | 'metadata'>
+>;
 
 export type ReceivablesSummaryRow = {
   user_id: string;

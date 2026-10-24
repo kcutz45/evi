@@ -7,28 +7,35 @@
  * POR QUÉ EXISTE: Es el otro lado de "Dividir cuenta" (EVI_SPEC §0,
  *            aprobado 24/10/2026). Cobrar NO es un ingreso: solo baja
  *            lo que te deben; tu balance ya contaba solo tu parte.
+ *            Al cobrar se elige dónde te pagaron: sube el saldo de esa
+ *            cuenta ("Tu dinero hoy"), no el balance.
  *
- * DEPENDE DE: hooks/useReceivables.ts, lib/porCobrar.ts
+ * DEPENDE DE: hooks/useReceivables.ts, hooks/useAccounts.ts, lib/porCobrar.ts
  * ---------------------------------------------------------------
  */
 'use client';
 
+import { useState } from 'react';
 import Link from 'next/link';
 import { ArrowLeft, HandCoins } from 'lucide-react';
 import { FormAlert } from '@/components/auth/AuthHeading';
+import { HojaElegirCuenta } from '@/components/finance/cuentas/HojaElegirCuenta';
 import { ListaCobradas, TarjetaPersona } from '@/components/finance/porCobrar/DeudasList';
 import { Header } from '@/components/layout/Header';
 import { PageContainer } from '@/components/layout/PageContainer';
+import { useAccounts } from '@/hooks/useAccounts';
 import { useReceivables } from '@/hooks/useReceivables';
 import { RUTA_INICIO } from '@/lib/routes';
 import { agruparPendientesPorPersona, cobradas } from '@/lib/porCobrar';
+import type { PorCobrar } from '@/types/receivable';
 
 const FILAS_DE_CARGA = 2;
 
 export default function PorCobrarPage() {
   const deudas = useReceivables();
+  const cobro = useCobroConCuenta(deudas.alternarCobro);
   const personas = agruparPendientesPorPersona(deudas.data);
-  const acciones = { ocupadoId: deudas.ocupadoId, onAlternar: deudas.alternarCobro };
+  const acciones = { ocupadoId: deudas.ocupadoId, onAlternar: cobro.alternar };
 
   return (
     <PageContainer>
@@ -45,8 +52,31 @@ export default function PorCobrarPage() {
         {personas.map((p) => <TarjetaPersona key={p.clave} persona={p} {...acciones} />)}
         <ListaCobradas deudas={cobradas(deudas.data)} {...acciones} />
       </div>
+      {cobro.deuda && (
+        <HojaElegirCuenta titulo="¿Dónde te pagaron?" cuentas={cobro.cuentas}
+          subtitulo={`${cobro.deuda.nombre} te devolvió su parte. Elegí la cuenta donde está ese dinero.`}
+          onElegir={cobro.elegir} onCerrar={cobro.cancelar} />
+      )}
     </PageContainer>
   );
+}
+
+// Cobrar pide la cuenta (si tenés cuentas); deshacer no pregunta nada.
+function useCobroConCuenta(alternarCobro: (deuda: PorCobrar, cuentaId?: string | null) => Promise<void>) {
+  const { data: cuentas, recargar } = useAccounts();
+  const [deuda, setDeuda] = useState<PorCobrar | null>(null);
+  return {
+    deuda,
+    cuentas,
+    alternar: (d: PorCobrar) => (d.cobrado || cuentas.length === 0 ? void alternarCobro(d) : setDeuda(d)),
+    elegir: async (cuentaId: string) => {
+      if (!deuda) return;
+      setDeuda(null);
+      await alternarCobro(deuda, cuentaId);
+      recargar();
+    },
+    cancelar: () => setDeuda(null),
+  };
 }
 
 function SinDeudas() {

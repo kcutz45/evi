@@ -16,6 +16,7 @@ import { Calculator, Check, Users } from 'lucide-react';
 import { AppIcon } from '@/components/ui/AppIcon';
 import { Button } from '@/components/ui/Button';
 import type { useCalculator } from '@/hooks/useCalculator';
+import type { Cuenta } from '@/types/account';
 import { cn } from '@/lib/cn';
 import type { Category } from '@/types/category';
 import { CalculatorKeypad } from './CalculatorKeypad';
@@ -34,6 +35,9 @@ interface PasoMontoProps {
   onCalculadora: () => void;
   // Si viene, se ofrece "Dividir esta cuenta" (solo gastos, al crear).
   onDividir?: () => void;
+  // Cuenta elegida (null = sin cuenta; undefined = el usuario no tiene cuentas).
+  cuenta: Cuenta | null | undefined;
+  onCuenta: () => void;
 }
 
 export function PasoMonto(props: PasoMontoProps) {
@@ -50,6 +54,11 @@ export function PasoMonto(props: PasoMontoProps) {
           </output>
         </div>
         <div className="flex flex-wrap justify-center gap-2">
+          {props.cuenta !== undefined && (
+            <Atajo onClick={props.onCuenta} icono={<AppIcon name={props.cuenta?.icono ?? 'circle'} size={16} />}>
+              {props.cuenta?.nombre ?? 'Sin cuenta'}
+            </Atajo>
+          )}
           <Atajo onClick={props.onCalculadora} icono={<Calculator size={16} aria-hidden />}>Calculadora</Atajo>
           {props.onDividir && !props.esIngreso && calc.esValido && (
             <Atajo onClick={props.onDividir} icono={<Users size={16} aria-hidden />}>Dividir esta cuenta</Atajo>

@@ -48,10 +48,11 @@ export async function obtenerResumenDelMes(client: Cliente, inicioDeMes: string)
 
 type FilaMovimiento = Pick<
   MovementRow,
-  'id' | 'type' | 'amount' | 'note' | 'occurred_on' | 'status' | 'category_id' | 'event_id'
+  'id' | 'type' | 'amount' | 'note' | 'occurred_on' | 'status' | 'category_id' | 'event_id' | 'account_id'
 > & {
   categories: { name: string; icon: string } | null;
   events: { name: string } | null;
+  accounts: { name: string } | null;
   receivables: Array<{ debtor_name: string; amount: number; status: string }>;
 };
 
@@ -72,6 +73,8 @@ function toDetalle(fila: FilaMovimiento): MovementDetalle {
     eventId: fila.event_id,
     note: fila.note,
     occurredOn: fila.occurred_on,
+    accountId: fila.account_id,
+    accountName: fila.accounts?.name ?? null,
     porCobrar: fila.receivables.map((r) => ({
       nombre: r.debtor_name, monto: Number(r.amount), cobrado: r.status === 'cobrado',
     })),
@@ -80,7 +83,7 @@ function toDetalle(fila: FilaMovimiento): MovementDetalle {
 
 // Un solo texto literal: si se parte con +, supabase-js pierde el tipo de la fila.
 const COLUMNAS_LISTA =
-  'id, type, amount, note, occurred_on, status, category_id, event_id, categories(name, icon), events(name), receivables(debtor_name, amount, status)';
+  'id, type, amount, note, occurred_on, status, category_id, event_id, account_id, categories(name, icon), events(name), accounts(name), receivables(debtor_name, amount, status)';
 
 // Incluye los pendientes de eventos abiertos: el usuario debe verlos con
 // su marca "Pendiente" aunque todavía no sumen al balance (regla 4d).
@@ -121,6 +124,7 @@ export async function crearMovimiento(client: Cliente, draft: MovementDraft): Pr
       category_id: draft.categoryId,
       event_id: draft.eventId,
       note: draft.note,
+      account_id: draft.accountId,
     })
     .select('status')
     .single();
@@ -158,6 +162,7 @@ export async function actualizarMovimiento(client: Cliente, id: string, draft: M
       category_id: draft.categoryId,
       event_id: draft.eventId,
       note: draft.note,
+      account_id: draft.accountId,
     })
     .eq('id', id);
   if (error) {

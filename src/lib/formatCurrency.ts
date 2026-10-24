@@ -33,3 +33,11 @@ export function formatSignedCurrency(amount: number, isIncome: boolean): string 
 export function formatCurrencyShort(amount: number): string {
   return `Q${shortFormatter.format(Math.round(Math.abs(amount)))}`;
 }
+
+// Lo que el usuario escribe en un campo de monto ("1,250.50", "Q300")
+// → número. null si no es un monto válido. Redondea a centavos.
+export function leerMonto(texto: string): number | null {
+  const limpio = texto.replace(/[Q,\s]/gi, '');
+  if (limpio === '' || !/^\d+(\.\d{0,2})?$/.test(limpio)) return null;
+  return Math.round(Number(limpio) * 100) / 100;
+}

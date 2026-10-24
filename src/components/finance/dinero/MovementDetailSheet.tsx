@@ -53,13 +53,7 @@ export function MovementDetailSheet({ movimiento: m, ocupado, error, onEditar, o
             {formatSignedCurrency(m.amount, esIngreso)}
           </span>
         </div>
-        <dl className="mt-5 flex flex-col divide-y divide-line rounded-card bg-white px-4 shadow-card">
-          <Fila etiqueta="Categoría" valor={m.categoryName} />
-          <Fila etiqueta="Fecha" valor={fechaLarga(m.occurredOn)} />
-          {m.eventName && <Fila etiqueta="Evento" valor={m.eventName} />}
-          {m.eventName && <Fila etiqueta="Estado" valor={m.isPending ? 'Pendiente: suma al cerrar el evento' : 'Pasado a tus finanzas'} />}
-          {m.note && m.note !== m.title && <Fila etiqueta="Nota" valor={m.note} />}
-        </dl>
+        <Datos m={m} />
         <DivisionResumen personas={m.porCobrar} />
         {error && <div className="mt-3"><FormAlert message={error} /></div>}
         {confirmando ? (
@@ -72,6 +66,20 @@ export function MovementDetailSheet({ movimiento: m, ocupado, error, onEditar, o
         )}
       </div>
     </div>
+  );
+}
+
+// Categoría, fecha, cuenta, evento y nota del movimiento.
+function Datos({ m }: { m: MovementDetalle }) {
+  return (
+    <dl className="mt-5 flex flex-col divide-y divide-line rounded-card bg-white px-4 shadow-card">
+      <Fila etiqueta="Categoría" valor={m.categoryName} />
+      <Fila etiqueta="Fecha" valor={fechaLarga(m.occurredOn)} />
+      {m.accountName && <Fila etiqueta={m.type === 'ingreso' ? 'Entró a' : 'Salió de'} valor={m.accountName} />}
+      {m.eventName && <Fila etiqueta="Evento" valor={m.eventName} />}
+      {m.eventName && <Fila etiqueta="Estado" valor={m.isPending ? 'Pendiente: suma al cerrar el evento' : 'Pasado a tus finanzas'} />}
+      {m.note && m.note !== m.title && <Fila etiqueta="Nota" valor={m.note} />}
+    </dl>
   );
 }
 

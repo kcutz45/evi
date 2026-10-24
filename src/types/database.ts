@@ -104,13 +104,17 @@ export type MovementRow = Auditoria & {
   occurred_on: string;
   status: MovementStatus;
   accounting_date: string | null;
+  // De qué cuenta salió / a cuál entró (opcional, §12 de schema.sql).
+  account_id: string | null;
 };
 
 export type SavingsGoalRow = Auditoria & {
   id: string;
   user_id: string;
   name: string;
+  icon: string;
   target_amount: number;
+  // Lo calcula un trigger con la suma de los abonos (§12).
   saved_amount: number;
   deadline: string | null;
   status: SavingsGoalStatus;
@@ -154,15 +158,15 @@ export type EventTaskInsert = Pick<EventTaskRow, 'event_id' | 'title'> &
 export type EventTaskUpdate = Optional<EventTaskRow, 'title' | 'is_done' | 'position' | 'metadata'>;
 
 type MovementWritable =
-  | 'type' | 'amount' | 'category_id' | 'event_id' | 'note' | 'occurred_on' | 'metadata';
+  | 'type' | 'amount' | 'category_id' | 'event_id' | 'note' | 'occurred_on' | 'account_id' | 'metadata';
 export type MovementInsert = Pick<MovementRow, 'type' | 'amount'> &
-  Optional<MovementRow, 'category_id' | 'event_id' | 'note' | 'occurred_on' | 'metadata'>;
+  Optional<MovementRow, 'category_id' | 'event_id' | 'note' | 'occurred_on' | 'account_id' | 'metadata'>;
 export type MovementUpdate = Optional<MovementRow, MovementWritable>;
 
 type SavingsGoalWritable =
-  | 'name' | 'target_amount' | 'saved_amount' | 'deadline' | 'status' | 'metadata';
+  | 'name' | 'icon' | 'target_amount' | 'deadline' | 'status' | 'metadata';
 export type SavingsGoalInsert = Pick<SavingsGoalRow, 'name' | 'target_amount'> &
-  Optional<SavingsGoalRow, 'saved_amount' | 'deadline' | 'status' | 'metadata'>;
+  Optional<SavingsGoalRow, 'icon' | 'deadline' | 'metadata'>;
 export type SavingsGoalUpdate = Optional<SavingsGoalRow, SavingsGoalWritable>;
 
 // ---------------------------------------------------------------

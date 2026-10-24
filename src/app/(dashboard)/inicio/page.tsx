@@ -15,7 +15,7 @@
  *            el balance ya está al día.
  *
  * DEPENDE DE: hooks/useAuth, useMonthlySummary, useMovements,
- *            useCategories, useCategoryUsage, useActiveEvents
+ *            useCategories, useCategoryUsage, useActiveEvents, useAccounts
  * ---------------------------------------------------------------
  */
 'use client';
@@ -23,11 +23,13 @@
 import { useCallback, useState } from 'react';
 import { AddMovementButton } from '@/components/finance/AddMovementButton';
 import { BalanceSection, RecentMovementsSection } from '@/components/finance/DashboardSections';
+import { TuDineroCard } from '@/components/finance/cuentas/TuDineroCard';
 import { TeDebenCard } from '@/components/finance/porCobrar/TeDebenCard';
 import { RegistroWizard } from '@/components/finance/registro/RegistroWizard';
 import { Header } from '@/components/layout/Header';
 import { PageContainer } from '@/components/layout/PageContainer';
 import { UserMenu } from '@/components/layout/UserMenu';
+import { useAccounts } from '@/hooks/useAccounts';
 import { useActiveEvents } from '@/hooks/useActiveEvents';
 import { useAuth } from '@/hooks/useAuth';
 import { useCategories } from '@/hooks/useCategories';
@@ -47,10 +49,11 @@ export default function InicioPage() {
   const usos = useCategoryUsage();
   const teDeben = useReceivablesSummary();
   const cats = useCategories();
+  const cuentas = useAccounts();
   const categorias = cats.data;
   const { data: eventos } = useActiveEvents();
   const [isHidden, setIsHidden] = useState(false);
-  const registro = useRegistroEnDashboard(movimientos, categorias, [resumen.recargar, usos.recargar, teDeben.recargar]);
+  const registro = useRegistroEnDashboard(movimientos, categorias, [resumen.recargar, usos.recargar, teDeben.recargar, cuentas.recargar]);
 
   const nombre = perfil?.fullName ?? '';
   return (
@@ -60,13 +63,14 @@ export default function InicioPage() {
       <BalanceSection monthLabel={nombreDelMes(resumen.inicioDeMes)} {...resumen.data}
         isLoading={resumen.isLoading} error={resumen.error} isHidden={isHidden} prestado={teDeben.data.total}
         onToggleHidden={() => setIsHidden((oculto) => !oculto)} onRetry={resumen.recargar} />
+      <TuDineroCard total={cuentas.total} cuentas={cuentas.data.length} isHidden={isHidden} />
       <TeDebenCard resumen={teDeben.data} />
       <RecentMovementsSection movements={movimientos.data} isLoading={movimientos.isLoading}
         error={movimientos.error} onRetry={movimientos.recargar} />
       {registro.abierto && (
         <RegistroWizard categorias={categorias} onCrearCategoria={cats.crear} creandoCategoria={cats.creando}
           errorCategoria={cats.errorCrear} usos={usos.data} eventosActivos={eventos}
-          guardando={movimientos.isSaving} errorGuardado={movimientos.saveError}
+          cuentas={cuentas.data} cuentaPorDefecto={cuentas.cuentaPorDefecto} guardando={movimientos.isSaving} errorGuardado={movimientos.saveError}
           onGuardar={registro.guardar} onCerrar={registro.cerrar} />
       )}
     </PageContainer>
