@@ -1,0 +1,11 @@
+# Saltos de línea: todo el código del repositorio usa LF (estilo Unix).
+# Sin esto, cada integrante en Windows guarda con CRLF, Git avisa
+# "LF will be replaced by CRLF" y los pull requests se llenan de cambios
+# fantasma en líneas que nadie tocó (§2.2: evitar conflictos inútiles).
+* text=auto eol=lf
+
+# Binarios: Git no debe tocarlos.
+*.png binary
+*.jpg binary
+*.ico binary
+*.woff2 binary
