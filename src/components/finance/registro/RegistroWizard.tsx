@@ -3,24 +3,31 @@
  * ---------------------------------------------------------------
  * PROPÓSITO: Registro de un movimiento paso a paso, a pantalla completa:
  *            1 ¿Gasto o ingreso? → 2 ¿En qué? → 3 ¿Cuánto? → ¡Listo!
+ *            Desde el paso 3, un gasto se puede dividir con otras
+ *            personas ("¿Con quién dividís?").
  *
  * POR QUÉ EXISTE: Reemplaza al formulario de una sola pantalla, que a
  *            varios usuarios se les complicó (24/10/2026). Une los pasos;
- *            el estado vive en useRegistroWizard y guardar es trabajo de
- *            la página (onGuardar). En escritorio se ve como una columna
- *            de celular centrada (max-w-md): el MVP es móvil primero.
+ *            el estado vive en useRegistroWizard y useDivision, y guardar
+ *            es trabajo de la página (onGuardar). En escritorio se ve como
+ *            columna de celular centrada (max-w-md): MVP móvil primero.
  *
- * DEPENDE DE: hooks/useRegistroWizard.ts y los Paso*.tsx de esta carpeta
- * USADO EN:   app/(dashboard)/inicio/page.tsx, app/demo/page.tsx
+ * DEPENDE DE: hooks/useRegistroWizard.ts, hooks/useDivision.ts y los
+ *            Paso*.tsx de esta carpeta
+ * USADO EN:   app/(dashboard)/inicio, app/(dashboard)/dinero, app/demo
  * ---------------------------------------------------------------
  */
 'use client';
 
 import { useState } from 'react';
+import { useDivision, type Division } from '@/hooks/useDivision';
 import { PASOS_NUMERADOS, useRegistroWizard, type ValoresIniciales } from '@/hooks/useRegistroWizard';
+import { formatCurrency } from '@/lib/formatCurrency';
 import type { Category } from '@/types/category';
 import type { MovementDraft } from '@/types/movement';
+import type { Deudor } from '@/types/receivable';
 import { PasoCategoria } from './PasoCategoria';
+import { PasoDividir } from './PasoDividir';
 import { PasoListo } from './PasoListo';
 import { PasoMonto } from './PasoMonto';
 import { PasoTipo } from './PasoTipo';
@@ -32,11 +39,100 @@ interface RegistroWizardProps {
   eventosActivos: Array<{ id: string; name: string }>;
   guardando: boolean;
   errorGuardado: string | null;
-  // Devuelve true si se guardó; el wizard muestra entonces "¡Listo!".
-  onGuardar: (draft: MovementDraft, segundos: number) => Promise<boolean>;
+  // Devuelve true si se guardó. deudores vacío = gasto normal.
+  onGuardar: (draft: MovementDraft, segundos: number, deudores: Deudor[]) => Promise<boolean>;
   onCerrar: () => void;
   // Si viene, es una EDICIÓN: arranca en el monto con todo cargado.
   inicial?: ValoresIniciales;
+}
+
+type Wizard = ReturnType<typeof useRegistroWizard>;
+type Guardado = ReturnType<typeof useGuardado>;
+
+export function RegistroWizard(props: RegistroWizardProps) {
+  const w = useRegistroWizard(props.inicial);
+  const division = useDivision(w.calc.valor ?? 0);
+  const g = useGuardado(w, division, props.onGuardar);
+  const esEdicion = props.inicial !== undefined;
+
+  return (
+    <div className="fixed inset-0 z-50 bg-light">
+      <div className="mx-auto flex h-dvh max-w-md flex-col">
+        {w.paso === 'listo' ? (
+          <Exito w={w} g={g} division={division} props={props} esEdicion={esEdicion} />
+        ) : (
+          <>
+            <WizardHeader numeroDePaso={w.numeroDePaso} totalDePasos={PASOS_NUMERADOS.length}
+              {...textosDelPaso(w.paso, w.tipo, esEdicion)} onVolver={w.paso === 'tipo' ? null : w.volver}
+              onCerrar={props.onCerrar} />
+            <CuerpoDelPaso w={w} g={g} division={division} props={props} esEdicion={esEdicion} />
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// Guarda normal o dividido. Al dividir, el monto del gasto es TU parte.
+function useGuardado(w: Wizard, division: Division, onGuardar: RegistroWizardProps['onGuardar']) {
+  const [errorLocal, setErrorLocal] = useState<string | null>(null);
+  const [dividido, setDividido] = useState(false);
+
+  const guardar = async (deudores: Deudor[] = []) => {
+    const borrador = w.construirBorrador(deudores.length > 0 ? division.miParte : w.calc.valor);
+    if (!borrador.ok) return setErrorLocal(borrador.error);
+    setErrorLocal(null);
+    if (await onGuardar(borrador.draft, borrador.segundos, deudores)) {
+      setDividido(deudores.length > 0);
+      w.terminar();
+    }
+  };
+  return { errorLocal, dividido, guardar };
+}
+
+interface PiezaProps {
+  w: Wizard;
+  g: Guardado;
+  division: Division;
+  props: RegistroWizardProps;
+  esEdicion: boolean;
+}
+
+function CuerpoDelPaso({ w, g, division, props, esEdicion }: PiezaProps) {
+  if (w.paso === 'tipo') return <PasoTipo onElegir={w.elegirTipo} />;
+  if (w.paso === 'categoria') {
+    return (
+      <PasoCategoria categorias={props.categorias.filter((c) => c.kind === w.tipo)} usos={props.usos}
+        seleccionadaId={w.categoriaId} onElegir={w.elegirCategoria} />
+    );
+  }
+  if (w.paso === 'dividir') {
+    return (
+      <PasoDividir total={w.calc.valor ?? 0} division={division} errorServidor={props.errorGuardado}
+        guardando={props.guardando} onGuardar={() => g.guardar(division.deudores)} />
+    );
+  }
+  return (
+    <PasoMonto categoria={props.categorias.find((c) => c.id === w.categoriaId)} esIngreso={w.tipo === 'ingreso'}
+      calc={w.calc} error={g.errorLocal ?? props.errorGuardado} guardando={props.guardando}
+      detalles={{ nota: w.nota, onNota: w.setNota, eventoId: w.eventoId, onEvento: w.setEventoId,
+        eventos: w.tipo === 'egreso' ? props.eventosActivos : null }}
+      onCambiarCategoria={w.volver} onGuardar={() => g.guardar()}
+      onDividir={esEdicion ? undefined : w.irADividir} />
+  );
+}
+
+function Exito({ w, g, division, props, esEdicion }: PiezaProps) {
+  const prestado = division.deudores.reduce((suma, d) => suma + d.monto, 0);
+  return (
+    <PasoListo esEdicion={esEdicion} esIngreso={w.tipo === 'ingreso'} onListo={props.onCerrar}
+      monto={g.dividido ? formatCurrency(division.miParte) : w.calc.total}
+      categoria={props.categorias.find((c) => c.id === w.categoriaId)?.name ?? 'Sin categoría'}
+      evento={props.eventosActivos.find((e) => e.id === w.eventoId)?.name ?? null}
+      teDeben={g.dividido ? {
+        total: formatCurrency(prestado), nombres: division.deudores.map((d) => d.nombre.trim()).join(', '),
+      } : null} />
+  );
 }
 
 const TEXTOS = {
@@ -49,64 +145,13 @@ const TEXTOS = {
     egreso: { titulo: '¿Cuánto gastaste?', sub: 'Podés sumar o multiplicar: 3 × 35.' },
     ingreso: { titulo: '¿Cuánto recibiste?', sub: 'Podés sumar o multiplicar: 2 × 750.' },
   },
+  dividir: { titulo: '¿Con quién dividís?', sub: 'Tu parte queda como gasto; lo demás, en «Te deben».' },
 };
 
-export function RegistroWizard(props: RegistroWizardProps) {
-  const w = useRegistroWizard(props.inicial);
-  const esEdicion = props.inicial !== undefined;
-  const [errorLocal, setErrorLocal] = useState<string | null>(null);
-  const categoria = props.categorias.find((c) => c.id === w.categoriaId);
+type PasoConTexto = 'tipo' | 'categoria' | 'monto' | 'dividir';
 
-  const guardar = async () => {
-    const borrador = w.construirBorrador();
-    if (!borrador.ok) return setErrorLocal(borrador.error);
-    setErrorLocal(null);
-    if (await props.onGuardar(borrador.draft, borrador.segundos)) w.terminar();
-  };
-
-  return (
-    <div className="fixed inset-0 z-50 bg-light">
-      <div className="mx-auto flex h-dvh max-w-md flex-col">
-        {w.paso === 'listo' ? (
-          <PasoListo esEdicion={esEdicion} monto={w.calc.total} categoria={categoria?.name ?? 'Sin categoría'}
-            esIngreso={w.tipo === 'ingreso'} onListo={props.onCerrar}
-            evento={props.eventosActivos.find((e) => e.id === w.eventoId)?.name ?? null} />
-        ) : (
-          <>
-            <WizardHeader numeroDePaso={w.numeroDePaso} totalDePasos={PASOS_NUMERADOS.length}
-              {...textosDelPaso(w.paso, w.tipo, esEdicion)} onVolver={w.paso === 'tipo' ? null : w.volver}
-              onCerrar={props.onCerrar} />
-            {w.paso !== 'monto' ? <PasoDeEleccion w={w} categorias={props.categorias} usos={props.usos} /> : (
-              <PasoMonto categoria={categoria} esIngreso={w.tipo === 'ingreso'} calc={w.calc}
-                detalles={{ nota: w.nota, onNota: w.setNota, eventoId: w.eventoId, onEvento: w.setEventoId,
-                  eventos: w.tipo === 'egreso' ? props.eventosActivos : null }}
-                error={errorLocal ?? props.errorGuardado} guardando={props.guardando}
-                onCambiarCategoria={w.volver} onGuardar={guardar} />
-            )}
-          </>
-        )}
-      </div>
-    </div>
-  );
-}
-
-// Pasos 1 y 2: un toque elige y avanza.
-interface PasoDeEleccionProps {
-  w: ReturnType<typeof useRegistroWizard>;
-  categorias: Category[];
-  usos: string[];
-}
-
-function PasoDeEleccion({ w, categorias, usos }: PasoDeEleccionProps) {
-  if (w.paso === 'tipo') return <PasoTipo onElegir={w.elegirTipo} />;
-  return (
-    <PasoCategoria categorias={categorias.filter((c) => c.kind === w.tipo)} usos={usos}
-      seleccionadaId={w.categoriaId} onElegir={w.elegirCategoria} />
-  );
-}
-
-function textosDelPaso(paso: 'tipo' | 'categoria' | 'monto', tipo: 'egreso' | 'ingreso', esEdicion: boolean) {
-  const t = paso === 'tipo' ? TEXTOS.tipo : TEXTOS[paso][tipo];
+function textosDelPaso(paso: PasoConTexto, tipo: 'egreso' | 'ingreso', esEdicion: boolean) {
+  const t = paso === 'tipo' || paso === 'dividir' ? TEXTOS[paso] : TEXTOS[paso][tipo];
   const subtitulo = esEdicion && paso === 'monto' ? 'Corregí lo que haga falta y tocá Guardar.' : t.sub;
   return { titulo: t.titulo, subtitulo };
 }

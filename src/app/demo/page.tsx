@@ -23,7 +23,9 @@ import { Header } from '@/components/layout/Header';
 import { UserMenu } from '@/components/layout/UserMenu';
 import { PageContainer } from '@/components/layout/PageContainer';
 import { Button } from '@/components/ui/Button';
+import { TeDebenCard } from '@/components/finance/porCobrar/TeDebenCard';
 import { DemoDinero } from './DemoDinero';
+import { DemoTeDeben } from './DemoTeDeben';
 import { demoCategories, demoEvents, demoMovements, demoSlices, demoTasks, demoUsos } from './mockData';
 
 export default function DemoPage() {
@@ -45,12 +47,14 @@ export default function DemoPage() {
       <Header eyebrow="Buen día," title="Andrea" action={<UserMenu nombre="Andrea López" plan="gratis" onLogout={logoutDemo} />} />
       <BalanceCard monthLabel="octubre" balance={4820.5} income={8450} expense={3629.5}
         isHidden={isHidden} onToggleHidden={() => setIsHidden((h) => !h)} />
+      <TeDebenCard resumen={{ total: 235, personas: 2 }} />
       <DemoSection title="Últimos movimientos"><MovementList movements={demoMovements} /></DemoSection>
       <DemoSection title="Eventos">
         {active.map((e) => <EventCard key={e.id} event={e} />)}
         {demoEvents.filter((e) => e.status === 'cerrado').map((e) => <ClosedEventCard key={e.id} event={e} />)}
       </DemoSection>
       <DemoSection title="Dinero (pantalla)"><DemoDinero /></DemoSection>
+      <DemoSection title="Te deben (pantalla)"><DemoTeDeben /></DemoSection>
       <DemoSection title="Tareas"><Checklist tasks={tasks} onToggle={toggleTask} /></DemoSection>
       <DemoSection title="Reporte"><MonthlyChart slices={demoSlices} /></DemoSection>
       <Button variant="soft" fullWidth className="mt-6" onClick={() => setIsCloseOpen(true)}>Probar cierre de evento</Button>

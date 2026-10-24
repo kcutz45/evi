@@ -23,6 +23,7 @@
 import { useCallback, useState } from 'react';
 import { AddMovementButton } from '@/components/finance/AddMovementButton';
 import { BalanceSection, RecentMovementsSection } from '@/components/finance/DashboardSections';
+import { TeDebenCard } from '@/components/finance/porCobrar/TeDebenCard';
 import { RegistroWizard } from '@/components/finance/registro/RegistroWizard';
 import { Header } from '@/components/layout/Header';
 import { PageContainer } from '@/components/layout/PageContainer';
@@ -33,19 +34,22 @@ import { useCategories } from '@/hooks/useCategories';
 import { useCategoryUsage } from '@/hooks/useCategoryUsage';
 import { useMonthlySummary } from '@/hooks/useMonthlySummary';
 import { useMovements } from '@/hooks/useMovements';
+import { useReceivablesSummary } from '@/hooks/useReceivables';
 import { nombreDelMes, saludoGT } from '@/lib/dates';
 import type { Category } from '@/types/category';
 import type { MovementDraft } from '@/types/movement';
+import type { Deudor } from '@/types/receivable';
 
 export default function InicioPage() {
   const { perfil, cerrarSesion } = useAuth();
   const resumen = useMonthlySummary();
   const movimientos = useMovements();
   const usos = useCategoryUsage();
+  const teDeben = useReceivablesSummary();
   const { data: categorias } = useCategories();
   const { data: eventos } = useActiveEvents();
   const [isHidden, setIsHidden] = useState(false);
-  const registro = useRegistroEnDashboard(movimientos, categorias, [resumen.recargar, usos.recargar]);
+  const registro = useRegistroEnDashboard(movimientos, categorias, [resumen.recargar, usos.recargar, teDeben.recargar]);
 
   const nombre = perfil?.fullName ?? '';
   return (
@@ -55,6 +59,7 @@ export default function InicioPage() {
       <BalanceSection monthLabel={nombreDelMes(resumen.inicioDeMes)} {...resumen.data}
         isLoading={resumen.isLoading} error={resumen.error} isHidden={isHidden}
         onToggleHidden={() => setIsHidden((oculto) => !oculto)} onRetry={resumen.recargar} />
+      <TeDebenCard resumen={teDeben.data} />
       <RecentMovementsSection movements={movimientos.data} isLoading={movimientos.isLoading}
         error={movimientos.error} onRetry={movimientos.recargar} />
       {registro.abierto && (
@@ -83,9 +88,9 @@ function useRegistroEnDashboard(
     limpiarError();
   }, [limpiarError]);
 
-  const guardar = async (draft: MovementDraft, segundos: number) => {
+  const guardar = async (draft: MovementDraft, segundos: number, deudores: Deudor[]) => {
     const categoria = categorias.find((c) => c.id === draft.categoryId)?.name ?? null;
-    const ok = await movimientos.crear(draft, segundos, categoria);
+    const ok = await movimientos.crear(draft, segundos, categoria, deudores);
     if (ok) [movimientos.recargar, ...recargarTambien].forEach((recargar) => recargar());
     return ok;
   };

@@ -52,6 +52,7 @@ type FilaMovimiento = Pick<
 > & {
   categories: { name: string; icon: string } | null;
   events: { name: string } | null;
+  receivables: Array<{ debtor_name: string; amount: number; status: string }>;
 };
 
 function toDetalle(fila: FilaMovimiento): MovementDetalle {
@@ -71,11 +72,15 @@ function toDetalle(fila: FilaMovimiento): MovementDetalle {
     eventId: fila.event_id,
     note: fila.note,
     occurredOn: fila.occurred_on,
+    porCobrar: fila.receivables.map((r) => ({
+      nombre: r.debtor_name, monto: Number(r.amount), cobrado: r.status === 'cobrado',
+    })),
   };
 }
 
+// Un solo texto literal: si se parte con +, supabase-js pierde el tipo de la fila.
 const COLUMNAS_LISTA =
-  'id, type, amount, note, occurred_on, status, category_id, event_id, categories(name, icon), events(name)';
+  'id, type, amount, note, occurred_on, status, category_id, event_id, categories(name, icon), events(name), receivables(debtor_name, amount, status)';
 
 // Incluye los pendientes de eventos abiertos: el usuario debe verlos con
 // su marca "Pendiente" aunque todavía no sumen al balance (regla 4d).

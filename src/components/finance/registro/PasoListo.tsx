@@ -25,13 +25,15 @@ interface PasoListoProps {
   esIngreso: boolean;
   // Si el gasto quedó pendiente en un evento, su nombre.
   evento: string | null;
+  // Si se dividió la cuenta: cuánto te deben y quiénes.
+  teDeben: { total: string; nombres: string } | null;
   onListo: () => void;
 }
 
-export function PasoListo({ esEdicion, monto, categoria, esIngreso, evento, onListo }: PasoListoProps) {
+export function PasoListo({ esEdicion, monto, categoria, esIngreso, evento, teDeben, onListo }: PasoListoProps) {
   const titulo = `${esIngreso ? 'Ingreso' : 'Gasto'} ${esEdicion ? 'actualizado' : 'guardado'}`;
   // Con un evento pendiente hay más que leer: se queda el doble de tiempo.
-  const duracion = evento ? REGISTRO_EXITO_MS * 2 : REGISTRO_EXITO_MS;
+  const duracion = evento || teDeben ? REGISTRO_EXITO_MS * 2 : REGISTRO_EXITO_MS;
 
   useEffect(() => {
     const timer = window.setTimeout(onListo, duracion);
@@ -49,6 +51,11 @@ export function PasoListo({ esEdicion, monto, categoria, esIngreso, evento, onLi
         <span className="tabular text-5xl font-black tracking-tighter">{monto}</span>
         <span className="text-base font-bold">en {categoria}</span>
       </span>
+      {teDeben && (
+        <span className="max-w-xs rounded-tile bg-white/40 px-4 py-3 text-sm font-bold leading-snug">
+          Te deben {teDeben.total}: {teDeben.nombres}. Lo ves en «Te deben» del Inicio.
+        </span>
+      )}
       {evento && (
         <span className="max-w-xs rounded-tile bg-white/40 px-4 py-3 text-sm font-bold leading-snug">
           Quedó pendiente en «{evento}». Pasa a tu balance cuando cerrés el evento.

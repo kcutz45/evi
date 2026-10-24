@@ -21,7 +21,7 @@ import { AppIcon } from '@/components/ui/AppIcon';
 import { Button } from '@/components/ui/Button';
 import { cn } from '@/lib/cn';
 import { fechaLarga } from '@/lib/dates';
-import { formatSignedCurrency } from '@/lib/formatCurrency';
+import { formatCurrency, formatSignedCurrency } from '@/lib/formatCurrency';
 import type { MovementDetalle } from '@/types/movement';
 
 interface MovementDetailSheetProps {
@@ -60,9 +60,10 @@ export function MovementDetailSheet({ movimiento: m, ocupado, error, onEditar, o
           {m.eventName && <Fila etiqueta="Estado" valor={m.isPending ? 'Pendiente: suma al cerrar el evento' : 'Pasado a tus finanzas'} />}
           {m.note && m.note !== m.title && <Fila etiqueta="Nota" valor={m.note} />}
         </dl>
+        <DivisionResumen personas={m.porCobrar} />
         {error && <div className="mt-3"><FormAlert message={error} /></div>}
         {confirmando ? (
-          <Confirmacion esIngreso={esIngreso} ocupado={ocupado} onSi={onEliminar} onNo={() => setConfirmando(false)} />
+          <Confirmacion esIngreso={esIngreso} conDeudas={m.porCobrar.length > 0} ocupado={ocupado} onSi={onEliminar} onNo={() => setConfirmando(false)} />
         ) : (
           <div className="mt-4 grid grid-cols-2 gap-2.5">
             <Button variant="soft" icon={<Trash2 size={17} aria-hidden />} onClick={() => setConfirmando(true)}>Eliminar</Button>
@@ -85,21 +86,47 @@ function Fila({ etiqueta, valor }: { etiqueta: string; valor: string }) {
 
 interface ConfirmacionProps {
   esIngreso: boolean;
+  // El gasto dividido arrastra sus deudas (ON DELETE CASCADE): se avisa.
+  conDeudas: boolean;
   ocupado: boolean;
   onSi: () => void;
   onNo: () => void;
 }
 
-function Confirmacion({ esIngreso, ocupado, onSi, onNo }: ConfirmacionProps) {
+function Confirmacion({ esIngreso, conDeudas, ocupado, onSi, onNo }: ConfirmacionProps) {
   return (
     <div className="mt-4 flex flex-col gap-2.5 rounded-card bg-gold/25 p-4">
       <p className="text-center text-sm font-extrabold text-gold-ink">
-        ¿Eliminar este {esIngreso ? 'ingreso' : 'gasto'}? No se puede deshacer.
+        ¿Eliminar este {esIngreso ? 'ingreso' : 'gasto'}?{conDeudas && ' También se borran sus deudas por cobrar.'} No se
+        puede deshacer.
       </p>
       <div className="grid grid-cols-2 gap-2.5">
         <Button variant="ghost" onClick={onNo} disabled={ocupado}>Cancelar</Button>
         <Button onClick={onSi} disabled={ocupado}>{ocupado ? 'Eliminando…' : 'Sí, eliminar'}</Button>
       </div>
+    </div>
+  );
+}
+
+// Gasto dividido: con quién y si ya te pagaron.
+function DivisionResumen({ personas }: { personas: MovementDetalle['porCobrar'] }) {
+  if (personas.length === 0) return null;
+  return (
+    <div className="mt-3 rounded-card bg-gold/20 px-4 py-3">
+      <p className="text-xs font-black uppercase tracking-widest text-gold-ink">Dividida con</p>
+      <ul className="mt-1.5 flex flex-col gap-1">
+        {personas.map((p, i) => (
+          <li key={i} className="flex items-center justify-between text-sm font-bold">
+            <span>{p.nombre}</span>
+            <span className="tabular">
+              {formatCurrency(p.monto)}{' '}
+              <span className={cn('text-xs', p.cobrado ? 'text-mint-dark' : 'text-gold-dark')}>
+                {p.cobrado ? '· cobrado' : '· pendiente'}
+              </span>
+            </span>
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }

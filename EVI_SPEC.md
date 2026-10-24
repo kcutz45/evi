@@ -1,7 +1,7 @@
 # EVI_SPEC.md — EVI
 
 > **Documento de arquitectura y especificación técnica del MVP**
-> Versión 1.3.1 · 24 de octubre de 2026
+> Versión 1.4 · 24 de octubre de 2026
 > Proyecto académico — Licenciatura en Informática e Inteligencia de Negocios, UMES
 > Equipo: 3 integrantes · Plazo: 8 semanas · Inversión de infraestructura: ≈ Q300
 
@@ -40,7 +40,7 @@ Surgieron en las pruebas del 24/10/2026. **No se construyen hasta que los tres i
 
 | Propuesta | Qué resuelve | Diseño elegido |
 |---|---|---|
-| **Dividir cuenta / Por cobrar** | Pagar una cuenta de varios y que otros te deban su parte ("dinero flotante") | Se guarda como gasto **solo tu parte** (en su categoría) y el resto queda **Por cobrar** a nombre de cada persona; al cobrar, se marca como cobrado. Tarjeta "Te deben Q…" en Inicio. Requiere una tabla nueva (`receivables`) con RLS |
+| **Dividir cuenta / Por cobrar** · ✅ **aprobada y construida (24/10/2026)** | Pagar una cuenta de varios y que otros te deban su parte ("dinero flotante") | Al registrar un gasto, *Dividir esta cuenta*: se guarda como gasto **solo tu parte** y el resto queda **Por cobrar** a nombre de cada persona (partes iguales por defecto, editables; el centavo sobrante queda en tu parte). Tarjeta "Te deben" en Inicio y pantalla `/por-cobrar` con **Cobrar** / **Deshacer**. **Cobrar no es un ingreso**: el balance ya contaba solo tu parte. Tabla `receivables` con RLS, RPC atómica `create_split_expense` y vista `vw_receivables_summary` (schema.sql §11, `migrations/20261024b_por_cobrar.sql`) |
 | **Mis categorías** | Categorías propias de gasto o ingreso además de las 18 del sistema | Crear, editar y borrar desde el menú del avatar; aparecen en el registro junto a las del sistema. La tabla `categories` ya lo soporta (`user_id` propio + RLS) |
 
 ---
@@ -167,6 +167,7 @@ Prueba rápida: *¿puedo mover este componente a otro proyecto con otra base de 
 │   ├── /events               # EventCard, ClosedEventCard, EventsEmptyState, BudgetBar,
 │   │                         # BudgetAlert, Checklist, CloseEventModal, CloseEventSummary,
 │   │                         # TransferAnimation
+│   ├── /finance/porCobrar    # TeDebenCard, DeudasList (TarjetaPersona, ListaCobradas)
 │   ├── /finance/dinero       # MonthHeader, MovementFilters, MovementDayGroups,
 │   │                         # MovementDetailSheet
 │   └── /layout               # BottomNav, Header (+ UserAvatar), UserMenu, PageContainer,
@@ -409,6 +410,7 @@ Radio de borde: 16–20 px. Tipografía sans-serif redondeada. Moneda siempre `Q
 | 1 de 3 | ¿Qué querés registrar? | Dos tarjetas grandes con ejemplo: *Un gasto* / *Un ingreso*. Un toque y avanza |
 | 2 de 3 | ¿En qué gastaste? / ¿De dónde vino el dinero? | Cuadrícula de categorías grandes. **"Tus frecuentes"** arriba: las que el usuario más usa (≥ 2 veces en sus últimos 100 movimientos, máximo 3). Un toque y avanza |
 | 3 de 3 | ¿Cuánto gastaste? / ¿Cuánto recibiste? | Monto enorme y **calculadora** (+ − × ÷, con precedencia): "3 × 35" → Q105.00. Nota y evento plegados como *opcional*. Botón Guardar |
+| 3 de 3 (opcional) | ¿Con quién dividís? | Solo gastos. Personas y su parte (iguales por defecto). "Tu parte" grande: es lo que se guarda como gasto; lo demás queda en «Te deben» |
 | ¡Listo! | — | Pantalla completa en menta con ✓, monto y categoría. Si el gasto quedó pendiente en un evento, lo explica (regla 4d). Vuelve sola al inicio |
 
 - Siempre visibles: barra "Paso X de 3", volver al paso anterior (el monto escrito se conserva) y cerrar sin guardar.
@@ -601,6 +603,8 @@ CREATE POLICY analytics_insert_self ON public.analytics_events
 | `category_suggestion_rejected` | El usuario la cambia | `{ suggested, chosen }` |
 | `monthly_report_viewed` | Se abre el reporte | `{ month, total_spent, categories_count }` |
 | `savings_goal_created` | Se crea una meta | `{ target_amount }` |
+| `expense_split_created` | Se guarda un gasto dividido | `{ total, my_share, debtors_count }` |
+| `receivable_collected` | Se marca una deuda como cobrada | `{ amount }` |
 
 > `seconds_to_complete` en `movement_created` es la métrica más importante del producto: mide directamente la promesa de "3 toques". Si la mediana sube de 8 segundos, hay que rediseñar la pantalla.
 
@@ -779,6 +783,7 @@ END IF;
 | Autenticación y rutas protegidas | ✅ Registro, login, middleware y cierre de sesión (PR #2) |
 | Dashboard real (§3, pantalla 3) | ✅ Balance del mes, últimos movimientos y registro paso a paso con calculadora y frecuentes · Eventos y Reportes muestran "Próximamente" |
 | Pantalla Dinero (historial) | ✅ Mes a mes con totales, filtros por tipo y categoría, agrupado por día; tocar un movimiento abre su detalle para editarlo (mismo registro paso a paso) o eliminarlo con confirmación |
+| Dividir cuenta / Te deben | ✅ Paso "¿Con quién dividís?" en el registro, tarjeta en Inicio, pantalla `/por-cobrar` agrupada por persona, detalle del gasto con sus deudas. Probado en PostgreSQL (20 verificaciones) y en la demo |
 | Landing, metas y planes | Pendiente |
 | Servicio de telemetría | ✅ Conectado: `signup_*`, `login_succeeded`, `movement_created` (con `seconds_to_complete`) · pendientes: `onboarding_completed` y eventos de las pantallas por construir |
 | Configuración de PWA y despliegue en Vercel | Pendiente |
@@ -888,6 +893,7 @@ Una funcionalidad está lista cuando cumple **todo** lo siguiente:
 | 2026-10-23 | 1.2.2 | `schema.sql` v1.2 aplicado y verificado en "Evi charger" (6 de 6 chequeos); hallazgos 1, 4 y 5 de §5.5 y riesgos de vistas y columnas de estado cerrados en producción |
 | 2026-10-24 | 1.3 | Registro de movimiento paso a paso (§3): tipo → categoría → monto con calculadora → ¡Listo!, "Tus frecuentes" según el uso de cada usuario, móvil primero. Categorías del sistema ampliadas a 11 de gasto y 7 de ingreso (`migrations/20261024_categorias_ampliadas.sql`). Dashboard con datos reales |
 | 2026-10-24 | 1.3.1 | Pantalla Dinero: historial mensual con filtros, detalle, edición y eliminación (`movement_deleted`). "Cerrar sesión" pasa al menú del avatar. Propuestas "Dividir cuenta / Por cobrar" y "Mis categorías" registradas en §0, pendientes del acuerdo del equipo |
+| 2026-10-24 | 1.4 | **Alcance:** se aprueba y construye "Dividir cuenta / Por cobrar" (§0). Tabla `receivables`, RPC `create_split_expense`, vista `vw_receivables_summary` (§11 de schema.sql). Telemetría `expense_split_created` y `receivable_collected` (§4.3) |
 
 ---
 

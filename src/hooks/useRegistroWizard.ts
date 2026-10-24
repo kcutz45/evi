@@ -23,7 +23,8 @@ import { useRef, useState } from 'react';
 import { movementDraftSchema, type MovementDraft, type MovementType } from '@/types/movement';
 import { useCalculator } from './useCalculator';
 
-export type PasoRegistro = 'tipo' | 'categoria' | 'monto' | 'listo';
+// 'dividir' es un paso opcional después del monto (Dividir cuenta).
+export type PasoRegistro = 'tipo' | 'categoria' | 'monto' | 'dividir' | 'listo';
 
 // Los pasos que cuentan en "Paso 2 de 3" (el "¡Listo!" no se numera).
 export const PASOS_NUMERADOS: PasoRegistro[] = ['tipo', 'categoria', 'monto'];
@@ -94,14 +95,17 @@ export function useRegistroWizard(inicial?: ValoresIniciales) {
   };
 
   // El monto escrito se conserva al volver: nadie quiere teclearlo dos veces.
-  const volver = () => setPaso((actual) => (actual === 'monto' ? 'categoria' : 'tipo'));
+  const volver = () =>
+    setPaso((actual) => (actual === 'dividir' ? 'monto' : actual === 'monto' ? 'categoria' : 'tipo'));
 
-  const construirBorrador = () =>
-    validarBorrador({ tipo, monto: calc.valor, categoriaId, eventoId, nota, inicio: inicio.current });
+  // monto: al dividir, se guarda TU parte en vez del total de la cuenta.
+  const construirBorrador = (monto: number | null = calc.valor) =>
+    validarBorrador({ tipo, monto, categoriaId, eventoId, nota, inicio: inicio.current });
 
   return {
     paso,
-    numeroDePaso: PASOS_NUMERADOS.indexOf(paso),
+    // Dividir es parte del paso 3 ("¿Cuánto?"): no suma un número nuevo.
+    numeroDePaso: paso === 'dividir' ? PASOS_NUMERADOS.indexOf('monto') : PASOS_NUMERADOS.indexOf(paso),
     tipo,
     categoriaId,
     nota,
@@ -112,6 +116,7 @@ export function useRegistroWizard(inicial?: ValoresIniciales) {
     elegirTipo,
     elegirCategoria,
     volver,
+    irADividir: () => setPaso('dividir'),
     terminar: () => setPaso('listo'),
     construirBorrador,
   };

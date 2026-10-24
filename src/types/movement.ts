@@ -62,4 +62,6 @@ export interface MovementDetalle extends MovementView {
   eventId: string | null;
   note: string | null;
   occurredOn: string;
+  // Si se dividió la cuenta: quién te debe su parte (vacío si no).
+  porCobrar: Array<{ nombre: string; monto: number; cobrado: boolean }>;
 }

@@ -21,6 +21,7 @@ import { useMovements } from '@/hooks/useMovements';
 import type { ValoresIniciales } from '@/hooks/useRegistroWizard';
 import type { Category } from '@/types/category';
 import type { MovementDetalle, MovementDraft } from '@/types/movement';
+import type { Deudor } from '@/types/receivable';
 
 // inicial undefined = crear; con valores = editar ese movimiento.
 interface EstadoWizard {
@@ -47,10 +48,10 @@ export function useAccionesDinero(categorias: Category[], recargar: Array<() => 
     limpiarErrorCreacion();
   }, [limpiarError, limpiarErrorCreacion]);
 
-  const guardar = async (draft: MovementDraft, segundos: number) => {
+  const guardar = async (draft: MovementDraft, segundos: number, deudores: Deudor[]) => {
     const ok = seleccionado && wizard?.inicial
       ? await acciones.editar(seleccionado.id, draft)
-      : await creacion.crear(draft, segundos, categorias.find((c) => c.id === draft.categoryId)?.name ?? null);
+      : await creacion.crear(draft, segundos, categorias.find((c) => c.id === draft.categoryId)?.name ?? null, deudores);
     if (ok) recargar.forEach((fn) => fn());
     return ok;
   };

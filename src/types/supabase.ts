@@ -42,6 +42,12 @@ import type {
   SavingsGoalRow,
   SavingsGoalUpdate,
 } from './database';
+import type {
+  ReceivableInsert,
+  ReceivableRow,
+  ReceivableUpdate,
+  ReceivablesSummaryRow,
+} from './receivable';
 
 // Solo las llaves foráneas entre tablas de `public`: supabase-js las usa
 // para tipar selects anidados como select('*, categories(name, icon)').
@@ -98,6 +104,20 @@ export type Database = {
         Update: SavingsGoalUpdate;
         Relationships: [];
       };
+      receivables: {
+        Row: ReceivableRow;
+        Insert: ReceivableInsert;
+        Update: ReceivableUpdate;
+        Relationships: [
+          {
+            foreignKeyName: 'receivables_movement_id_fkey';
+            columns: ['movement_id'];
+            isOneToOne: false;
+            referencedRelation: 'movements';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
       // Sin SELECT por API: Row vacía para que nadie intente leerla.
       analytics_events: {
         Row: Record<string, never>;
@@ -108,8 +128,21 @@ export type Database = {
     };
     Views: {
       vw_monthly_summary: { Row: MonthlySummaryRow; Relationships: [] };
+      vw_receivables_summary: { Row: ReceivablesSummaryRow; Relationships: [] };
     };
-    Functions: { [_ in never]: never };
+    Functions: {
+      // schema.sql sección 11: gasto (tu parte) + deudas en una transacción.
+      create_split_expense: {
+        Args: {
+          p_amount: number;
+          p_category_id: string | null;
+          p_event_id: string | null;
+          p_note: string | null;
+          p_debtors: Array<{ name: string; amount: number }>;
+        };
+        Returns: string;
+      };
+    };
     Enums: { [_ in never]: never };
     CompositeTypes: { [_ in never]: never };
   };

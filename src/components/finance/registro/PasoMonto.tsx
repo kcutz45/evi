@@ -11,7 +11,7 @@
  * DEPENDE DE: CalculatorKeypad.tsx, DetallesOpcionales.tsx
  * ---------------------------------------------------------------
  */
-import { Check } from 'lucide-react';
+import { Check, Users } from 'lucide-react';
 import { AppIcon } from '@/components/ui/AppIcon';
 import { Button } from '@/components/ui/Button';
 import type { useCalculator } from '@/hooks/useCalculator';
@@ -29,6 +29,8 @@ interface PasoMontoProps {
   guardando: boolean;
   onCambiarCategoria: () => void;
   onGuardar: () => void;
+  // Si viene, se ofrece "Dividir esta cuenta" (solo gastos, al crear).
+  onDividir?: () => void;
 }
 
 export function PasoMonto(props: PasoMontoProps) {
@@ -44,6 +46,12 @@ export function PasoMonto(props: PasoMontoProps) {
             {calc.total}
           </output>
         </div>
+        {props.onDividir && !props.esIngreso && calc.esValido && (
+          <button type="button" onClick={props.onDividir}
+            className="flex items-center justify-center gap-2 self-center rounded-full bg-primary-soft px-4 py-2 text-[13px] font-extrabold text-primary hover:bg-line">
+            <Users size={16} aria-hidden /> Dividir esta cuenta
+          </button>
+        )}
         <DetallesOpcionales {...props.detalles} />
         {props.error && <p role="alert" className="text-center text-xs font-bold text-gold-dark">{props.error}</p>}
       </div>

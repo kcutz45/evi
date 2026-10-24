@@ -22,11 +22,19 @@ import { useCallback, useState } from 'react';
 import { LIMITE_MOVIMIENTOS_RECIENTES } from '@/lib/constants';
 import { supabase } from '@/lib/supabase';
 import { crearMovimiento, listarRecientes } from '@/services/movementService';
+import { crearGastoDividido } from '@/services/receivableService';
 import { track } from '@/services/telemetryService';
 import type { MovementDraft, MovementView } from '@/types/movement';
+import type { Deudor } from '@/types/receivable';
 import { useAsyncData } from './useAsyncData';
 
 const SIN_MOVIMIENTOS: MovementView[] = [];
+
+// expense_split_created mide si "Dividir cuenta" se usa y cuánto se presta.
+function registrarDivision(miParte: number, deudores: Deudor[]) {
+  const prestado = deudores.reduce((suma, d) => suma + d.monto, 0);
+  void track('expense_split_created', { total: miParte + prestado, my_share: miParte, debtors_count: deudores.length });
+}
 
 export function useMovements(limite: number = LIMITE_MOVIMIENTOS_RECIENTES) {
   const estado = useAsyncData(() => listarRecientes(supabase, limite), SIN_MOVIMIENTOS);
@@ -34,13 +42,17 @@ export function useMovements(limite: number = LIMITE_MOVIMIENTOS_RECIENTES) {
   const [saveError, setSaveError] = useState<string | null>(null);
 
   // nombreCategoria viaja aparte porque el borrador solo trae el id, y en
-  // Looker se lee mejor "Comida" que un UUID.
+  // Looker se lee mejor "Comida" que un UUID. Con deudores, es una cuenta
+  // dividida: draft.amount es TU parte y se guarda con la RPC (una sola
+  // transacción para el gasto y las deudas).
   const crear = useCallback(
-    async (draft: MovementDraft, segundos: number, nombreCategoria: string | null) => {
+    async (draft: MovementDraft, segundos: number, nombreCategoria: string | null, deudores: Deudor[] = []) => {
       setIsSaving(true);
       setSaveError(null);
       try {
-        await crearMovimiento(supabase, draft);
+        if (deudores.length > 0) await crearGastoDividido(supabase, draft, deudores);
+        else await crearMovimiento(supabase, draft);
+        if (deudores.length > 0) registrarDivision(draft.amount, deudores);
         void track('movement_created', {
           type: draft.type,
           category: nombreCategoria,
