@@ -15,7 +15,8 @@
  *            el balance ya está al día.
  *
  * DEPENDE DE: hooks/useAuth, useMonthlySummary, useMovements,
- *            useCategories, useCategoryUsage, useActiveEvents, useAccounts
+ *            useCategories, useCategoryUsage, useActiveEvents, useAccounts,
+ *            useGoals
  * ---------------------------------------------------------------
  */
 'use client';
@@ -29,11 +30,13 @@ import { RegistroWizard } from '@/components/finance/registro/RegistroWizard';
 import { Header } from '@/components/layout/Header';
 import { PageContainer } from '@/components/layout/PageContainer';
 import { UserMenu } from '@/components/layout/UserMenu';
+import { MetasCard } from '@/components/metas/MetasCard';
 import { useAccounts } from '@/hooks/useAccounts';
 import { useActiveEvents } from '@/hooks/useActiveEvents';
 import { useAuth } from '@/hooks/useAuth';
 import { useCategories } from '@/hooks/useCategories';
 import { useCategoryUsage } from '@/hooks/useCategoryUsage';
+import { useGoals } from '@/hooks/useGoals';
 import { useMonthlySummary } from '@/hooks/useMonthlySummary';
 import { useMovements } from '@/hooks/useMovements';
 import { useReceivablesSummary } from '@/hooks/useReceivables';
@@ -50,6 +53,7 @@ export default function InicioPage() {
   const teDeben = useReceivablesSummary();
   const cats = useCategories();
   const cuentas = useAccounts();
+  const metas = useGoals();
   const categorias = cats.data;
   const { data: eventos } = useActiveEvents();
   const [isHidden, setIsHidden] = useState(false);
@@ -65,6 +69,7 @@ export default function InicioPage() {
         onToggleHidden={() => setIsHidden((oculto) => !oculto)} onRetry={resumen.recargar} />
       <TuDineroCard total={cuentas.total} cuentas={cuentas.data.length} isHidden={isHidden} />
       <TeDebenCard resumen={teDeben.data} />
+      <MetasCard metas={metas.data.length} totalAhorrado={metas.totalAhorrado} isHidden={isHidden} />
       <RecentMovementsSection movements={movimientos.data} isLoading={movimientos.isLoading}
         error={movimientos.error} onRetry={movimientos.recargar} />
       {registro.abierto && (

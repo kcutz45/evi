@@ -27,6 +27,7 @@ import type { NuevaCategoria } from '@/types/category';
 import { DemoCuentas } from './DemoCuentas';
 import { DemoDinero } from './DemoDinero';
 import { DemoEvento } from './DemoEvento';
+import { DemoMetas } from './DemoMetas';
 import { DemoReporte } from './DemoReporte';
 import { DemoTeDeben } from './DemoTeDeben';
 import { demoCategories, demoCuentas, demoEvents, demoMovements, demoTasks, demoUsos } from './mockData';
@@ -59,6 +60,7 @@ export default function DemoPage() {
         {demoEvents.filter((e) => e.status === 'cerrado').map((e) => <ClosedEventCard key={e.id} event={e} />)}
       </DemoSection>
       <DemoSection title="Mis cuentas (pantalla)"><DemoCuentas /></DemoSection>
+      <DemoSection title="Mis metas (pantalla)"><DemoMetas /></DemoSection>
       <DemoSection title="Evento (pantalla)"><DemoEvento /></DemoSection>
       <DemoSection title="Dinero (pantalla)"><DemoDinero /></DemoSection>
       <DemoSection title="Te deben (pantalla)"><DemoTeDeben /></DemoSection>

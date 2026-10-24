@@ -57,6 +57,7 @@ import type {
   AccountUpdate,
 } from './account';
 import type { EventBudgetRow } from './event';
+import type { SavingsContributionInsert, SavingsContributionRow } from './goal';
 
 // Solo las llaves foráneas entre tablas de `public`: supabase-js las usa
 // para tipar selects anidados como select('*, categories(name, icon)').
@@ -138,6 +139,12 @@ export type Database = {
       account_transfers: {
         Row: AccountTransferRow;
         Insert: AccountTransferInsert;
+        Update: never;
+        Relationships: [];
+      };
+      savings_contributions: {
+        Row: SavingsContributionRow;
+        Insert: SavingsContributionInsert;
         Update: never;
         Relationships: [];
       };

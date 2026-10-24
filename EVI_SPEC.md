@@ -1,7 +1,7 @@
 # EVI_SPEC.md — EVI
 
 > **Documento de arquitectura y especificación técnica del MVP**
-> Versión 1.8 · 24 de octubre de 2026
+> Versión 1.9 · 24 de octubre de 2026
 > Proyecto académico — Licenciatura en Informática e Inteligencia de Negocios, UMES
 > Equipo: 3 integrantes · Plazo: 8 semanas · Inversión de infraestructura: ≈ Q300
 
@@ -175,6 +175,7 @@ Prueba rápida: *¿puedo mover este componente a otro proyecto con otra base de 
 │   ├── /report               # TotalGastado, DesgloseCategorias, ResumenDelMes
 │   ├── /finance/cuentas      # TuDineroCard, ListaCuentas, HojaNuevaCuenta, HojaTransferir,
 │   │                         # HojaAjustarSaldo, HojaElegirCuenta
+│   ├── /metas                # MetaDestacada, TarjetaMeta, HojaAbonar, HojaNuevaMeta, MetasCard
 │   ├── /finance/porCobrar    # TeDebenCard, DeudasList (TarjetaPersona, ListaCobradas)
 │   ├── /finance/dinero       # MonthHeader, MovementFilters, MovementDayGroups,
 │   │                         # MovementDetailSheet
@@ -185,9 +186,10 @@ Prueba rápida: *¿puedo mover este componente a otro proyecto con otra base de 
 │                             # useCategories, useCategoryUsage, useActiveEvents,
 │                             # useRegistroWizard, useCalculator, useZodForm, useEvents,
 │                             # useEvento, useEventTasks, useEventoWizard…
-│                             # useMonthlyReport, useAccounts…
+│                             # useMonthlyReport, useAccounts, useGoals, useEjecutor…
 ├── /services                 # authService, movementService, eventService, taskService,
 │                             # categoryService, receivableService, reportService, accountService,
+│                             # goalService,
 │                             # telemetryService
 ├── /lib                      # supabase, routes, constants, dates, calculator,
 │                             # categoryRanking, formatCurrency, budget, report, text, cn
@@ -806,7 +808,8 @@ END IF;
 | Eventos y cierre (§3, pantalla 4) | ✅ `/eventos`: activos arriba y cerrados abajo; "Nuevo evento" paso a paso (nombre e ícono → fecha → presupuesto). `/eventos/[id]`: presupuesto con alerta al 80%, pestañas Tareas y Gastos, "Agregar gasto" (registro ya apuntado al evento) y "Cerrar evento" con la RPC atómica `close_event_and_transfer` |
 | Reporte mensual | ✅ Mes a mes: total gastado y comparación con el mes anterior (dorado si subió, nunca rojo), dona por categoría, desglose con barras, "Tu resumen" con promedio diario y cuánto vino de eventos cerrados. Solo gastos confirmados por `accounting_date` (§4d), igual que el balance |
 | Mis cuentas | ✅ `/cuentas` (total, lista, nueva cuenta, transferir, ajustar saldo, quitar), tarjeta "Tu dinero hoy" en Inicio, cuenta en el registro y en el detalle de Dinero, cobro a una cuenta. Migración probada en PostgreSQL (26 verificaciones, incluida la seguridad entre usuarios). **Requiere aplicar** `migrations/20261024c_cuentas_y_metas.sql` |
-| Landing, metas y planes | Pendiente (la base de las metas ya está en la migración de cuentas) |
+| Metas de ahorro | ✅ `/metas`: total ahorrado, meta principal con anillo de avance, demás metas con barra, mensaje de ánimo, nueva meta (nombre, ícono, objetivo, fecha opcional), **abonar y retirar desde una cuenta** (atajos Q50/Q100/Q200). Tarjeta "Mis metas" en Inicio. Usa la misma migración de cuentas |
+| Landing y planes | Pendiente |
 | Servicio de telemetría | ✅ Conectado: `signup_*`, `login_succeeded`, `movement_created` (con `seconds_to_complete`), `event_created`, `event_task_completed`, `budget_alert_shown`, `budget_exceeded`, `event_closed`, `expenses_transferred`, `monthly_report_viewed` · pendientes: `onboarding_completed` y eventos de las pantallas por construir |
 | Configuración de PWA y despliegue en Vercel | Pendiente |
 
@@ -920,6 +923,7 @@ Una funcionalidad está lista cuando cumple **todo** lo siguiente:
 | 2026-10-24 | 1.6 | Eventos y cierre (§3, pantalla 4): lista de eventos, "Nuevo evento" paso a paso, detalle con tareas y gastos, "Agregar gasto" desde el evento y cierre con `close_event_and_transfer`. Telemetría de eventos conectada (§4.3) |
 | 2026-10-24 | 1.7 | Reporte mensual (§3, pantallas complementarias): total y comparación, dona, desglose por categoría y resumen; cuenta solo lo confirmado por `accounting_date` (§4d). Telemetría `monthly_report_viewed`. En Inicio, la tarjeta del balance muestra "Tenés Q… prestados" (lo pendiente de cobrar, que no es ingreso al cobrarse) |
 | 2026-10-24 | 1.8 | **Alcance:** se aprueban "Mis cuentas" y "Metas conectadas a cuentas" (§0). Tablas `accounts`, `account_transfers`, `savings_contributions`; columnas `movements.account_id`, `receivables.collected_account_id`, `savings_goals.icon`; vista `vw_account_balances`; `create_split_expense` recibe la cuenta; "Efectivo" automático para cada usuario (schema.sql §12). Pantalla `/cuentas`. Telemetría `account_created`, `transfer_created`, `savings_contribution_added` |
+| 2026-10-24 | 1.9 | Metas de ahorro (§0, alcance congelado): pantalla `/metas` según el diseño, abonos y retiros desde una cuenta, tarjeta en Inicio. Telemetría `savings_goal_created` y `savings_contribution_added` |
 
 ---
 

@@ -14,13 +14,12 @@
 import { useState } from 'react';
 import { ArrowDown } from 'lucide-react';
 import { FormAlert } from '@/components/auth/AuthHeading';
-import { AppIcon } from '@/components/ui/AppIcon';
 import { Button } from '@/components/ui/Button';
 import { CampoMonto } from '@/components/ui/CampoMonto';
 import { Hoja } from '@/components/ui/Hoja';
-import { cn } from '@/lib/cn';
 import { leerMonto } from '@/lib/formatCurrency';
 import type { Cuenta, Transferencia } from '@/types/account';
+import { SelectorDeCuenta } from './SelectorDeCuenta';
 
 interface HojaTransferirProps {
   cuentas: Cuenta[];
@@ -42,9 +41,9 @@ export function HojaTransferir({ cuentas, guardando, error, onTransferir, onCerr
 
   return (
     <Hoja titulo="Transferir" subtitulo="Mové dinero entre tus cuentas. No es gasto ni ingreso." onCerrar={onCerrar}>
-      <Selector titulo="Sale de" cuentas={cuentas} elegida={desde} onElegir={setDesde} />
+      <SelectorDeCuenta titulo="Sale de" cuentas={cuentas} elegida={desde} onElegir={setDesde} />
       <ArrowDown size={20} className="self-center text-primary" aria-hidden />
-      <Selector titulo="Llega a" cuentas={cuentas} elegida={hacia} onElegir={setHacia} />
+      <SelectorDeCuenta titulo="Llega a" cuentas={cuentas} elegida={hacia} onElegir={setHacia} />
       <CampoMonto etiqueta="¿Cuánto?" valor={texto} onCambiar={setTexto} />
       <FormAlert message={desde === hacia ? 'Elegí dos cuentas distintas' : error} />
       <Button variant="mint" size="lg" fullWidth disabled={guardando || monto === null || monto <= 0 || desde === hacia}
@@ -52,29 +51,5 @@ export function HojaTransferir({ cuentas, guardando, error, onTransferir, onCerr
         {guardando ? 'Transfiriendo…' : 'Transferir'}
       </Button>
     </Hoja>
-  );
-}
-
-interface SelectorProps {
-  titulo: string;
-  cuentas: Cuenta[];
-  elegida: string;
-  onElegir: (id: string) => void;
-}
-
-function Selector({ titulo, cuentas, elegida, onElegir }: SelectorProps) {
-  return (
-    <fieldset className="flex flex-col gap-1.5">
-      <legend className="mb-1.5 text-sm font-bold text-muted">{titulo}</legend>
-      <div className="flex flex-wrap gap-2">
-        {cuentas.map((c) => (
-          <button key={c.id} type="button" aria-pressed={elegida === c.id} onClick={() => onElegir(c.id)}
-            className={cn('flex items-center gap-1.5 rounded-full px-3.5 py-2 text-[13px] font-extrabold transition',
-              elegida === c.id ? 'bg-primary text-white shadow-glow-primary' : 'bg-white text-dark shadow-card')}>
-            <AppIcon name={c.icono} size={15} /> {c.nombre}
-          </button>
-        ))}
-      </div>
-    </fieldset>
   );
 }
