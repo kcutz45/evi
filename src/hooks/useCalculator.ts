@@ -19,8 +19,9 @@ import {
 } from '@/lib/calculator';
 import { formatCurrency } from '@/lib/formatCurrency';
 
-export function useCalculator() {
-  const [expresion, setExpresion] = useState<Expresion>([]);
+// montoInicial: al editar, la calculadora arranca con el monto guardado.
+export function useCalculator(montoInicial?: number) {
+  const [expresion, setExpresion] = useState<Expresion>(montoInicial ? [String(montoInicial)] : []);
   const valor = evaluar(expresion);
 
   const presionar = useCallback((tecla: TeclaCalc) => {

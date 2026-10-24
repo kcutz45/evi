@@ -18,6 +18,8 @@ import { Check } from 'lucide-react';
 import { REGISTRO_EXITO_MS } from '@/lib/constants';
 
 interface PasoListoProps {
+  // Al editar dice "actualizado" en vez de "guardado".
+  esEdicion: boolean;
   monto: string;
   categoria: string;
   esIngreso: boolean;
@@ -26,7 +28,8 @@ interface PasoListoProps {
   onListo: () => void;
 }
 
-export function PasoListo({ monto, categoria, esIngreso, evento, onListo }: PasoListoProps) {
+export function PasoListo({ esEdicion, monto, categoria, esIngreso, evento, onListo }: PasoListoProps) {
+  const titulo = `${esIngreso ? 'Ingreso' : 'Gasto'} ${esEdicion ? 'actualizado' : 'guardado'}`;
   // Con un evento pendiente hay más que leer: se queda el doble de tiempo.
   const duracion = evento ? REGISTRO_EXITO_MS * 2 : REGISTRO_EXITO_MS;
 
@@ -42,9 +45,7 @@ export function PasoListo({ monto, categoria, esIngreso, evento, onListo }: Paso
         <Check size={52} strokeWidth={3} aria-hidden />
       </span>
       <span role="status" className="flex flex-col gap-1">
-        <span className="text-sm font-extrabold uppercase tracking-widest">
-          {esIngreso ? 'Ingreso guardado' : 'Gasto guardado'}
-        </span>
+        <span className="text-sm font-extrabold uppercase tracking-widest">{titulo}</span>
         <span className="tabular text-5xl font-black tracking-tighter">{monto}</span>
         <span className="text-base font-bold">en {categoria}</span>
       </span>

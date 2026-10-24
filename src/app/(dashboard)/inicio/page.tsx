@@ -21,12 +21,12 @@
 'use client';
 
 import { useCallback, useState } from 'react';
-import { LogoutButton } from '@/components/auth/LogoutButton';
 import { AddMovementButton } from '@/components/finance/AddMovementButton';
 import { BalanceSection, RecentMovementsSection } from '@/components/finance/DashboardSections';
 import { RegistroWizard } from '@/components/finance/registro/RegistroWizard';
-import { Header, UserAvatar } from '@/components/layout/Header';
+import { Header } from '@/components/layout/Header';
 import { PageContainer } from '@/components/layout/PageContainer';
+import { UserMenu } from '@/components/layout/UserMenu';
 import { useActiveEvents } from '@/hooks/useActiveEvents';
 import { useAuth } from '@/hooks/useAuth';
 import { useCategories } from '@/hooks/useCategories';
@@ -51,13 +51,12 @@ export default function InicioPage() {
   return (
     <PageContainer floatingAction={<AddMovementButton onClick={registro.abrir} />}>
       <Header eyebrow={saludoGT()} title={nombre || 'qué gusto verte'}
-        action={<UserAvatar fullName={nombre || 'EVI'} />} />
+        action={<UserMenu nombre={nombre} plan={perfil?.plan ?? null} onLogout={cerrarSesion} />} />
       <BalanceSection monthLabel={nombreDelMes(resumen.inicioDeMes)} {...resumen.data}
         isLoading={resumen.isLoading} error={resumen.error} isHidden={isHidden}
         onToggleHidden={() => setIsHidden((oculto) => !oculto)} onRetry={resumen.recargar} />
       <RecentMovementsSection movements={movimientos.data} isLoading={movimientos.isLoading}
         error={movimientos.error} onRetry={movimientos.recargar} />
-      <LogoutButton onLogout={cerrarSesion} />
       {registro.abierto && (
         <RegistroWizard categorias={categorias} usos={usos.data} eventosActivos={eventos}
           guardando={movimientos.isSaving} errorGuardado={movimientos.saveError}

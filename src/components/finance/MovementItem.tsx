@@ -16,11 +16,30 @@ import { cn } from '@/lib/cn';
 import { formatSignedCurrency } from '@/lib/formatCurrency';
 import type { MovementView } from '@/types/movement';
 
-export function MovementItem({ movement }: { movement: MovementView }) {
+interface MovementItemProps {
+  movement: MovementView;
+  // Si viene, la fila se puede tocar (ej. abrir el detalle en Dinero).
+  onSelect?: () => void;
+}
+
+const FILA = 'flex w-full items-center gap-3 rounded-[18px] bg-white p-3.5 text-left shadow-card';
+
+export function MovementItem({ movement, onSelect }: MovementItemProps) {
+  if (!onSelect) return <li className={FILA}><Contenido movement={movement} /></li>;
+  return (
+    <li>
+      <button type="button" onClick={onSelect} className={cn(FILA, 'transition hover:ring-2 hover:ring-primary/30 active:scale-[0.99]')}>
+        <Contenido movement={movement} />
+      </button>
+    </li>
+  );
+}
+
+function Contenido({ movement }: { movement: MovementView }) {
   const isIncome = movement.type === 'ingreso';
 
   return (
-    <li className="flex items-center gap-3 rounded-[18px] bg-white p-3.5 shadow-card">
+    <>
       <span
         className={cn(
           'grid h-[42px] w-[42px] flex-none place-items-center rounded-tile',
@@ -47,6 +66,6 @@ export function MovementItem({ movement }: { movement: MovementView }) {
       <span className={cn('tabular text-[15.5px] font-black', isIncome ? 'text-mint-dark' : 'text-dark')}>
         {formatSignedCurrency(movement.amount, isIncome)}
       </span>
-    </li>
+    </>
   );
 }

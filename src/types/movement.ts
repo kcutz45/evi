@@ -54,3 +54,12 @@ export interface MovementView {
   eventName: string | null;
   isPending: boolean;
 }
+
+// Fila de la pantalla Dinero: lo que se pinta más lo necesario para
+// editarla (ids crudos y la fecha ISO para agrupar por día).
+export interface MovementDetalle extends MovementView {
+  categoryId: string | null;
+  eventId: string | null;
+  note: string | null;
+  occurredOn: string;
+}

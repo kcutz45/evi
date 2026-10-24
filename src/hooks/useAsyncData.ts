@@ -16,7 +16,8 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 
-export function useAsyncData<T>(cargar: () => Promise<T>, inicial: T) {
+// clave: si cambia (ej. el mes elegido), se vuelve a cargar solo.
+export function useAsyncData<T>(cargar: () => Promise<T>, inicial: T, clave = '') {
   const [data, setData] = useState<T>(inicial);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -46,7 +47,7 @@ export function useAsyncData<T>(cargar: () => Promise<T>, inicial: T) {
     return () => {
       isActive = false;
     };
-  }, [version]);
+  }, [version, clave]);
 
   const recargar = useCallback(() => setVersion((v) => v + 1), []);
 

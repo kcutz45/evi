@@ -19,9 +19,11 @@ import { BalanceCard } from '@/components/finance/BalanceCard';
 import { MonthlyChart } from '@/components/finance/MonthlyChart';
 import { RegistroWizard } from '@/components/finance/registro/RegistroWizard';
 import { MovementList } from '@/components/finance/MovementList';
-import { Header, UserAvatar } from '@/components/layout/Header';
+import { Header } from '@/components/layout/Header';
+import { UserMenu } from '@/components/layout/UserMenu';
 import { PageContainer } from '@/components/layout/PageContainer';
 import { Button } from '@/components/ui/Button';
+import { DemoDinero } from './DemoDinero';
 import { demoCategories, demoEvents, demoMovements, demoSlices, demoTasks, demoUsos } from './mockData';
 
 export default function DemoPage() {
@@ -33,12 +35,14 @@ export default function DemoPage() {
   const toggleTask = (taskId: string, isDone: boolean) =>
     setTasks((current) => current.map((t) => (t.id === taskId ? { ...t, isDone } : t)));
 
+  // En la demo no hay sesión: cerrar sesión no hace nada.
+  const logoutDemo = async () => ({ ok: false as const, error: 'Demo sin sesión' });
   // Simula el guardado: espera un poco y "sale bien" para ver el ¡Listo!.
   const guardarDemo = () => new Promise<boolean>((resolve) => setTimeout(() => resolve(true), 500));
 
   return (
     <PageContainer floatingAction={<AddMovementButton onClick={() => setIsFormOpen(true)} />}>
-      <Header eyebrow="Buen día," title="Andrea" action={<UserAvatar fullName="Andrea López" />} />
+      <Header eyebrow="Buen día," title="Andrea" action={<UserMenu nombre="Andrea López" plan="gratis" onLogout={logoutDemo} />} />
       <BalanceCard monthLabel="octubre" balance={4820.5} income={8450} expense={3629.5}
         isHidden={isHidden} onToggleHidden={() => setIsHidden((h) => !h)} />
       <DemoSection title="Últimos movimientos"><MovementList movements={demoMovements} /></DemoSection>
@@ -46,6 +50,7 @@ export default function DemoPage() {
         {active.map((e) => <EventCard key={e.id} event={e} />)}
         {demoEvents.filter((e) => e.status === 'cerrado').map((e) => <ClosedEventCard key={e.id} event={e} />)}
       </DemoSection>
+      <DemoSection title="Dinero (pantalla)"><DemoDinero /></DemoSection>
       <DemoSection title="Tareas"><Checklist tasks={tasks} onToggle={toggleTask} /></DemoSection>
       <DemoSection title="Reporte"><MonthlyChart slices={demoSlices} /></DemoSection>
       <Button variant="soft" fullWidth className="mt-6" onClick={() => setIsCloseOpen(true)}>Probar cierre de evento</Button>

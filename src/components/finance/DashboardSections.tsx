@@ -13,6 +13,7 @@
  * USADO EN:   app/(dashboard)/inicio/page.tsx
  * ---------------------------------------------------------------
  */
+import Link from 'next/link';
 import { FormAlert } from '@/components/auth/AuthHeading';
 import { Button } from '@/components/ui/Button';
 import type { MovementView } from '@/types/movement';
@@ -52,7 +53,10 @@ interface RecentMovementsSectionProps {
 export function RecentMovementsSection({ movements, isLoading, error, onRetry }: RecentMovementsSectionProps) {
   return (
     <section className="mt-6 flex flex-col gap-3">
-      <h2 className="text-lg font-black tracking-tight">Últimos movimientos</h2>
+      <div className="flex items-baseline justify-between">
+        <h2 className="text-lg font-black tracking-tight">Últimos movimientos</h2>
+        <Link href="/dinero" className="text-[13px] font-extrabold text-primary">Ver todo</Link>
+      </div>
       {error ? <RetryAlert message={error} onRetry={onRetry} /> : (
         <MovementList movements={movements} isLoading={isLoading} />
       )}

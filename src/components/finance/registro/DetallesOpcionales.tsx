@@ -56,7 +56,8 @@ export function DetallesOpcionales(props: DetallesOpcionalesProps) {
           {props.eventos && (
             <EventPicker events={props.eventos} selectedId={props.eventoId} onSelect={props.onEvento} />
           )}
-          {props.eventoId && (
+          {/* Solo si el evento sigue activo: uno cerrado ya transfirió sus gastos. */}
+          {props.eventoId && props.eventos?.some((e) => e.id === props.eventoId) && (
             <p className="px-1 text-xs font-semibold leading-snug text-muted">
               Este gasto queda <strong className="text-gold-dark">pendiente</strong> en el evento: pasa a tu
               balance cuando cerrés el evento.

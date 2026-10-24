@@ -1,7 +1,7 @@
 # EVI_SPEC.md — EVI
 
 > **Documento de arquitectura y especificación técnica del MVP**
-> Versión 1.3 · 24 de octubre de 2026
+> Versión 1.3.1 · 24 de octubre de 2026
 > Proyecto académico — Licenciatura en Informática e Inteligencia de Negocios, UMES
 > Equipo: 3 integrantes · Plazo: 8 semanas · Inversión de infraestructura: ≈ Q300
 
@@ -33,6 +33,15 @@ Este documento describe **únicamente** lo que entra en el MVP. Nada fuera de es
 | Funciona desde el navegador del celular (PWA) | Multi-moneda y multi-país |
 | Metas de ahorro (crear y registrar avance) | Gestión de invitados de un evento |
 | Pantalla de planes con pago manual | Cobro automático de suscripciones |
+
+### Propuestas de cambio al alcance (pendientes del acuerdo del equipo)
+
+Surgieron en las pruebas del 24/10/2026. **No se construyen hasta que los tres integrantes las aprueben** y se anote la decisión en la bitácora.
+
+| Propuesta | Qué resuelve | Diseño elegido |
+|---|---|---|
+| **Dividir cuenta / Por cobrar** | Pagar una cuenta de varios y que otros te deban su parte ("dinero flotante") | Se guarda como gasto **solo tu parte** (en su categoría) y el resto queda **Por cobrar** a nombre de cada persona; al cobrar, se marca como cobrado. Tarjeta "Te deben Q…" en Inicio. Requiere una tabla nueva (`receivables`) con RLS |
+| **Mis categorías** | Categorías propias de gasto o ingreso además de las 18 del sistema | Crear, editar y borrar desde el menú del avatar; aparecen en el registro junto a las del sistema. La tabla `categories` ya lo soporta (`user_id` propio + RLS) |
 
 ---
 
@@ -158,7 +167,10 @@ Prueba rápida: *¿puedo mover este componente a otro proyecto con otra base de 
 │   ├── /events               # EventCard, ClosedEventCard, EventsEmptyState, BudgetBar,
 │   │                         # BudgetAlert, Checklist, CloseEventModal, CloseEventSummary,
 │   │                         # TransferAnimation
-│   └── /layout               # BottomNav, Header (+ UserAvatar), PageContainer
+│   ├── /finance/dinero       # MonthHeader, MovementFilters, MovementDayGroups,
+│   │                         # MovementDetailSheet
+│   └── /layout               # BottomNav, Header (+ UserAvatar), UserMenu, PageContainer,
+│                             # ComingSoon
 │
 ├── /hooks                    # useAuth, useAsyncData, useMonthlySummary, useMovements,
 │                             # useCategories, useCategoryUsage, useActiveEvents,
@@ -765,7 +777,8 @@ END IF;
 | Componentes visuales de las pantallas 3 y 4, registro y reporte | ✅ Escritos (§2.3) · revisables en `/demo` |
 | Hooks y servicios de datos | ✅ Dashboard: `movementService`, `eventService` (activos), `useMonthlySummary`, `useMovements`, `useActiveEvents` · pendientes: eventos completos, reporte, metas |
 | Autenticación y rutas protegidas | ✅ Registro, login, middleware y cierre de sesión (PR #2) |
-| Dashboard real (§3, pantalla 3) | ✅ Balance del mes, últimos movimientos y registro paso a paso con calculadora y frecuentes · Dinero, Eventos y Reportes muestran "Próximamente" |
+| Dashboard real (§3, pantalla 3) | ✅ Balance del mes, últimos movimientos y registro paso a paso con calculadora y frecuentes · Eventos y Reportes muestran "Próximamente" |
+| Pantalla Dinero (historial) | ✅ Mes a mes con totales, filtros por tipo y categoría, agrupado por día; tocar un movimiento abre su detalle para editarlo (mismo registro paso a paso) o eliminarlo con confirmación |
 | Landing, metas y planes | Pendiente |
 | Servicio de telemetría | ✅ Conectado: `signup_*`, `login_succeeded`, `movement_created` (con `seconds_to_complete`) · pendientes: `onboarding_completed` y eventos de las pantallas por construir |
 | Configuración de PWA y despliegue en Vercel | Pendiente |
@@ -874,6 +887,7 @@ Una funcionalidad está lista cuando cumple **todo** lo siguiente:
 | 2026-10-23 | 1.2.1 | Inventario de la base real: `schema.sql` conserva `updated_at`, `metadata` y otras columnas del diseño original; `GRANT` por columna en todas las tablas (cierra INSERT de eventos ya cerrados); sección 10 de respaldo de perfiles; script probado en PostgreSQL (31 verificaciones). Flujo de trabajo: `CONTRIBUTING.md`, plantilla de PR, GitHub Actions y protección de `main` |
 | 2026-10-23 | 1.2.2 | `schema.sql` v1.2 aplicado y verificado en "Evi charger" (6 de 6 chequeos); hallazgos 1, 4 y 5 de §5.5 y riesgos de vistas y columnas de estado cerrados en producción |
 | 2026-10-24 | 1.3 | Registro de movimiento paso a paso (§3): tipo → categoría → monto con calculadora → ¡Listo!, "Tus frecuentes" según el uso de cada usuario, móvil primero. Categorías del sistema ampliadas a 11 de gasto y 7 de ingreso (`migrations/20261024_categorias_ampliadas.sql`). Dashboard con datos reales |
+| 2026-10-24 | 1.3.1 | Pantalla Dinero: historial mensual con filtros, detalle, edición y eliminación (`movement_deleted`). "Cerrar sesión" pasa al menú del avatar. Propuestas "Dividir cuenta / Por cobrar" y "Mis categorías" registradas en §0, pendientes del acuerdo del equipo |
 
 ---
 

@@ -17,7 +17,7 @@
 'use client';
 
 import { useState } from 'react';
-import { PASOS_NUMERADOS, useRegistroWizard } from '@/hooks/useRegistroWizard';
+import { PASOS_NUMERADOS, useRegistroWizard, type ValoresIniciales } from '@/hooks/useRegistroWizard';
 import type { Category } from '@/types/category';
 import type { MovementDraft } from '@/types/movement';
 import { PasoCategoria } from './PasoCategoria';
@@ -35,6 +35,8 @@ interface RegistroWizardProps {
   // Devuelve true si se guardó; el wizard muestra entonces "¡Listo!".
   onGuardar: (draft: MovementDraft, segundos: number) => Promise<boolean>;
   onCerrar: () => void;
+  // Si viene, es una EDICIÓN: arranca en el monto con todo cargado.
+  inicial?: ValoresIniciales;
 }
 
 const TEXTOS = {
@@ -50,10 +52,10 @@ const TEXTOS = {
 };
 
 export function RegistroWizard(props: RegistroWizardProps) {
-  const w = useRegistroWizard();
+  const w = useRegistroWizard(props.inicial);
+  const esEdicion = props.inicial !== undefined;
   const [errorLocal, setErrorLocal] = useState<string | null>(null);
   const categoria = props.categorias.find((c) => c.id === w.categoriaId);
-  const evento = props.eventosActivos.find((e) => e.id === w.eventoId);
 
   const guardar = async () => {
     const borrador = w.construirBorrador();
@@ -66,19 +68,15 @@ export function RegistroWizard(props: RegistroWizardProps) {
     <div className="fixed inset-0 z-50 bg-light">
       <div className="mx-auto flex h-dvh max-w-md flex-col">
         {w.paso === 'listo' ? (
-          <PasoListo monto={w.calc.total} categoria={categoria?.name ?? 'Sin categoría'}
-            esIngreso={w.tipo === 'ingreso'} evento={evento?.name ?? null} onListo={props.onCerrar} />
+          <PasoListo esEdicion={esEdicion} monto={w.calc.total} categoria={categoria?.name ?? 'Sin categoría'}
+            esIngreso={w.tipo === 'ingreso'} onListo={props.onCerrar}
+            evento={props.eventosActivos.find((e) => e.id === w.eventoId)?.name ?? null} />
         ) : (
           <>
             <WizardHeader numeroDePaso={w.numeroDePaso} totalDePasos={PASOS_NUMERADOS.length}
-              {...textosDelPaso(w.paso, w.tipo)} onVolver={w.paso === 'tipo' ? null : w.volver}
+              {...textosDelPaso(w.paso, w.tipo, esEdicion)} onVolver={w.paso === 'tipo' ? null : w.volver}
               onCerrar={props.onCerrar} />
-            {w.paso === 'tipo' && <PasoTipo onElegir={w.elegirTipo} />}
-            {w.paso === 'categoria' && (
-              <PasoCategoria categorias={props.categorias.filter((c) => c.kind === w.tipo)}
-                usos={props.usos} seleccionadaId={w.categoriaId} onElegir={w.elegirCategoria} />
-            )}
-            {w.paso === 'monto' && (
+            {w.paso !== 'monto' ? <PasoDeEleccion w={w} categorias={props.categorias} usos={props.usos} /> : (
               <PasoMonto categoria={categoria} esIngreso={w.tipo === 'ingreso'} calc={w.calc}
                 detalles={{ nota: w.nota, onNota: w.setNota, eventoId: w.eventoId, onEvento: w.setEventoId,
                   eventos: w.tipo === 'egreso' ? props.eventosActivos : null }}
@@ -92,7 +90,23 @@ export function RegistroWizard(props: RegistroWizardProps) {
   );
 }
 
-function textosDelPaso(paso: 'tipo' | 'categoria' | 'monto', tipo: 'egreso' | 'ingreso') {
+// Pasos 1 y 2: un toque elige y avanza.
+interface PasoDeEleccionProps {
+  w: ReturnType<typeof useRegistroWizard>;
+  categorias: Category[];
+  usos: string[];
+}
+
+function PasoDeEleccion({ w, categorias, usos }: PasoDeEleccionProps) {
+  if (w.paso === 'tipo') return <PasoTipo onElegir={w.elegirTipo} />;
+  return (
+    <PasoCategoria categorias={categorias.filter((c) => c.kind === w.tipo)} usos={usos}
+      seleccionadaId={w.categoriaId} onElegir={w.elegirCategoria} />
+  );
+}
+
+function textosDelPaso(paso: 'tipo' | 'categoria' | 'monto', tipo: 'egreso' | 'ingreso', esEdicion: boolean) {
   const t = paso === 'tipo' ? TEXTOS.tipo : TEXTOS[paso][tipo];
-  return { titulo: t.titulo, subtitulo: t.sub };
+  const subtitulo = esEdicion && paso === 'monto' ? 'Corregí lo que haga falta y tocá Guardar.' : t.sub;
+  return { titulo: t.titulo, subtitulo };
 }

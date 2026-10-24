@@ -59,13 +59,23 @@ function validarBorrador(d: DatosDelBorrador): BorradorResultado {
   return { ok: true, draft: parsed.data, segundos };
 }
 
-export function useRegistroWizard() {
-  const calc = useCalculator();
-  const [paso, setPaso] = useState<PasoRegistro>('tipo');
-  const [tipo, setTipo] = useState<MovementType>('egreso');
-  const [categoriaId, setCategoriaId] = useState<string | null>(null);
-  const [nota, setNota] = useState('');
-  const [eventoId, setEventoId] = useState<string | null>(null);
+// Al EDITAR, el wizard arranca en el paso del monto con todo cargado;
+// "volver" sigue permitiendo cambiar la categoría o el tipo.
+export interface ValoresIniciales {
+  tipo: MovementType;
+  monto: number;
+  categoriaId: string | null;
+  nota: string | null;
+  eventoId: string | null;
+}
+
+export function useRegistroWizard(inicial?: ValoresIniciales) {
+  const calc = useCalculator(inicial?.monto);
+  const [paso, setPaso] = useState<PasoRegistro>(inicial ? 'monto' : 'tipo');
+  const [tipo, setTipo] = useState<MovementType>(inicial?.tipo ?? 'egreso');
+  const [categoriaId, setCategoriaId] = useState<string | null>(inicial?.categoriaId ?? null);
+  const [nota, setNota] = useState(inicial?.nota ?? '');
+  const [eventoId, setEventoId] = useState<string | null>(inicial?.eventoId ?? null);
   // useRef: el momento de inicio no debe provocar renders.
   const inicio = useRef(Date.now());
 

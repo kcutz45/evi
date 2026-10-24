@@ -13,7 +13,7 @@
  * USADO EN:   services/movementService.ts, app/(dashboard)/inicio
  * ---------------------------------------------------------------
  */
-import { format, parseISO, subDays } from 'date-fns';
+import { addMonths, format, parseISO, subDays } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { APP_TIME_ZONE, HORA_INICIO_NOCHE, HORA_INICIO_TARDE } from './constants';
 
@@ -38,6 +38,23 @@ export function inicioDeMesGT(ahora: Date = new Date()): string {
 // 'octubre'
 export function nombreDelMes(inicioDeMes: string): string {
   return format(parseISO(inicioDeMes), 'MMMM', { locale: es });
+}
+
+// '2026-10-01' + 1 → '2026-11-01'. Para navegar entre meses en Dinero.
+export function moverMes(inicioDeMes: string, meses: number): string {
+  return format(addMonths(parseISO(inicioDeMes), meses), 'yyyy-MM-dd');
+}
+
+// '2026-10-01' → 'Octubre 2026'
+export function etiquetaDeMes(inicioDeMes: string): string {
+  const texto = format(parseISO(inicioDeMes), 'MMMM yyyy', { locale: es });
+  return texto.charAt(0).toUpperCase() + texto.slice(1);
+}
+
+// '2026-10-24' → 'Sábado 24 de octubre' (detalle de un movimiento).
+export function fechaLarga(fechaIso: string): string {
+  const texto = format(parseISO(fechaIso), "EEEE d 'de' MMMM", { locale: es });
+  return texto.charAt(0).toUpperCase() + texto.slice(1);
 }
 
 // '2026-10-23' → 'Hoy' · '2026-10-22' → 'Ayer' · '2026-09-26' → '26 sep'

@@ -10,7 +10,7 @@
 import { buildCategorySlices } from '@/lib/report';
 import type { Category } from '@/types/category';
 import type { EventSummary, EventTask } from '@/types/event';
-import type { MovementView } from '@/types/movement';
+import type { MovementDetalle, MovementView } from '@/types/movement';
 
 // UUID fijos: el esquema Zod del formulario exige UUID válidos.
 const id = (n: number) => `00000000-0000-4000-8000-${String(n).padStart(12, '0')}`;
@@ -59,3 +59,23 @@ export const demoSlices = buildCategorySlices([
   { categoryId: id(2), name: 'Transporte', icon: 'bus', amount: 310 },
   { categoryId: id(5), name: 'Estudio', icon: 'graduation-cap', amount: 199.5 },
 ]);
+
+// Mes de ejemplo para la sección "Dinero" de la demo.
+const det = (n: number, title: string, cat: number, fecha: string, type: 'ingreso' | 'egreso', amount: number,
+  extra: Partial<MovementDetalle> = {}): MovementDetalle => {
+  const c = demoCategories[cat - 1];
+  return {
+    id: `d${n}`, title, categoryName: c?.name ?? 'Sin categoría', categoryIcon: c?.icon ?? 'circle',
+    dateLabel: '', type, amount, eventName: null, isPending: false, categoryId: c?.id ?? null,
+    eventId: null, note: title, occurredOn: fecha, ...extra,
+  };
+};
+
+export const demoDetalles: MovementDetalle[] = [
+  det(1, '3 almuerzos en Xela', 1, '2026-10-24', 'egreso', 105),
+  det(2, 'Decoración', 11, '2026-10-24', 'egreso', 320, { eventName: 'Cumpleaños de Sofía', eventId: id(20), isPending: true }),
+  det(3, 'Quincena', 12, '2026-10-23', 'ingreso', 1500),
+  det(4, 'Bus a la U', 2, '2026-10-23', 'egreso', 12),
+  det(5, 'Súper La Torre', 4, '2026-10-20', 'egreso', 412.75),
+  det(6, 'Netflix', 8, '2026-10-15', 'egreso', 79),
+];

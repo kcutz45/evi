@@ -20,7 +20,7 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { etiquetaDeDia } from '@/lib/dates';
 import type { MovementRow } from '@/types/database';
-import type { MovementDraft, MovementStatus, MovementView } from '@/types/movement';
+import type { MovementDetalle, MovementDraft, MovementStatus, MovementView } from '@/types/movement';
 import type { Database } from '@/types/supabase';
 
 type Cliente = SupabaseClient<Database>;
@@ -46,12 +46,15 @@ export async function obtenerResumenDelMes(client: Cliente, inicioDeMes: string)
   return { income: Number(data.income), expense: Number(data.expense), balance: Number(data.balance) };
 }
 
-type FilaReciente = Pick<MovementRow, 'id' | 'type' | 'amount' | 'note' | 'occurred_on' | 'status'> & {
+type FilaMovimiento = Pick<
+  MovementRow,
+  'id' | 'type' | 'amount' | 'note' | 'occurred_on' | 'status' | 'category_id' | 'event_id'
+> & {
   categories: { name: string; icon: string } | null;
   events: { name: string } | null;
 };
 
-function toView(fila: FilaReciente): MovementView {
+function toDetalle(fila: FilaMovimiento): MovementDetalle {
   const categoria = fila.categories;
   return {
     id: fila.id,
@@ -64,20 +67,27 @@ function toView(fila: FilaReciente): MovementView {
     amount: Number(fila.amount),
     eventName: fila.events?.name ?? null,
     isPending: fila.status === 'pendiente',
+    categoryId: fila.category_id,
+    eventId: fila.event_id,
+    note: fila.note,
+    occurredOn: fila.occurred_on,
   };
 }
+
+const COLUMNAS_LISTA =
+  'id, type, amount, note, occurred_on, status, category_id, event_id, categories(name, icon), events(name)';
 
 // Incluye los pendientes de eventos abiertos: el usuario debe verlos con
 // su marca "Pendiente" aunque todavía no sumen al balance (regla 4d).
 export async function listarRecientes(client: Cliente, limite: number): Promise<MovementView[]> {
   const { data, error } = await client
     .from('movements')
-    .select('id, type, amount, note, occurred_on, status, categories(name, icon), events(name)')
+    .select(COLUMNAS_LISTA)
     .order('occurred_on', { ascending: false })
     .order('created_at', { ascending: false })
     .limit(limite);
   if (error) throw new Error('No pudimos cargar tus movimientos.', { cause: error });
-  return data.map(toView);
+  return data.map(toDetalle);
 }
 
 // category_id de los últimos movimientos, para "Tus frecuentes". Solo
@@ -116,4 +126,44 @@ export async function crearMovimiento(client: Cliente, draft: MovementDraft): Pr
     throw new Error(mensaje, { cause: error });
   }
   return data.status;
+}
+
+// Movimientos que OCURRIERON en el mes (occurred_on), para Dinero. Los
+// pendientes de eventos aparecen con su marca aunque no sumen al balance.
+export async function listarDelMes(client: Cliente, inicioDeMes: string, inicioSiguiente: string): Promise<MovementDetalle[]> {
+  const { data, error } = await client
+    .from('movements')
+    .select(COLUMNAS_LISTA)
+    .gte('occurred_on', inicioDeMes)
+    .lt('occurred_on', inicioSiguiente)
+    .order('occurred_on', { ascending: false })
+    .order('created_at', { ascending: false });
+  if (error) throw new Error('No pudimos cargar los movimientos del mes.', { cause: error });
+  return data.map(toDetalle);
+}
+
+// Solo columnas que el usuario decide (regla 10). Si cambia el evento o
+// la fecha, el trigger recalcula status y accounting_date.
+export async function actualizarMovimiento(client: Cliente, id: string, draft: MovementDraft): Promise<void> {
+  const { error } = await client
+    .from('movements')
+    .update({
+      type: draft.type,
+      amount: draft.amount,
+      category_id: draft.categoryId,
+      event_id: draft.eventId,
+      note: draft.note,
+    })
+    .eq('id', id);
+  if (error) {
+    const mensaje = error.message.includes(ERROR_EVENTO_CERRADO)
+      ? 'Ese evento ya se cerró: no se le pueden mover gastos.'
+      : 'No pudimos guardar los cambios. Intentá de nuevo.';
+    throw new Error(mensaje, { cause: error });
+  }
+}
+
+export async function eliminarMovimiento(client: Cliente, id: string): Promise<void> {
+  const { error } = await client.from('movements').delete().eq('id', id);
+  if (error) throw new Error('No pudimos eliminar el movimiento. Intentá de nuevo.', { cause: error });
 }
