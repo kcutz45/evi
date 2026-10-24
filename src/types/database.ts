@@ -116,6 +116,16 @@ export type SavingsGoalRow = Auditoria & {
   status: SavingsGoalStatus;
 };
 
+// Vista vw_monthly_summary (schema.sql, sección 7). Solo movimientos
+// 'confirmado'; con security_invoker, el RLS deja ver solo los propios.
+export type MonthlySummaryRow = {
+  user_id: string;
+  month: string;
+  income: number;
+  expense: number;
+  balance: number;
+};
+
 // ---------------------------------------------------------------
 // Escritura (INSERT / UPDATE)
 // Regla 10: lo que decide el servidor (status, accounting_date,

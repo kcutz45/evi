@@ -1,7 +1,7 @@
 # EVI_SPEC.md — EVI
 
 > **Documento de arquitectura y especificación técnica del MVP**
-> Versión 1.2.2 · 23 de octubre de 2026
+> Versión 1.5 · 24 de octubre de 2026
 > Proyecto académico — Licenciatura en Informática e Inteligencia de Negocios, UMES
 > Equipo: 3 integrantes · Plazo: 8 semanas · Inversión de infraestructura: ≈ Q300
 
@@ -33,6 +33,15 @@ Este documento describe **únicamente** lo que entra en el MVP. Nada fuera de es
 | Funciona desde el navegador del celular (PWA) | Multi-moneda y multi-país |
 | Metas de ahorro (crear y registrar avance) | Gestión de invitados de un evento |
 | Pantalla de planes con pago manual | Cobro automático de suscripciones |
+
+### Propuestas de cambio al alcance (pendientes del acuerdo del equipo)
+
+Surgieron en las pruebas del 24/10/2026. **No se construyen hasta que los tres integrantes las aprueben** y se anote la decisión en la bitácora.
+
+| Propuesta | Qué resuelve | Diseño elegido |
+|---|---|---|
+| **Dividir cuenta / Por cobrar** · ✅ **aprobada y construida (24/10/2026)** | Pagar una cuenta de varios y que otros te deban su parte ("dinero flotante") | Al registrar un gasto, *Dividir esta cuenta*: se guarda como gasto **solo tu parte** y el resto queda **Por cobrar** a nombre de cada persona (partes iguales por defecto, editables; el centavo sobrante queda en tu parte). Tarjeta "Te deben" en Inicio y pantalla `/por-cobrar` con **Cobrar** / **Deshacer**. **Cobrar no es un ingreso**: el balance ya contaba solo tu parte. Tabla `receivables` con RLS, RPC atómica `create_split_expense` y vista `vw_receivables_summary` (schema.sql §11, `migrations/20261024b_por_cobrar.sql`) |
+| **Mis categorías** · ✅ **aprobada y construida (24/10/2026)** | Categorías propias de gasto o ingreso además de las 18 del sistema | Mosaico **"＋ Nueva categoría"** al final de "¿En qué?" → pantalla aparte con nombre e ícono (26 íconos) → **Crear y usar**: queda elegida y se pasa al monto. No permite nombres repetidos del mismo tipo. Sin cambios en la base: `categories` ya lo soportaba (`user_id` propio + RLS; verificado en PostgreSQL) |
 
 ---
 
@@ -152,23 +161,34 @@ Prueba rápida: *¿puedo mover este componente a otro proyecto con otra base de 
 ├── /components
 │   ├── /ui                   # Button, Card, Input, Badge, AppIcon
 │   ├── /finance              # BalanceCard, MovementItem, MovementList, AddMovementButton,
-│   │                         # MovementForm, TypeToggle, CategoryPicker, EventPicker,
-│   │                         # NumericKeypad, MonthlyChart
+│   │   │                     # DashboardSections, EventPicker, MonthlyChart
+│   │   └── /registro         # RegistroWizard, WizardHeader, PasoTipo, PasoCategoria,
+│   │                         # PasoNuevaCategoria, PasoMonto, PasoCalculadora, PasoDividir,
+│   │                         # PasoListo, CalculatorKeypad, DetallesOpcionales
 │   ├── /events               # EventCard, ClosedEventCard, EventsEmptyState, BudgetBar,
 │   │                         # BudgetAlert, Checklist, CloseEventModal, CloseEventSummary,
 │   │                         # TransferAnimation
-│   └── /layout               # BottomNav, Header (+ UserAvatar), PageContainer
+│   ├── /finance/porCobrar    # TeDebenCard, DeudasList (TarjetaPersona, ListaCobradas)
+│   ├── /finance/dinero       # MonthHeader, MovementFilters, MovementDayGroups,
+│   │                         # MovementDetailSheet
+│   └── /layout               # BottomNav, Header (+ UserAvatar), UserMenu, PageContainer,
+│                             # ComingSoon
 │
-├── /hooks                    # useAmountInput, useMovementDraft ✅ · useMovements, useEvents,
-│                             # useMonthlyReport, useAuth (pendientes)
-├── /services                 # telemetryService ✅ · movementService, eventService (pendientes)
-├── /lib                      # supabase, constants, formatCurrency, budget, amountInput,
-│                             # report, text, cn
-├── /types                    # movement, event, category, telemetry
+├── /hooks                    # useAuth, useAsyncData, useMonthlySummary, useMovements,
+│                             # useCategories, useCategoryUsage, useActiveEvents,
+│                             # useRegistroWizard, useCalculator, useZodForm…
+│                             # (pendientes: useEvents completo, useMonthlyReport)
+├── /services                 # authService, movementService, eventService, categoryService,
+│                             # telemetryService
+├── /lib                      # supabase, routes, constants, dates, calculator,
+│                             # categoryRanking, formatCurrency, budget, report, text, cn
+├── /types                    # movement, event, category, user, auth, database, supabase,
+│                             # telemetry
 └── /styles                   # tokens.ts (colores, única fuente) · globals.css (mínimo)
 
 /supabase
-└── schema.sql                # Script completo de la base de datos (v1.2)
+├── schema.sql                # Script completo de la base de datos (v1.2)
+└── /migrations              # Cambios sobre una base existente (idempotentes)
 ```
 
 **Convenciones de nombres:**
@@ -382,7 +402,24 @@ Radio de borde: 16–20 px. Tipografía sans-serif redondeada. Moneda siempre `Q
 
 > **v1.2:** la cuarta pestaña es **Reportes** y no Perfil, para coincidir con las rutas de §2.3; el reporte mensual sí está en el alcance congelado y el perfil no tiene pantalla definida. Al perfil se llega tocando el avatar.
 
-**Acción central — el botón flotante `+`** abre el registro de movimiento. Debe completarse en **menos de 5 segundos y 3 toques**: monto en teclado numérico grande → categoría con un toque → guardar. Si esta interacción no se siente instantánea, la app no se usa a diario, y sin uso diario no hay datos que analizar ni suscripciones que vender.
+**Acción central — el botón flotante `+`** abre el registro de movimiento. Si esta interacción no se siente instantánea, la app no se usa a diario, y sin uso diario no hay datos que analizar ni suscripciones que vender.
+
+**Registro paso a paso (v1.3, 24/10/2026).** La primera versión ponía todo en una pantalla (interruptor Gasto/Ingreso, categorías, nota, evento y teclado) y en pruebas con usuarios **a varios se les complicó**. Se rediseñó como un flujo de **una pregunta por pantalla**, a pantalla completa:
+
+| Paso | Pregunta | Interacción |
+|---|---|---|
+| 1 de 3 | ¿Qué querés registrar? | Dos tarjetas grandes con ejemplo: *Un gasto* / *Un ingreso*. Un toque y avanza |
+| 2 de 3 | ¿En qué gastaste? / ¿De dónde vino el dinero? | Cuadrícula de categorías grandes. **"Tus frecuentes"** arriba: las que el usuario más usa (≥ 2 veces en sus últimos 100 movimientos, máximo 3). Un toque y avanza |
+| 2 de 3 (opcional) | Nueva categoría | Pantalla aparte desde el mosaico *＋ Nueva categoría*: nombre + ícono → *Crear y usar* (queda elegida y pasa al monto). Del mismo tipo que el registro en curso |
+| 3 de 3 | ¿Cuánto gastaste? / ¿Cuánto recibiste? | Monto enorme y **solo teclado numérico**: la mayoría solo escribe un monto. Botones *Calculadora* y *Dividir esta cuenta*. Nota y evento plegados como *opcional*. Botón Guardar |
+| 3 de 3 (opcional) | Calculadora | **Pantalla aparte**, a pantalla completa: visor con la cuenta y el resultado, + − × ÷ con precedencia ("3 × 35 + 10" → Q115.00). *Usar este resultado* vuelve al monto con el total cargado; ← vuelve sin cambiar nada |
+| 3 de 3 (opcional) | ¿Con quién dividís? | Solo gastos. Personas y su parte (iguales por defecto). "Tu parte" grande: es lo que se guarda como gasto; lo demás queda en «Te deben» |
+| ¡Listo! | — | Pantalla completa en menta con ✓, monto y categoría. Si el gasto quedó pendiente en un evento, lo explica (regla 4d). Vuelve sola al inicio |
+
+- Siempre visibles: barra "Paso X de 3", volver al paso anterior (el monto escrito se conserva) y cerrar sin guardar.
+- **Concesión consciente:** el flujo suma un toque (elegir el tipo) frente a la promesa original de 3 toques, a cambio de que todos lo entiendan. `seconds_to_complete` (§4.3) dirá si el costo es real: si la mediana supera 8 s, se evalúa recordar el último tipo usado y saltar el paso 1.
+- **Móvil primero:** en pantallas anchas el registro se ve como una columna de celular centrada (`max-w-md`). La versión de escritorio se diseña después del MVP.
+- La categoría ahora es obligatoria en el flujo: ya no quedan movimientos "Sin categoría".
 
 **Notas técnicas:** los agregados del mes (balance, ingresos, egresos) se calculan en la vista `vw_monthly_summary` (con `security_invoker`, regla 9), no sumando en el cliente. El movimiento que pertenece a un evento muestra su etiqueta de origen y, si el evento sigue abierto, la marca **Pendiente** (ver la regla contable en 4d).
 
@@ -567,8 +604,11 @@ CREATE POLICY analytics_insert_self ON public.analytics_events
 | `category_suggested` | Gemini propone una categoría | `{ suggested_category, latency_ms }` |
 | `category_suggestion_accepted` | El usuario conserva la sugerencia | `{ category }` |
 | `category_suggestion_rejected` | El usuario la cambia | `{ suggested, chosen }` |
+| `category_created` | Se crea una categoría propia | `{ kind }` |
 | `monthly_report_viewed` | Se abre el reporte | `{ month, total_spent, categories_count }` |
 | `savings_goal_created` | Se crea una meta | `{ target_amount }` |
+| `expense_split_created` | Se guarda un gasto dividido | `{ total, my_share, debtors_count }` |
+| `receivable_collected` | Se marca una deuda como cobrada | `{ amount }` |
 
 > `seconds_to_complete` en `movement_created` es la métrica más importante del producto: mide directamente la promesa de "3 toques". Si la mediana sube de 8 segundos, hay que rediseñar la pantalla.
 
@@ -740,13 +780,16 @@ END IF;
 | Paso | Estado |
 |---|---|
 | `/supabase/schema.sql` versionado | ✅ v1.2 aplicado y verificado en "Evi charger" el 23/10/2026 (ver 5.5) |
-| Repositorio en GitHub | Pendiente |
-| Proyecto Next.js: configuración, tokens, ESLint con las reglas 2, 3, 4 y 6 | ✅ Escrito · falta `npm install` y primer build |
+| Repositorio en GitHub | ✅ github.com/kcutz45/evi · `main` protegida, verificación automática en cada PR |
+| Proyecto Next.js: configuración, tokens, ESLint con las reglas 2, 3, 4 y 6 | ✅ Instalado y compilando (build verificado en cada PR) |
 | Componentes visuales de las pantallas 3 y 4, registro y reporte | ✅ Escritos (§2.3) · revisables en `/demo` |
-| Hooks y servicios de datos (`useMovements`, `useEvents`, `eventService`…) | Pendiente |
-| Autenticación y rutas protegidas | Pendiente |
-| Landing, registro/login, metas y planes | Pendiente |
-| Servicio de telemetría | ✅ Escrito (corregido v1.2) · falta conectarlo a las pantallas |
+| Hooks y servicios de datos | ✅ Dashboard: `movementService`, `eventService` (activos), `useMonthlySummary`, `useMovements`, `useActiveEvents` · pendientes: eventos completos, reporte, metas |
+| Autenticación y rutas protegidas | ✅ Registro, login, middleware y cierre de sesión (PR #2) |
+| Dashboard real (§3, pantalla 3) | ✅ Balance del mes, últimos movimientos y registro paso a paso con calculadora y frecuentes · Eventos y Reportes muestran "Próximamente" |
+| Pantalla Dinero (historial) | ✅ Mes a mes con totales, filtros por tipo y categoría, agrupado por día; tocar un movimiento abre su detalle para editarlo (mismo registro paso a paso) o eliminarlo con confirmación |
+| Dividir cuenta / Te deben | ✅ Paso "¿Con quién dividís?" en el registro, tarjeta en Inicio, pantalla `/por-cobrar` agrupada por persona, detalle del gasto con sus deudas. Probado en PostgreSQL (20 verificaciones) y en la demo |
+| Landing, metas y planes | Pendiente |
+| Servicio de telemetría | ✅ Conectado: `signup_*`, `login_succeeded`, `movement_created` (con `seconds_to_complete`) · pendientes: `onboarding_completed` y eventos de las pantallas por construir |
 | Configuración de PWA y despliegue en Vercel | Pendiente |
 
 ### 5.5 Correcciones de seguridad v1.2 — cómo aplicarlas
@@ -852,6 +895,10 @@ Una funcionalidad está lista cuando cumple **todo** lo siguiente:
 | 2026-10-03 | 1.2 | Revisión de seguridad: vistas con `security_invoker` y esquema `analytics` (regla 9), privilegios por columna (regla 10), `user_id` por defecto en telemetría y eliminación de `updated_at`; regla contable de eventos (4d); metas y planes entran al alcance congelado e *Invitados* sale; pestaña Reportes en la navegación; `schema.sql` completo; proyecto Next.js y componentes visuales |
 | 2026-10-23 | 1.2.1 | Inventario de la base real: `schema.sql` conserva `updated_at`, `metadata` y otras columnas del diseño original; `GRANT` por columna en todas las tablas (cierra INSERT de eventos ya cerrados); sección 10 de respaldo de perfiles; script probado en PostgreSQL (31 verificaciones). Flujo de trabajo: `CONTRIBUTING.md`, plantilla de PR, GitHub Actions y protección de `main` |
 | 2026-10-23 | 1.2.2 | `schema.sql` v1.2 aplicado y verificado en "Evi charger" (6 de 6 chequeos); hallazgos 1, 4 y 5 de §5.5 y riesgos de vistas y columnas de estado cerrados en producción |
+| 2026-10-24 | 1.3 | Registro de movimiento paso a paso (§3): tipo → categoría → monto con calculadora → ¡Listo!, "Tus frecuentes" según el uso de cada usuario, móvil primero. Categorías del sistema ampliadas a 11 de gasto y 7 de ingreso (`migrations/20261024_categorias_ampliadas.sql`). Dashboard con datos reales |
+| 2026-10-24 | 1.3.1 | Pantalla Dinero: historial mensual con filtros, detalle, edición y eliminación (`movement_deleted`). "Cerrar sesión" pasa al menú del avatar. Propuestas "Dividir cuenta / Por cobrar" y "Mis categorías" registradas en §0, pendientes del acuerdo del equipo |
+| 2026-10-24 | 1.4 | **Alcance:** se aprueba y construye "Dividir cuenta / Por cobrar" (§0). Tabla `receivables`, RPC `create_split_expense`, vista `vw_receivables_summary` (§11 de schema.sql). Telemetría `expense_split_created` y `receivable_collected` (§4.3) |
+| 2026-10-24 | 1.5 | **Alcance:** se aprueba y construye "Mis categorías" (§0): crear categorías propias desde el registro. La calculadora pasa a ser una pantalla aparte (§3). Telemetría `category_created` |
 
 ---
 

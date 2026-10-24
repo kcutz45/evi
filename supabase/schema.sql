@@ -27,7 +27,7 @@
 -- ORDEN:     0 reset · 1 utilidades · 2 tablas · 3 triggers · 4 RLS
 --            5 privilegios · 6 funciones RPC · 7 vistas de la app
 --            8 esquema analytics (Looker) · 9 datos del sistema
---            10 respaldo de perfiles
+--            10 respaldo de perfiles · 11 por cobrar (dividir cuenta)
 -- =====================================================================
 
 
@@ -42,6 +42,8 @@
 --   public.vw_category_distribution cascade;
 -- drop trigger if exists on_auth_user_created on auth.users;
 -- drop trigger if exists trg_on_auth_user_created on auth.users;  -- nombre de v1.1
+-- drop view if exists public.vw_receivables_summary cascade;
+-- drop table if exists public.receivables cascade;
 -- drop table if exists public.analytics_events, public.waitlist,
 --   public.savings_goals, public.movements, public.event_tasks,
 --   public.events, public.categories, public.profiles cascade;
@@ -50,6 +52,8 @@
 -- drop function if exists public.set_movement_accounting() cascade;
 -- drop function if exists public.set_task_completed_at() cascade;
 -- drop function if exists public.set_updated_at() cascade;
+-- drop function if exists public.create_split_expense(numeric, uuid, uuid, text, jsonb) cascade;
+-- drop function if exists public.set_receivable_collected_at() cascade;
 -- drop function if exists public.gt_today() cascade;
 --
 -- NO se borra public.rls_auto_enable(): es un event trigger que activa
@@ -707,15 +711,28 @@ grant select on all tables in schema analytics to looker_readonly;
 -- Solo las categorías base. Los datos de prueba no van aquí: este
 -- archivo reconstruye PRODUCCIÓN.
 -- =====================================================================
+-- Ampliadas el 24/10/2026 (migrations/20261024_categorias_ampliadas.sql):
+-- reflejan cómo gana y gasta el usuario tipo (§0). Los íconos deben
+-- existir en components/ui/AppIcon.tsx.
 insert into public.categories (user_id, name, icon, kind) values
-  (null, 'Comida',     'utensils',        'egreso'),
-  (null, 'Transporte', 'bus',             'egreso'),
-  (null, 'Despensa',   'shopping-basket', 'egreso'),
-  (null, 'Vivienda',   'house',           'egreso'),
-  (null, 'Estudio',    'graduation-cap',  'egreso'),
-  (null, 'Salud',      'heart-pulse',     'egreso'),
-  (null, 'Otros',      'ellipsis',        'egreso'),
-  (null, 'Ingresos',   'banknote',        'ingreso');
+  (null, 'Comida',         'utensils',        'egreso'),
+  (null, 'Transporte',     'bus',             'egreso'),
+  (null, 'Salidas',        'party-popper',    'egreso'),
+  (null, 'Despensa',       'shopping-basket', 'egreso'),
+  (null, 'Estudio',        'graduation-cap',  'egreso'),
+  (null, 'Salud',          'heart-pulse',     'egreso'),
+  (null, 'Vivienda',       'house',           'egreso'),
+  (null, 'Suscripciones',  'tv',              'egreso'),
+  (null, 'Ropa',           'shirt',           'egreso'),
+  (null, 'Regalos',        'gift',            'egreso'),
+  (null, 'Otros',          'ellipsis',        'egreso'),
+  (null, 'Salario',        'briefcase',       'ingreso'),
+  (null, 'Freelance',      'laptop',          'ingreso'),
+  (null, 'Ventas',         'tag',             'ingreso'),
+  (null, 'Remesas',        'globe',           'ingreso'),
+  (null, 'Mesada',         'wallet',          'ingreso'),
+  (null, 'Regalo',         'gift',            'ingreso'),
+  (null, 'Otros ingresos', 'banknote',        'ingreso');
 
 
 -- =====================================================================
@@ -730,3 +747,152 @@ insert into public.profiles (id, full_name)
 select u.id, coalesce(u.raw_user_meta_data ->> 'full_name', '')
 from auth.users u
 on conflict (id) do nothing;
+
+
+-- =====================================================================
+-- 11. POR COBRAR (dividir cuenta) — agregado el 24/10/2026
+-- Mismo contenido que migrations/20261024b_por_cobrar.sql. Va al final
+-- porque depende de movements, set_updated_at y las políticas previas.
+-- =====================================================================
+-- --------------------------------------------------------------------
+-- Tabla: una fila por persona que te debe parte de un gasto.
+-- Borrar el gasto borra sus deudas (ON DELETE CASCADE): sin el gasto,
+-- la deuda pierde su razón de ser.
+-- --------------------------------------------------------------------
+create table if not exists public.receivables (
+  id            uuid primary key default gen_random_uuid(),
+  user_id       uuid not null default auth.uid()
+                references auth.users(id) on delete cascade,
+  movement_id   uuid not null references public.movements(id) on delete cascade,
+  debtor_name   text not null check (char_length(trim(debtor_name)) between 1 and 60),
+  amount        numeric(12,2) not null check (amount > 0),
+  status        text not null default 'pendiente'
+                check (status in ('pendiente', 'cobrado')),
+  -- Lo llena el trigger receivables_collected_at al marcarla cobrada.
+  collected_at  timestamptz,
+  metadata      jsonb not null default '{}'::jsonb,
+  created_at    timestamptz not null default now(),
+  updated_at    timestamptz not null default now(),
+  constraint receivables_collected_consistency
+    check ((status = 'cobrado') = (collected_at is not null))
+);
+
+create index if not exists receivables_user_status_idx on public.receivables (user_id, status);
+create index if not exists receivables_movement_idx    on public.receivables (movement_id);
+
+-- --------------------------------------------------------------------
+-- Trigger: collected_at nunca contradice a status.
+-- --------------------------------------------------------------------
+create or replace function public.set_receivable_collected_at()
+returns trigger
+language plpgsql
+set search_path = ''
+as $$
+begin
+  if new.status <> 'cobrado' then
+    new.collected_at := null;
+  elsif tg_op = 'INSERT' or old.status <> 'cobrado' then
+    new.collected_at := now();
+  else
+    new.collected_at := old.collected_at;
+  end if;
+  return new;
+end;
+$$;
+
+drop trigger if exists receivables_collected_at on public.receivables;
+create trigger receivables_collected_at
+  before insert or update of status on public.receivables
+  for each row execute function public.set_receivable_collected_at();
+
+drop trigger if exists receivables_updated_at on public.receivables;
+create trigger receivables_updated_at before update on public.receivables
+  for each row execute function public.set_updated_at();
+
+-- --------------------------------------------------------------------
+-- RLS: solo lo mío, y solo colgado de un gasto mío.
+-- --------------------------------------------------------------------
+alter table public.receivables enable row level security;
+
+drop policy if exists receivables_all_own on public.receivables;
+create policy receivables_all_own on public.receivables
+  for all to authenticated
+  using (user_id = auth.uid())
+  with check (
+    user_id = auth.uid()
+    and exists (select 1 from public.movements m
+                where m.id = receivables.movement_id and m.user_id = auth.uid())
+  );
+
+-- --------------------------------------------------------------------
+-- Privilegios por columna (regla 10): collected_at lo pone el trigger.
+-- --------------------------------------------------------------------
+revoke all on public.receivables from anon, authenticated;
+grant select, delete on public.receivables to authenticated;
+grant insert (movement_id, debtor_name, amount, metadata) on public.receivables to authenticated;
+grant update (debtor_name, amount, status, metadata) on public.receivables to authenticated;
+revoke execute on function public.set_receivable_collected_at() from public, anon, authenticated;
+
+-- --------------------------------------------------------------------
+-- RPC: crea el gasto (tu parte) y sus deudas en UNA transacción.
+-- SECURITY INVOKER: corre como el usuario, así RLS y los privilegios por
+-- columna se aplican igual que desde la app (no necesita regla 8).
+-- p_debtors: [{"name": "Ana", "amount": 100}, ...]
+-- --------------------------------------------------------------------
+create or replace function public.create_split_expense(
+  p_amount numeric,
+  p_category_id uuid,
+  p_event_id uuid,
+  p_note text,
+  p_debtors jsonb
+)
+returns uuid
+language plpgsql
+security invoker
+set search_path = ''
+as $$
+declare
+  v_movement uuid;
+  v_item     jsonb;
+begin
+  if auth.uid() is null then
+    raise exception 'Sesión requerida';
+  end if;
+  if jsonb_typeof(p_debtors) is distinct from 'array'
+     or jsonb_array_length(p_debtors) not between 1 and 20 then
+    raise exception 'Agregá entre 1 y 20 personas';
+  end if;
+
+  insert into public.movements (type, amount, category_id, event_id, note)
+  values ('egreso', p_amount, p_category_id, p_event_id, p_note)
+  returning id into v_movement;
+
+  for v_item in select * from jsonb_array_elements(p_debtors) loop
+    insert into public.receivables (movement_id, debtor_name, amount)
+    values (v_movement, trim(v_item ->> 'name'), (v_item ->> 'amount')::numeric);
+  end loop;
+
+  return v_movement;
+end;
+$$;
+
+revoke execute on function public.create_split_expense(numeric, uuid, uuid, text, jsonb) from public, anon;
+grant execute on function public.create_split_expense(numeric, uuid, uuid, text, jsonb) to authenticated;
+
+-- --------------------------------------------------------------------
+-- Vista: cuánto te deben en total (tarjeta "Te deben" del Inicio).
+-- security_invoker (regla 9): cada quien ve solo lo suyo.
+-- --------------------------------------------------------------------
+create or replace view public.vw_receivables_summary
+with (security_invoker = true) as
+select
+  r.user_id,
+  sum(r.amount)                                as pending_total,
+  count(*)                                     as pending_count,
+  count(distinct lower(trim(r.debtor_name)))   as debtors_count
+from public.receivables r
+where r.status = 'pendiente'
+group by r.user_id;
+
+revoke all on public.vw_receivables_summary from anon;
+grant select on public.vw_receivables_summary to authenticated;

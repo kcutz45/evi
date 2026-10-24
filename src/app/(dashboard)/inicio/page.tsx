@@ -1,62 +1,101 @@
 /**
  * inicio/page.tsx
  * ---------------------------------------------------------------
- * PROPÓSITO: Pantalla protegida MÍNIMA: saludo con el nombre del
- *            perfil, el plan y el botón para cerrar sesión.
+ * PROPÓSITO: Dashboard principal (§3, pantalla 3): saludo, balance del
+ *            mes, últimos movimientos y el botón "+" que abre el
+ *            registro paso a paso.
  *
- * POR QUÉ EXISTE: Verifica de punta a punta el flujo de auth:
- *            registro → trigger handle_new_user crea el perfil →
- *            middleware deja pasar → RLS deja leer SOLO el perfil propio.
- *            El dashboard real (§3, pantalla 3) la reemplaza después.
+ * POR QUÉ EXISTE: Es la pantalla que el usuario ve todos los días. Esta
+ *            página solo CONECTA: los datos vienen de hooks y los
+ *            componentes solo pintan (§2.1). No hay sumas aquí: el
+ *            balance lo calcula la vista vw_monthly_summary.
  *
- * NOTA:      Si alguien llega aquí sin sesión, el middleware ya lo mandó
- *            a /login; este archivo no necesita revisar eso.
+ * NOTA:      El registro se abre ENCIMA del Dashboard. Al guardar se
+ *            recargan los datos mientras se ve "¡Listo!", así al volver
+ *            el balance ya está al día.
  *
- * DEPENDE DE: hooks/useAuth.ts
+ * DEPENDE DE: hooks/useAuth, useMonthlySummary, useMovements,
+ *            useCategories, useCategoryUsage, useActiveEvents
  * ---------------------------------------------------------------
  */
 'use client';
 
-import { useState } from 'react';
-import { LogOut } from 'lucide-react';
-import { FormAlert } from '@/components/auth/AuthHeading';
-import { Badge } from '@/components/ui/Badge';
-import { Button } from '@/components/ui/Button';
-import { Card } from '@/components/ui/Card';
+import { useCallback, useState } from 'react';
+import { AddMovementButton } from '@/components/finance/AddMovementButton';
+import { BalanceSection, RecentMovementsSection } from '@/components/finance/DashboardSections';
+import { TeDebenCard } from '@/components/finance/porCobrar/TeDebenCard';
+import { RegistroWizard } from '@/components/finance/registro/RegistroWizard';
+import { Header } from '@/components/layout/Header';
+import { PageContainer } from '@/components/layout/PageContainer';
+import { UserMenu } from '@/components/layout/UserMenu';
+import { useActiveEvents } from '@/hooks/useActiveEvents';
 import { useAuth } from '@/hooks/useAuth';
-import { RUTA_LOGIN, navegarConRecarga } from '@/lib/routes';
-import { planLabel } from '@/lib/text';
+import { useCategories } from '@/hooks/useCategories';
+import { useCategoryUsage } from '@/hooks/useCategoryUsage';
+import { useMonthlySummary } from '@/hooks/useMonthlySummary';
+import { useMovements } from '@/hooks/useMovements';
+import { useReceivablesSummary } from '@/hooks/useReceivables';
+import { nombreDelMes, saludoGT } from '@/lib/dates';
+import type { Category } from '@/types/category';
+import type { MovementDraft } from '@/types/movement';
+import type { Deudor } from '@/types/receivable';
 
 export default function InicioPage() {
-  const { perfil, isLoading, error, cerrarSesion } = useAuth();
-  const [isLeaving, setIsLeaving] = useState(false);
+  const { perfil, cerrarSesion } = useAuth();
+  const resumen = useMonthlySummary();
+  const movimientos = useMovements();
+  const usos = useCategoryUsage();
+  const teDeben = useReceivablesSummary();
+  const cats = useCategories();
+  const categorias = cats.data;
+  const { data: eventos } = useActiveEvents();
+  const [isHidden, setIsHidden] = useState(false);
+  const registro = useRegistroEnDashboard(movimientos, categorias, [resumen.recargar, usos.recargar, teDeben.recargar]);
 
-  const handleCerrarSesion = async () => {
-    setIsLeaving(true);
-    const resultado = await cerrarSesion();
-    if (!resultado.ok) return setIsLeaving(false);
-    navegarConRecarga(RUTA_LOGIN);
+  const nombre = perfil?.fullName ?? '';
+  return (
+    <PageContainer floatingAction={<AddMovementButton onClick={registro.abrir} />}>
+      <Header eyebrow={saludoGT()} title={nombre || 'qué gusto verte'}
+        action={<UserMenu nombre={nombre} plan={perfil?.plan ?? null} onLogout={cerrarSesion} />} />
+      <BalanceSection monthLabel={nombreDelMes(resumen.inicioDeMes)} {...resumen.data}
+        isLoading={resumen.isLoading} error={resumen.error} isHidden={isHidden}
+        onToggleHidden={() => setIsHidden((oculto) => !oculto)} onRetry={resumen.recargar} />
+      <TeDebenCard resumen={teDeben.data} />
+      <RecentMovementsSection movements={movimientos.data} isLoading={movimientos.isLoading}
+        error={movimientos.error} onRetry={movimientos.recargar} />
+      {registro.abierto && (
+        <RegistroWizard categorias={categorias} onCrearCategoria={cats.crear} creandoCategoria={cats.creando}
+          errorCategoria={cats.errorCrear} usos={usos.data} eventosActivos={eventos}
+          guardando={movimientos.isSaving} errorGuardado={movimientos.saveError}
+          onGuardar={registro.guardar} onCerrar={registro.cerrar} />
+      )}
+    </PageContainer>
+  );
+}
+
+// Abrir, guardar y cerrar el registro. Al guardar bien, recarga la lista
+// y lo que se pase en `recargarTambien` (balance, frecuentes).
+function useRegistroEnDashboard(
+  movimientos: ReturnType<typeof useMovements>,
+  categorias: Category[],
+  recargarTambien: Array<() => void>,
+) {
+  const [abierto, setAbierto] = useState(false);
+  const { limpiarError } = movimientos;
+
+  // useCallback: "¡Listo!" programa su cierre con esta función; si
+  // cambiara en cada render, el temporizador se reiniciaría.
+  const cerrar = useCallback(() => {
+    setAbierto(false);
+    limpiarError();
+  }, [limpiarError]);
+
+  const guardar = async (draft: MovementDraft, segundos: number, deudores: Deudor[]) => {
+    const categoria = categorias.find((c) => c.id === draft.categoryId)?.name ?? null;
+    const ok = await movimientos.crear(draft, segundos, categoria, deudores);
+    if (ok) [movimientos.recargar, ...recargarTambien].forEach((recargar) => recargar());
+    return ok;
   };
 
-  return (
-    <main className="mx-auto flex min-h-dvh max-w-md flex-col gap-5 bg-light px-5 py-8">
-      {isLoading && <div aria-busy className="h-40 animate-pulse rounded-card bg-white/70" />}
-      <FormAlert message={error} />
-      {!isLoading && perfil && (
-        <Card className="flex flex-col gap-3 p-5">
-          <h1 className="text-2xl font-black tracking-tight">Hola, {perfil.fullName || 'de nuevo'}</h1>
-          <p className="flex items-center gap-2 text-sm font-bold text-muted">
-            Tu plan: <Badge tone="mint">{planLabel(perfil.plan)}</Badge>
-          </p>
-        </Card>
-      )}
-      {!isLoading && !perfil && !error && (
-        <FormAlert message="Tu sesión está activa, pero no encontramos tu perfil." />
-      )}
-      <Button variant="soft" fullWidth disabled={isLeaving} onClick={handleCerrarSesion}
-        icon={<LogOut size={18} aria-hidden />}>
-        {isLeaving ? 'Cerrando sesión…' : 'Cerrar sesión'}
-      </Button>
-    </main>
-  );
+  return { abierto, abrir: () => setAbierto(true), cerrar, guardar };
 }

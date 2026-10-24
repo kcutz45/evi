@@ -17,12 +17,17 @@ import { EventCard } from '@/components/events/EventCard';
 import { AddMovementButton } from '@/components/finance/AddMovementButton';
 import { BalanceCard } from '@/components/finance/BalanceCard';
 import { MonthlyChart } from '@/components/finance/MonthlyChart';
-import { MovementForm } from '@/components/finance/MovementForm';
+import { RegistroWizard } from '@/components/finance/registro/RegistroWizard';
 import { MovementList } from '@/components/finance/MovementList';
-import { Header, UserAvatar } from '@/components/layout/Header';
+import { Header } from '@/components/layout/Header';
+import { UserMenu } from '@/components/layout/UserMenu';
 import { PageContainer } from '@/components/layout/PageContainer';
 import { Button } from '@/components/ui/Button';
-import { demoCategories, demoEvents, demoMovements, demoSlices, demoTasks } from './mockData';
+import { TeDebenCard } from '@/components/finance/porCobrar/TeDebenCard';
+import type { NuevaCategoria } from '@/types/category';
+import { DemoDinero } from './DemoDinero';
+import { DemoTeDeben } from './DemoTeDeben';
+import { demoCategories, demoEvents, demoMovements, demoSlices, demoTasks, demoUsos } from './mockData';
 
 export default function DemoPage() {
   const [isHidden, setIsHidden] = useState(false);
@@ -33,29 +38,36 @@ export default function DemoPage() {
   const toggleTask = (taskId: string, isDone: boolean) =>
     setTasks((current) => current.map((t) => (t.id === taskId ? { ...t, isDone } : t)));
 
-  if (isFormOpen) {
-    return (
-      <MovementForm categories={demoCategories} activeEvents={active} suggestedCategoryId={demoCategories[0]?.id}
-        onClose={() => setIsFormOpen(false)} onSubmit={() => setIsFormOpen(false)} />
-    );
-  }
+  const { demoCategorias, crearCategoriaDemo } = useCategoriasDemo();
+  // En la demo no hay sesión: cerrar sesión no hace nada.
+  const logoutDemo = async () => ({ ok: false as const, error: 'Demo sin sesión' });
+  // Simula el guardado: espera un poco y "sale bien" para ver el ¡Listo!.
+  const guardarDemo = () => new Promise<boolean>((resolve) => setTimeout(() => resolve(true), 500));
 
   return (
     <PageContainer floatingAction={<AddMovementButton onClick={() => setIsFormOpen(true)} />}>
-      <Header eyebrow="Buen día," title="Andrea" action={<UserAvatar fullName="Andrea López" />} />
+      <Header eyebrow="Buen día," title="Andrea" action={<UserMenu nombre="Andrea López" plan="gratis" onLogout={logoutDemo} />} />
       <BalanceCard monthLabel="octubre" balance={4820.5} income={8450} expense={3629.5}
         isHidden={isHidden} onToggleHidden={() => setIsHidden((h) => !h)} />
+      <TeDebenCard resumen={{ total: 235, personas: 2 }} />
       <DemoSection title="Últimos movimientos"><MovementList movements={demoMovements} /></DemoSection>
       <DemoSection title="Eventos">
         {active.map((e) => <EventCard key={e.id} event={e} />)}
         {demoEvents.filter((e) => e.status === 'cerrado').map((e) => <ClosedEventCard key={e.id} event={e} />)}
       </DemoSection>
+      <DemoSection title="Dinero (pantalla)"><DemoDinero /></DemoSection>
+      <DemoSection title="Te deben (pantalla)"><DemoTeDeben /></DemoSection>
       <DemoSection title="Tareas"><Checklist tasks={tasks} onToggle={toggleTask} /></DemoSection>
       <DemoSection title="Reporte"><MonthlyChart slices={demoSlices} /></DemoSection>
       <Button variant="soft" fullWidth className="mt-6" onClick={() => setIsCloseOpen(true)}>Probar cierre de evento</Button>
       <CloseEventModal isOpen={isCloseOpen} eventName="Cumpleaños de Sofía" planned={2000} actual={1700}
         expensesCount={12} targetMonthLabel="octubre" isClosing={false}
         onConfirm={() => setIsCloseOpen(false)} onCancel={() => setIsCloseOpen(false)} />
+      {isFormOpen && (
+        <RegistroWizard categorias={demoCategorias} onCrearCategoria={crearCategoriaDemo} creandoCategoria={false}
+          errorCategoria={null} usos={demoUsos} eventosActivos={active}
+          guardando={false} errorGuardado={null} onGuardar={guardarDemo} onCerrar={() => setIsFormOpen(false)} />
+      )}
     </PageContainer>
   );
 }
@@ -67,4 +79,15 @@ function DemoSection({ title, children }: { title: string; children: ReactNode }
       {children}
     </section>
   );
+}
+
+// En la demo, crear una categoría solo la agrega a la lista en memoria.
+function useCategoriasDemo() {
+  const [demoCategorias, setDemoCategorias] = useState(demoCategories);
+  const crearCategoriaDemo = async (datos: NuevaCategoria) => {
+    const nueva = { id: crypto.randomUUID(), ...datos, name: datos.name.trim() };
+    setDemoCategorias((actual) => [...actual, nueva]);
+    return nueva;
+  };
+  return { demoCategorias, crearCategoriaDemo };
 }

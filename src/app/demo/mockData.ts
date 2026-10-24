@@ -7,24 +7,33 @@
  *            de Supabase. Se borra antes de la beta (semana 7).
  * ---------------------------------------------------------------
  */
+import { etiquetaDeDia } from '@/lib/dates';
 import { buildCategorySlices } from '@/lib/report';
 import type { Category } from '@/types/category';
 import type { EventSummary, EventTask } from '@/types/event';
-import type { MovementView } from '@/types/movement';
+import type { MovementDetalle, MovementView } from '@/types/movement';
+import type { PorCobrar } from '@/types/receivable';
 
 // UUID fijos: el esquema Zod del formulario exige UUID válidos.
 const id = (n: number) => `00000000-0000-4000-8000-${String(n).padStart(12, '0')}`;
 
-export const demoCategories: Category[] = [
-  { id: id(1), name: 'Comida', icon: 'utensils', kind: 'egreso' },
-  { id: id(2), name: 'Transporte', icon: 'bus', kind: 'egreso' },
-  { id: id(3), name: 'Despensa', icon: 'shopping-basket', kind: 'egreso' },
-  { id: id(4), name: 'Vivienda', icon: 'house', kind: 'egreso' },
-  { id: id(5), name: 'Estudio', icon: 'graduation-cap', kind: 'egreso' },
-  { id: id(6), name: 'Salud', icon: 'heart-pulse', kind: 'egreso' },
-  { id: id(7), name: 'Otros', icon: 'ellipsis', kind: 'egreso' },
-  { id: id(8), name: 'Ingresos', icon: 'banknote', kind: 'ingreso' },
+// Misma lista que supabase/schema.sql (sección 9).
+const CATEGORIAS: Array<[string, string, Category['kind']]> = [
+  ['Comida', 'utensils', 'egreso'], ['Transporte', 'bus', 'egreso'], ['Salidas', 'party-popper', 'egreso'],
+  ['Despensa', 'shopping-basket', 'egreso'], ['Estudio', 'graduation-cap', 'egreso'],
+  ['Salud', 'heart-pulse', 'egreso'], ['Vivienda', 'house', 'egreso'], ['Suscripciones', 'tv', 'egreso'],
+  ['Ropa', 'shirt', 'egreso'], ['Regalos', 'gift', 'egreso'], ['Otros', 'ellipsis', 'egreso'],
+  ['Salario', 'briefcase', 'ingreso'], ['Freelance', 'laptop', 'ingreso'], ['Ventas', 'tag', 'ingreso'],
+  ['Remesas', 'globe', 'ingreso'], ['Mesada', 'wallet', 'ingreso'], ['Regalo', 'gift', 'ingreso'],
+  ['Otros ingresos', 'banknote', 'ingreso'],
 ];
+
+export const demoCategories: Category[] = CATEGORIAS.map(([name, icon, kind], i) => ({
+  id: id(i + 1), name, icon, kind,
+}));
+
+// Historial simulado: Despensa ×3 y Transporte ×2 aparecen en "Tus frecuentes".
+export const demoUsos: string[] = [id(4), id(2), id(4), id(1), id(2), id(4), id(12), id(12)];
 
 export const demoMovements: MovementView[] = [
   { id: 'm1', title: 'Decoración', categoryName: 'Otros', categoryIcon: 'ellipsis', dateLabel: 'Hoy', type: 'egreso', amount: 320, eventName: 'Cumpleaños de Sofía', isPending: true },
@@ -46,9 +55,39 @@ export const demoTasks: EventTask[] = [
 ];
 
 export const demoSlices = buildCategorySlices([
-  { categoryId: id(4), name: 'Vivienda', icon: 'house', amount: 1500 },
-  { categoryId: id(3), name: 'Despensa', icon: 'shopping-basket', amount: 980 },
+  { categoryId: id(7), name: 'Vivienda', icon: 'house', amount: 1500 },
+  { categoryId: id(4), name: 'Despensa', icon: 'shopping-basket', amount: 980 },
   { categoryId: id(1), name: 'Comida', icon: 'utensils', amount: 640 },
   { categoryId: id(2), name: 'Transporte', icon: 'bus', amount: 310 },
   { categoryId: id(5), name: 'Estudio', icon: 'graduation-cap', amount: 199.5 },
 ]);
+
+// Mes de ejemplo para la sección "Dinero" de la demo.
+const det = (n: number, title: string, cat: number, fecha: string, type: 'ingreso' | 'egreso', amount: number,
+  extra: Partial<MovementDetalle> = {}): MovementDetalle => {
+  const c = demoCategories[cat - 1];
+  return {
+    id: `d${n}`, title, categoryName: c?.name ?? 'Sin categoría', categoryIcon: c?.icon ?? 'circle',
+    dateLabel: etiquetaDeDia(fecha), type, amount, eventName: null, isPending: false, categoryId: c?.id ?? null,
+    eventId: null, note: title, occurredOn: fecha, porCobrar: [], ...extra,
+  };
+};
+
+export const demoDetalles: MovementDetalle[] = [
+  det(1, '3 almuerzos en Xela', 1, '2026-10-24', 'egreso', 35, {
+    porCobrar: [{ nombre: 'Ana', monto: 35, cobrado: false }, { nombre: 'Luis', monto: 35, cobrado: true }],
+  }),
+  det(2, 'Decoración', 11, '2026-10-24', 'egreso', 320, { eventName: 'Cumpleaños de Sofía', eventId: id(20), isPending: true }),
+  det(3, 'Quincena', 12, '2026-10-23', 'ingreso', 1500),
+  det(4, 'Bus a la U', 2, '2026-10-23', 'egreso', 12),
+  det(5, 'Súper La Torre', 4, '2026-10-20', 'egreso', 412.75),
+  det(6, 'Netflix', 8, '2026-10-15', 'egreso', 79),
+];
+
+// Deudas de ejemplo para "Te deben" en la demo.
+export const demoPorCobrar: PorCobrar[] = [
+  { id: 'r1', nombre: 'Ana', monto: 100, cobrado: false, concepto: 'Cena en Xela', fecha: '2026-10-24' },
+  { id: 'r2', nombre: 'ana ', monto: 35, cobrado: false, concepto: '3 almuerzos en Xela', fecha: '2026-10-23' },
+  { id: 'r3', nombre: 'Luis', monto: 100, cobrado: false, concepto: 'Cena en Xela', fecha: '2026-10-24' },
+  { id: 'r4', nombre: 'Luis', monto: 35, cobrado: true, concepto: '3 almuerzos en Xela', fecha: '2026-10-23' },
+];
