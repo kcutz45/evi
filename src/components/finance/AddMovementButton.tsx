@@ -10,12 +10,13 @@
  */
 import { Plus } from 'lucide-react';
 
-export function AddMovementButton({ onClick }: { onClick: () => void }) {
+// label: lo que dice el lector de pantalla (en Eventos es «Crear evento»).
+export function AddMovementButton({ onClick, label = 'Registrar movimiento' }: { onClick: () => void; label?: string }) {
   return (
     <button
       type="button"
       onClick={onClick}
-      aria-label="Registrar movimiento"
+      aria-label={label}
       className="grid h-14 w-14 place-items-center rounded-card bg-primary text-white shadow-glow-primary transition hover:bg-primary-dark active:scale-95"
     >
       <Plus size={26} strokeWidth={2.6} />

@@ -172,3 +172,15 @@ export async function eliminarMovimiento(client: Cliente, id: string): Promise<v
   const { error } = await client.from('movements').delete().eq('id', id);
   if (error) throw new Error('No pudimos eliminar el movimiento. Intentá de nuevo.', { cause: error });
 }
+
+// Gastos (e ingresos) asignados a un evento, para la pestaña "Gastos".
+export async function listarDelEvento(client: Cliente, eventoId: string): Promise<MovementDetalle[]> {
+  const { data, error } = await client
+    .from('movements')
+    .select(COLUMNAS_LISTA)
+    .eq('event_id', eventoId)
+    .order('occurred_on', { ascending: false })
+    .order('created_at', { ascending: false });
+  if (error) throw new Error('No pudimos cargar los gastos del evento.', { cause: error });
+  return data.map(toDetalle);
+}

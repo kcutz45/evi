@@ -52,16 +52,20 @@ interface RegistroWizardProps {
   errorCategoria: string | null;
   // Si viene, es una EDICIÓN: arranca en el monto con todo cargado.
   inicial?: ValoresIniciales;
+  // Si viene, es un gasto de ESTE evento (desde su detalle).
+  eventoFijo?: { id: string; name: string };
 }
 
 type Wizard = ReturnType<typeof useRegistroWizard>;
 type Guardado = ReturnType<typeof useGuardado>;
 
 export function RegistroWizard(props: RegistroWizardProps) {
-  const w = useRegistroWizard(props.inicial);
+  const w = useRegistroWizard(props.inicial, props.eventoFijo?.id);
   const division = useDivision(w.calc.valor ?? 0);
   const g = useGuardado(w, division, props.onGuardar);
   const esEdicion = props.inicial !== undefined;
+  // El primer paso no tiene "volver": es 'tipo', o 'categoria' si viene de un evento.
+  const esPrimero = w.paso === (props.eventoFijo ? 'categoria' : 'tipo');
 
   return (
     <div className="fixed inset-0 z-50 bg-light">
@@ -71,7 +75,7 @@ export function RegistroWizard(props: RegistroWizardProps) {
         ) : (
           <>
             <WizardHeader numeroDePaso={w.numeroDePaso} totalDePasos={PASOS_NUMERADOS.length}
-              {...textosDelPaso(w.paso, w.tipo, esEdicion)} onVolver={w.paso === 'tipo' ? null : w.volver}
+              {...textosDelPaso(w.paso, w.tipo, esEdicion)} onVolver={esPrimero ? null : w.volver}
               onCerrar={props.onCerrar} />
             <CuerpoDelPaso w={w} g={g} division={division} props={props} esEdicion={esEdicion} />
           </>

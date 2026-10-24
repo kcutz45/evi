@@ -84,7 +84,9 @@ export const ICONOS_CATEGORIA = [
 ];
 
 // Nombres disponibles para el selector de ícono al crear un evento.
-export const EVENT_ICON_NAMES = ['party-popper', 'cake', 'utensils', 'tree-palm', 'trophy', 'film'];
+export const EVENT_ICON_NAMES = [
+  'party-popper', 'cake', 'utensils', 'tree-palm', 'plane', 'trophy', 'film', 'gift', 'graduation-cap', 'house',
+];
 
 interface AppIconProps extends LucideProps {
   name: string;

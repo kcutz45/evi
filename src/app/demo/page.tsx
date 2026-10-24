@@ -26,6 +26,7 @@ import { Button } from '@/components/ui/Button';
 import { TeDebenCard } from '@/components/finance/porCobrar/TeDebenCard';
 import type { NuevaCategoria } from '@/types/category';
 import { DemoDinero } from './DemoDinero';
+import { DemoEvento } from './DemoEvento';
 import { DemoTeDeben } from './DemoTeDeben';
 import { demoCategories, demoEvents, demoMovements, demoSlices, demoTasks, demoUsos } from './mockData';
 
@@ -55,6 +56,7 @@ export default function DemoPage() {
         {active.map((e) => <EventCard key={e.id} event={e} />)}
         {demoEvents.filter((e) => e.status === 'cerrado').map((e) => <ClosedEventCard key={e.id} event={e} />)}
       </DemoSection>
+      <DemoSection title="Evento (pantalla)"><DemoEvento /></DemoSection>
       <DemoSection title="Dinero (pantalla)"><DemoDinero /></DemoSection>
       <DemoSection title="Te deben (pantalla)"><DemoTeDeben /></DemoSection>
       <DemoSection title="Tareas"><Checklist tasks={tasks} onToggle={toggleTask} /></DemoSection>
