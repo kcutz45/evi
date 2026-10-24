@@ -1,7 +1,7 @@
 # EVI_SPEC.md — EVI
 
 > **Documento de arquitectura y especificación técnica del MVP**
-> Versión 1.2.1 · 23 de octubre de 2026
+> Versión 1.2.2 · 23 de octubre de 2026
 > Proyecto académico — Licenciatura en Informática e Inteligencia de Negocios, UMES
 > Equipo: 3 integrantes · Plazo: 8 semanas · Inversión de infraestructura: ≈ Q300
 
@@ -666,9 +666,9 @@ Las vistas que **sí** consume la app (`vw_monthly_summary`, `vw_event_budget`) 
 |---|---|---|---|
 | `vw_monthly_summary` | `public` (invoker) | Balance, ingresos y egresos del mes del usuario | ✅ en schema.sql v1.2 |
 | `vw_event_budget` | `public` (invoker) | Gasto, presupuesto y tareas por evento | ✅ en schema.sql v1.2 |
-| `vw_daily_activity` | `analytics` | Usuarios activos diarios y semanales | ✅ creada · mover a `analytics` |
-| `vw_event_lifecycle` | `analytics` | Eventos creados vs. cerrados — mide el diferenciador | ✅ creada · mover a `analytics` |
-| `vw_category_distribution` | `analytics` | En qué gastan los usuarios | ✅ creada · mover a `analytics` |
+| `vw_daily_activity` | `analytics` | Usuarios activos diarios y semanales | ✅ en `analytics` (aplicado 23/10/2026) |
+| `vw_event_lifecycle` | `analytics` | Eventos creados vs. cerrados — mide el diferenciador | ✅ en `analytics` (aplicado 23/10/2026) |
+| `vw_category_distribution` | `analytics` | En qué gastan los usuarios | ✅ en `analytics` (aplicado 23/10/2026) |
 | `vw_funnel_conversion` | `analytics` | Visita → registro → primer movimiento → pago | Pendiente |
 | `vw_retention_cohort` | `analytics` | Retención a 7, 14 y 30 días por cohorte | Pendiente |
 | `vw_speed_to_log` | `analytics` | Mediana de `seconds_to_complete` por semana | Pendiente |
@@ -739,7 +739,7 @@ END IF;
 
 | Paso | Estado |
 |---|---|
-| `/supabase/schema.sql` versionado | ✅ Escrito (v1.2) · falta aplicarlo en "Evi charger" (ver 5.5) |
+| `/supabase/schema.sql` versionado | ✅ v1.2 aplicado y verificado en "Evi charger" el 23/10/2026 (ver 5.5) |
 | Repositorio en GitHub | Pendiente |
 | Proyecto Next.js: configuración, tokens, ESLint con las reglas 2, 3, 4 y 6 | ✅ Escrito · falta `npm install` y primer build |
 | Componentes visuales de las pantallas 3 y 4, registro y reporte | ✅ Escritos (§2.3) · revisables en `/demo` |
@@ -751,7 +751,7 @@ END IF;
 
 ### 5.5 Correcciones de seguridad v1.2 — cómo aplicarlas
 
-Revisión del 03/10/2026, ajustada el 23/10/2026 tras inventariar la base real. Ninguna está aplicada todavía en la base "Evi charger".
+Revisión del 03/10/2026, ajustada el 23/10/2026 tras inventariar la base real. **Aplicadas y verificadas en "Evi charger" el 23/10/2026** (ver el resultado al final de esta sección).
 
 | # | Hallazgo | Corrección en `schema.sql` |
 |---|---|---|
@@ -796,6 +796,19 @@ SELECT has_column_privilege('authenticated', 'public.movements', 'status', 'UPDA
 
 Y la prueba con dos usuarios de la Definición de Terminado (§7): el usuario B no ve el balance ni los eventos del usuario A desde la app.
 
+**Resultado de la aplicación (23/10/2026).** El script (`schema.sql` de `main`, commit `8b97363`, con la sección 0 activa) se ejecutó en "Evi charger" sin errores. Verificación posterior:
+
+| Chequeo | Esperado | Resultado |
+|---|---|---|
+| Estado de la base (`movements.accounting_date` existe) | v1.2 | ✅ v1.2 aplicada |
+| Vistas de `public` sin `security_invoker` | 0 | ✅ 0 |
+| `anon` puede usar el esquema `analytics` | false | ✅ false |
+| `authenticated` puede hacer `UPDATE` de `movements.status` | false | ✅ false |
+| Categorías del sistema | 8 | ✅ 8 |
+| Cuentas sin perfil | 0 | ✅ 0 |
+
+En la app, cada cuenta inició sesión y vio solo su propio perfil. Los perfiles se recrearon desde `raw_user_meta_data`: las cuentas creadas desde el panel de Supabase (sin nombre) quedaron con `full_name` vacío y la app las saluda con "Hola, de nuevo".
+
 ---
 
 ## 6. RIESGOS TÉCNICOS RECONOCIDOS
@@ -804,8 +817,8 @@ Y la prueba con dos usuarios de la Definición de Terminado (§7): el usuario B 
 |---|---|---|---|
 | La transacción de cierre falla a la mitad | **Alto.** Corrompe datos financieros y rompe el diferenciador | Función `rpc` atómica en Postgres | ✅ Implementada y probada |
 | Validación de propietario omitida por `NULL` | **Alto.** Un usuario podría cerrar el evento de otro | Rechazo explícito de sesión nula | ✅ Corregido 17/09/2026 |
-| Vistas que se saltan el RLS expuestas por la API | **Alto.** Datos financieros agregados legibles con la clave pública | `security_invoker` + esquema `analytics` (regla 9) | Corregido en schema.sql · falta aplicar (5.5) |
-| Cliente escribe columnas de estado directamente | **Alto.** Un gasto podría "confirmarse" sin cerrar el evento | Privilegios por columna (regla 10) | Corregido en schema.sql · falta aplicar (5.5) |
+| Vistas que se saltan el RLS expuestas por la API | **Alto.** Datos financieros agregados legibles con la clave pública | `security_invoker` + esquema `analytics` (regla 9) | ✅ Corregido y aplicado 23/10/2026 |
+| Cliente escribe columnas de estado directamente | **Alto.** Un gasto podría "confirmarse" sin cerrar el evento | Privilegios por columna (regla 10) | ✅ Corregido y aplicado 23/10/2026 |
 | Sin pruebas automatizadas, una regresión llega a la beta | Medio | Checklist de pruebas manuales por despliegue + Sentry | Pendiente |
 | Cuota gratuita de Gemini agotada | Bajo | La categorización es opcional por diseño | Cubierto por diseño |
 | Capa gratuita de Supabase superada (~500 MB) | Bajo en el MVP | Ocurre cerca de los 500 usuarios activos; para entonces debería haber ingresos | Monitorear |
@@ -838,6 +851,7 @@ Una funcionalidad está lista cuando cumple **todo** lo siguiente:
 | 2026-09-17 | 1.1 | Base de datos construida y verificada; hallazgo y corrección de la validación de propietario; regla anti-spaghetti #8; sección de estado de implementación; riesgo de falta de respaldos |
 | 2026-10-03 | 1.2 | Revisión de seguridad: vistas con `security_invoker` y esquema `analytics` (regla 9), privilegios por columna (regla 10), `user_id` por defecto en telemetría y eliminación de `updated_at`; regla contable de eventos (4d); metas y planes entran al alcance congelado e *Invitados* sale; pestaña Reportes en la navegación; `schema.sql` completo; proyecto Next.js y componentes visuales |
 | 2026-10-23 | 1.2.1 | Inventario de la base real: `schema.sql` conserva `updated_at`, `metadata` y otras columnas del diseño original; `GRANT` por columna en todas las tablas (cierra INSERT de eventos ya cerrados); sección 10 de respaldo de perfiles; script probado en PostgreSQL (31 verificaciones). Flujo de trabajo: `CONTRIBUTING.md`, plantilla de PR, GitHub Actions y protección de `main` |
+| 2026-10-23 | 1.2.2 | `schema.sql` v1.2 aplicado y verificado en "Evi charger" (6 de 6 chequeos); hallazgos 1, 4 y 5 de §5.5 y riesgos de vistas y columnas de estado cerrados en producción |
 
 ---
 
