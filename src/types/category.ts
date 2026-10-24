@@ -3,7 +3,7 @@
  * ---------------------------------------------------------------
  * PROPÓSITO: Tipos de las categorías y del desglose del reporte mensual.
  *
- * USADO EN:   components/finance/CategoryPicker.tsx, MonthlyChart.tsx
+ * USADO EN:   components/finance/registro/PasoCategoria.tsx, MonthlyChart.tsx
  * ---------------------------------------------------------------
  */
 import type { MovementType } from './movement';

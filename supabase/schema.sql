@@ -707,15 +707,28 @@ grant select on all tables in schema analytics to looker_readonly;
 -- Solo las categorías base. Los datos de prueba no van aquí: este
 -- archivo reconstruye PRODUCCIÓN.
 -- =====================================================================
+-- Ampliadas el 24/10/2026 (migrations/20261024_categorias_ampliadas.sql):
+-- reflejan cómo gana y gasta el usuario tipo (§0). Los íconos deben
+-- existir en components/ui/AppIcon.tsx.
 insert into public.categories (user_id, name, icon, kind) values
-  (null, 'Comida',     'utensils',        'egreso'),
-  (null, 'Transporte', 'bus',             'egreso'),
-  (null, 'Despensa',   'shopping-basket', 'egreso'),
-  (null, 'Vivienda',   'house',           'egreso'),
-  (null, 'Estudio',    'graduation-cap',  'egreso'),
-  (null, 'Salud',      'heart-pulse',     'egreso'),
-  (null, 'Otros',      'ellipsis',        'egreso'),
-  (null, 'Ingresos',   'banknote',        'ingreso');
+  (null, 'Comida',         'utensils',        'egreso'),
+  (null, 'Transporte',     'bus',             'egreso'),
+  (null, 'Salidas',        'party-popper',    'egreso'),
+  (null, 'Despensa',       'shopping-basket', 'egreso'),
+  (null, 'Estudio',        'graduation-cap',  'egreso'),
+  (null, 'Salud',          'heart-pulse',     'egreso'),
+  (null, 'Vivienda',       'house',           'egreso'),
+  (null, 'Suscripciones',  'tv',              'egreso'),
+  (null, 'Ropa',           'shirt',           'egreso'),
+  (null, 'Regalos',        'gift',            'egreso'),
+  (null, 'Otros',          'ellipsis',        'egreso'),
+  (null, 'Salario',        'briefcase',       'ingreso'),
+  (null, 'Freelance',      'laptop',          'ingreso'),
+  (null, 'Ventas',         'tag',             'ingreso'),
+  (null, 'Remesas',        'globe',           'ingreso'),
+  (null, 'Mesada',         'wallet',          'ingreso'),
+  (null, 'Regalo',         'gift',            'ingreso'),
+  (null, 'Otros ingresos', 'banknote',        'ingreso');
 
 
 -- =====================================================================

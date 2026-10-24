@@ -9,7 +9,7 @@
  *            la capa de datos (Responsabilidad Única, §2.1).
  *
  * DEPENDE DE: services/categoryService.ts, lib/supabase.ts
- * USADO EN:   app/prueba/page.tsx (temporal) · CategoryPicker más adelante
+ * USADO EN:   app/(dashboard)/inicio/page.tsx · app/prueba/page.tsx (temporal)
  * ---------------------------------------------------------------
  */
 'use client';

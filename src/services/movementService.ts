@@ -80,6 +80,20 @@ export async function listarRecientes(client: Cliente, limite: number): Promise<
   return data.map(toView);
 }
 
+// category_id de los últimos movimientos, para "Tus frecuentes". Solo
+// ids: el conteo lo hace lib/categoryRanking.ts (no es dinero, así que
+// no aplica la regla de "sumar en la base").
+export async function listarUsoDeCategorias(client: Cliente, limite: number): Promise<string[]> {
+  const { data, error } = await client
+    .from('movements')
+    .select('category_id')
+    .not('category_id', 'is', null)
+    .order('created_at', { ascending: false })
+    .limit(limite);
+  if (error) throw new Error('No pudimos cargar tus categorías frecuentes.', { cause: error });
+  return data.flatMap((fila) => (fila.category_id ? [fila.category_id] : []));
+}
+
 // El trigger de la base lanza este texto si el evento ya se cerró.
 const ERROR_EVENTO_CERRADO = 'El evento está cerrado';
 

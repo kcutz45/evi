@@ -50,12 +50,25 @@ const config: Config = {
           '55%': { boxShadow: '0 0 0 12px rgba(46,230,168,0)' },
         },
         dash: { to: { strokeDashoffset: '-28' } },
+        // El ✓ de "¡Listo!" aparece con un pequeño rebote.
+        pop: {
+          '0%': { transform: 'scale(0.6)', opacity: '0' },
+          '70%': { transform: 'scale(1.08)', opacity: '1' },
+          '100%': { transform: 'scale(1)', opacity: '1' },
+        },
+        // Cada paso del registro entra deslizándose desde la derecha.
+        'step-in': {
+          from: { transform: 'translateX(24px)', opacity: '0' },
+          to: { transform: 'translateX(0)', opacity: '1' },
+        },
       },
       animation: {
         'sheet-in': 'sheet-in 0.45s cubic-bezier(0.22,1,0.36,1) both',
         travel: 'travel 2.4s cubic-bezier(0.5,0,0.5,1) infinite',
         'pulse-mint': 'pulse-mint 2.4s ease-out infinite',
         dash: 'dash 1.4s linear infinite',
+        pop: 'pop 0.45s cubic-bezier(0.22,1,0.36,1) both',
+        'step-in': 'step-in 0.28s cubic-bezier(0.22,1,0.36,1) both',
       },
     },
   },

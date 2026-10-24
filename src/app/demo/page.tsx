@@ -17,12 +17,12 @@ import { EventCard } from '@/components/events/EventCard';
 import { AddMovementButton } from '@/components/finance/AddMovementButton';
 import { BalanceCard } from '@/components/finance/BalanceCard';
 import { MonthlyChart } from '@/components/finance/MonthlyChart';
-import { MovementForm } from '@/components/finance/MovementForm';
+import { RegistroWizard } from '@/components/finance/registro/RegistroWizard';
 import { MovementList } from '@/components/finance/MovementList';
 import { Header, UserAvatar } from '@/components/layout/Header';
 import { PageContainer } from '@/components/layout/PageContainer';
 import { Button } from '@/components/ui/Button';
-import { demoCategories, demoEvents, demoMovements, demoSlices, demoTasks } from './mockData';
+import { demoCategories, demoEvents, demoMovements, demoSlices, demoTasks, demoUsos } from './mockData';
 
 export default function DemoPage() {
   const [isHidden, setIsHidden] = useState(false);
@@ -33,12 +33,8 @@ export default function DemoPage() {
   const toggleTask = (taskId: string, isDone: boolean) =>
     setTasks((current) => current.map((t) => (t.id === taskId ? { ...t, isDone } : t)));
 
-  if (isFormOpen) {
-    return (
-      <MovementForm categories={demoCategories} activeEvents={active} suggestedCategoryId={demoCategories[0]?.id}
-        onClose={() => setIsFormOpen(false)} onSubmit={() => setIsFormOpen(false)} />
-    );
-  }
+  // Simula el guardado: espera un poco y "sale bien" para ver el ¡Listo!.
+  const guardarDemo = () => new Promise<boolean>((resolve) => setTimeout(() => resolve(true), 500));
 
   return (
     <PageContainer floatingAction={<AddMovementButton onClick={() => setIsFormOpen(true)} />}>
@@ -56,6 +52,10 @@ export default function DemoPage() {
       <CloseEventModal isOpen={isCloseOpen} eventName="Cumpleaños de Sofía" planned={2000} actual={1700}
         expensesCount={12} targetMonthLabel="octubre" isClosing={false}
         onConfirm={() => setIsCloseOpen(false)} onCancel={() => setIsCloseOpen(false)} />
+      {isFormOpen && (
+        <RegistroWizard categorias={demoCategories} usos={demoUsos} eventosActivos={active}
+          guardando={false} errorGuardado={null} onGuardar={guardarDemo} onCerrar={() => setIsFormOpen(false)} />
+      )}
     </PageContainer>
   );
 }

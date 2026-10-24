@@ -10,7 +10,7 @@
  *
  * TEMPORAL:  Borrar la carpeta app/prueba completa una vez verificada
  *            la conexión. El servicio y el hook se quedan: los usará
- *            CategoryPicker.
+ *            PasoCategoria del registro.
  *
  * FLUJO:     services/categoryService → hooks/useCategories → este archivo
  *            → CategoryCheckList (solo pinta).

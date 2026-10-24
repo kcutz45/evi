@@ -15,16 +15,23 @@ import type { MovementView } from '@/types/movement';
 // UUID fijos: el esquema Zod del formulario exige UUID válidos.
 const id = (n: number) => `00000000-0000-4000-8000-${String(n).padStart(12, '0')}`;
 
-export const demoCategories: Category[] = [
-  { id: id(1), name: 'Comida', icon: 'utensils', kind: 'egreso' },
-  { id: id(2), name: 'Transporte', icon: 'bus', kind: 'egreso' },
-  { id: id(3), name: 'Despensa', icon: 'shopping-basket', kind: 'egreso' },
-  { id: id(4), name: 'Vivienda', icon: 'house', kind: 'egreso' },
-  { id: id(5), name: 'Estudio', icon: 'graduation-cap', kind: 'egreso' },
-  { id: id(6), name: 'Salud', icon: 'heart-pulse', kind: 'egreso' },
-  { id: id(7), name: 'Otros', icon: 'ellipsis', kind: 'egreso' },
-  { id: id(8), name: 'Ingresos', icon: 'banknote', kind: 'ingreso' },
+// Misma lista que supabase/schema.sql (sección 9).
+const CATEGORIAS: Array<[string, string, Category['kind']]> = [
+  ['Comida', 'utensils', 'egreso'], ['Transporte', 'bus', 'egreso'], ['Salidas', 'party-popper', 'egreso'],
+  ['Despensa', 'shopping-basket', 'egreso'], ['Estudio', 'graduation-cap', 'egreso'],
+  ['Salud', 'heart-pulse', 'egreso'], ['Vivienda', 'house', 'egreso'], ['Suscripciones', 'tv', 'egreso'],
+  ['Ropa', 'shirt', 'egreso'], ['Regalos', 'gift', 'egreso'], ['Otros', 'ellipsis', 'egreso'],
+  ['Salario', 'briefcase', 'ingreso'], ['Freelance', 'laptop', 'ingreso'], ['Ventas', 'tag', 'ingreso'],
+  ['Remesas', 'globe', 'ingreso'], ['Mesada', 'wallet', 'ingreso'], ['Regalo', 'gift', 'ingreso'],
+  ['Otros ingresos', 'banknote', 'ingreso'],
 ];
+
+export const demoCategories: Category[] = CATEGORIAS.map(([name, icon, kind], i) => ({
+  id: id(i + 1), name, icon, kind,
+}));
+
+// Historial simulado: Despensa ×3 y Transporte ×2 aparecen en "Tus frecuentes".
+export const demoUsos: string[] = [id(4), id(2), id(4), id(1), id(2), id(4), id(12), id(12)];
 
 export const demoMovements: MovementView[] = [
   { id: 'm1', title: 'Decoración', categoryName: 'Otros', categoryIcon: 'ellipsis', dateLabel: 'Hoy', type: 'egreso', amount: 320, eventName: 'Cumpleaños de Sofía', isPending: true },
@@ -46,8 +53,8 @@ export const demoTasks: EventTask[] = [
 ];
 
 export const demoSlices = buildCategorySlices([
-  { categoryId: id(4), name: 'Vivienda', icon: 'house', amount: 1500 },
-  { categoryId: id(3), name: 'Despensa', icon: 'shopping-basket', amount: 980 },
+  { categoryId: id(7), name: 'Vivienda', icon: 'house', amount: 1500 },
+  { categoryId: id(4), name: 'Despensa', icon: 'shopping-basket', amount: 980 },
   { categoryId: id(1), name: 'Comida', icon: 'utensils', amount: 640 },
   { categoryId: id(2), name: 'Transporte', icon: 'bus', amount: 310 },
   { categoryId: id(5), name: 'Estudio', icon: 'graduation-cap', amount: 199.5 },
