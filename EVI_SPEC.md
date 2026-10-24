@@ -743,10 +743,11 @@ END IF;
 | Repositorio en GitHub | Pendiente |
 | Proyecto Next.js: configuración, tokens, ESLint con las reglas 2, 3, 4 y 6 | ✅ Escrito · falta `npm install` y primer build |
 | Componentes visuales de las pantallas 3 y 4, registro y reporte | ✅ Escritos (§2.3) · revisables en `/demo` |
-| Hooks y servicios de datos (`useMovements`, `useEvents`, `eventService`…) | Pendiente |
-| Autenticación y rutas protegidas | Pendiente |
+| Hooks y servicios de datos | ✅ Dashboard: `movementService`, `eventService` (activos), `useMonthlySummary`, `useMovements`, `useActiveEvents` · pendientes: eventos completos, reporte, metas |
+| Autenticación y rutas protegidas | ✅ Registro, login, middleware y cierre de sesión (PR #2) |
+| Dashboard real (§3, pantalla 3) | ✅ Balance del mes, últimos movimientos y registro en 3 toques · Dinero, Eventos y Reportes muestran "Próximamente" |
 | Landing, registro/login, metas y planes | Pendiente |
-| Servicio de telemetría | ✅ Escrito (corregido v1.2) · falta conectarlo a las pantallas |
+| Servicio de telemetría | ✅ Conectado: `signup_*`, `login_succeeded`, `movement_created` (con `seconds_to_complete`) · pendientes: `onboarding_completed` y eventos de las pantallas por construir |
 | Configuración de PWA y despliegue en Vercel | Pendiente |
 
 ### 5.5 Correcciones de seguridad v1.2 — cómo aplicarlas
