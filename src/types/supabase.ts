@@ -32,6 +32,7 @@ import type {
   EventTaskRow,
   EventTaskUpdate,
   EventUpdate,
+  MonthlySummaryRow,
   MovementInsert,
   MovementRow,
   MovementUpdate,
@@ -105,7 +106,9 @@ export type Database = {
         Relationships: [];
       };
     };
-    Views: { [_ in never]: never };
+    Views: {
+      vw_monthly_summary: { Row: MonthlySummaryRow; Relationships: [] };
+    };
     Functions: { [_ in never]: never };
     Enums: { [_ in never]: never };
     CompositeTypes: { [_ in never]: never };

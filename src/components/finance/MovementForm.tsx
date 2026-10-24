@@ -31,6 +31,8 @@ interface MovementFormProps {
   activeEvents: Array<{ id: string; name: string }>;
   suggestedCategoryId?: string | null;
   isSaving?: boolean;
+  // Error que devolvió el servidor al guardar (ej. evento ya cerrado).
+  submitError?: string | null;
   onSubmit: (draft: MovementDraft, secondsToComplete: number) => void;
   onClose: () => void;
 }
@@ -60,7 +62,9 @@ export function MovementForm(props: MovementFormProps) {
           selectedId={form.categoryId} suggestedId={props.suggestedCategoryId} onSelect={form.setCategoryId} />
         <NoteField value={form.note} onChange={form.setNote} />
         {!isIncome && <EventPicker events={props.activeEvents} selectedId={form.eventId} onSelect={form.setEventId} />}
-        {error && <p role="alert" className="text-xs font-bold text-gold-dark">{error}</p>}
+        {(error ?? props.submitError) && (
+          <p role="alert" className="text-xs font-bold text-gold-dark">{error ?? props.submitError}</p>
+        )}
       </div>
       <div className="mt-auto px-4 pt-3">
         <NumericKeypad onKey={form.amount.pressKey} />

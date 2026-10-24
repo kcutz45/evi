@@ -23,3 +23,10 @@ export const AMOUNT_DECIMALS = 2;
 
 // Zona horaria de referencia para "hoy" y "este mes".
 export const APP_TIME_ZONE = 'America/Guatemala';
+
+// Horas (0–23) en que el saludo cambia: "Buen día" → "Buenas tardes" → "Buenas noches".
+export const HORA_INICIO_TARDE = 12;
+export const HORA_INICIO_NOCHE = 19;
+
+// Movimientos que muestra "Últimos movimientos" en el Dashboard (§3).
+export const LIMITE_MOVIMIENTOS_RECIENTES = 5;
