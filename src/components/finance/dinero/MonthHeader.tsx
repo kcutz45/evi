@@ -27,17 +27,26 @@ interface MonthHeaderProps {
 export function MonthHeader(props: MonthHeaderProps) {
   return (
     <div className="flex flex-col gap-3">
-      <div className="flex items-center justify-between rounded-[18px] bg-white p-2 shadow-card">
-        <BotonMes etiqueta="Mes anterior" onClick={props.onAnterior}><ChevronLeft size={19} strokeWidth={2.3} /></BotonMes>
-        <span className="text-[15.5px] font-black tracking-tight">{props.etiqueta}</span>
-        <BotonMes etiqueta="Mes siguiente" onClick={props.onSiguiente} deshabilitado={!props.puedeAvanzar}>
-          <ChevronRight size={19} strokeWidth={2.3} />
-        </BotonMes>
-      </div>
+      <SelectorDeMes {...props} />
       <div className="grid grid-cols-2 gap-2.5">
         <Total titulo="Ingresos" monto={props.ingresos} isLoading={props.isLoading} esIngreso />
         <Total titulo="Egresos" monto={props.egresos} isLoading={props.isLoading} />
       </div>
+    </div>
+  );
+}
+
+type SelectorDeMesProps = Pick<MonthHeaderProps, 'etiqueta' | 'puedeAvanzar' | 'onAnterior' | 'onSiguiente'>;
+
+// "‹ Octubre 2026 ›": también lo usa el Reporte mensual.
+export function SelectorDeMes(props: SelectorDeMesProps) {
+  return (
+    <div className="flex items-center justify-between rounded-[18px] bg-white p-2 shadow-card">
+      <BotonMes etiqueta="Mes anterior" onClick={props.onAnterior}><ChevronLeft size={19} strokeWidth={2.3} /></BotonMes>
+      <span className="text-[15.5px] font-black tracking-tight">{props.etiqueta}</span>
+      <BotonMes etiqueta="Mes siguiente" onClick={props.onSiguiente} deshabilitado={!props.puedeAvanzar}>
+        <ChevronRight size={19} strokeWidth={2.3} />
+      </BotonMes>
     </div>
   );
 }

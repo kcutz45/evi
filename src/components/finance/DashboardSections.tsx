@@ -30,6 +30,7 @@ interface BalanceSectionProps {
   isHidden: boolean;
   onToggleHidden: () => void;
   onRetry: () => void;
+  prestado?: number;
 }
 
 export function BalanceSection(props: BalanceSectionProps) {
@@ -39,7 +40,8 @@ export function BalanceSection(props: BalanceSectionProps) {
   if (props.error) return <RetryAlert message={props.error} onRetry={props.onRetry} />;
   return (
     <BalanceCard monthLabel={props.monthLabel} balance={props.balance} income={props.income}
-      expense={props.expense} isHidden={props.isHidden} onToggleHidden={props.onToggleHidden} />
+      expense={props.expense} isHidden={props.isHidden} onToggleHidden={props.onToggleHidden}
+      prestado={props.prestado} />
   );
 }
 

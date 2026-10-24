@@ -58,7 +58,7 @@ export default function InicioPage() {
       <Header eyebrow={saludoGT()} title={nombre || 'qué gusto verte'}
         action={<UserMenu nombre={nombre} plan={perfil?.plan ?? null} onLogout={cerrarSesion} />} />
       <BalanceSection monthLabel={nombreDelMes(resumen.inicioDeMes)} {...resumen.data}
-        isLoading={resumen.isLoading} error={resumen.error} isHidden={isHidden}
+        isLoading={resumen.isLoading} error={resumen.error} isHidden={isHidden} prestado={teDeben.data.total}
         onToggleHidden={() => setIsHidden((oculto) => !oculto)} onRetry={resumen.recargar} />
       <TeDebenCard resumen={teDeben.data} />
       <RecentMovementsSection movements={movimientos.data} isLoading={movimientos.isLoading}
