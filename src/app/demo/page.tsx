@@ -49,7 +49,7 @@ export default function DemoPage() {
     <PageContainer floatingAction={<AddMovementButton onClick={() => setIsFormOpen(true)} />}>
       <Header eyebrow="Buen día," title="Andrea" action={<UserMenu nombre="Andrea López" plan="gratis" onLogout={logoutDemo} />} />
       <BalanceCard monthLabel="octubre" balance={4820.5} income={8450} expense={3629.5}
-        isHidden={isHidden} onToggleHidden={() => setIsHidden((h) => !h)} />
+        isHidden={isHidden} onToggleHidden={() => setIsHidden((h) => !h)} prestado={235} />
       <TeDebenCard resumen={{ total: 235, personas: 2 }} />
       <DemoSection title="Últimos movimientos"><MovementList movements={demoMovements} /></DemoSection>
       <DemoSection title="Eventos">

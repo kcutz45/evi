@@ -907,7 +907,7 @@ Una funcionalidad está lista cuando cumple **todo** lo siguiente:
 | 2026-10-24 | 1.4 | **Alcance:** se aprueba y construye "Dividir cuenta / Por cobrar" (§0). Tabla `receivables`, RPC `create_split_expense`, vista `vw_receivables_summary` (§11 de schema.sql). Telemetría `expense_split_created` y `receivable_collected` (§4.3) |
 | 2026-10-24 | 1.5 | **Alcance:** se aprueba y construye "Mis categorías" (§0): crear categorías propias desde el registro. La calculadora pasa a ser una pantalla aparte (§3). Telemetría `category_created` |
 | 2026-10-24 | 1.6 | Eventos y cierre (§3, pantalla 4): lista de eventos, "Nuevo evento" paso a paso, detalle con tareas y gastos, "Agregar gasto" desde el evento y cierre con `close_event_and_transfer`. Telemetría de eventos conectada (§4.3) |
-| 2026-10-24 | 1.7 | Reporte mensual (§3, pantallas complementarias): total y comparación, dona, desglose por categoría y resumen; cuenta solo lo confirmado por `accounting_date` (§4d). Telemetría `monthly_report_viewed` |
+| 2026-10-24 | 1.7 | Reporte mensual (§3, pantallas complementarias): total y comparación, dona, desglose por categoría y resumen; cuenta solo lo confirmado por `accounting_date` (§4d). Telemetría `monthly_report_viewed`. En Inicio, la tarjeta del balance muestra "Tenés Q… prestados" (lo pendiente de cobrar, que no es ingreso al cobrarse) |
 
 ---
 
