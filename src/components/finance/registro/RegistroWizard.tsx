@@ -142,8 +142,8 @@ const TEXTOS = {
     ingreso: { titulo: '¿De dónde vino el dinero?', sub: 'Elegí la categoría que mejor lo describa.' },
   },
   monto: {
-    egreso: { titulo: '¿Cuánto gastaste?', sub: 'Podés sumar o multiplicar: 3 × 35.' },
-    ingreso: { titulo: '¿Cuánto recibiste?', sub: 'Podés sumar o multiplicar: 2 × 750.' },
+    egreso: { titulo: '¿Cuánto gastaste?', sub: 'Escribí el monto. ¿Necesitás una cuenta? Abrí la calculadora.' },
+    ingreso: { titulo: '¿Cuánto recibiste?', sub: 'Escribí el monto. ¿Necesitás una cuenta? Abrí la calculadora.' },
   },
   dividir: { titulo: '¿Con quién dividís?', sub: 'Tu parte queda como gasto; lo demás, en «Te deben».' },
 };

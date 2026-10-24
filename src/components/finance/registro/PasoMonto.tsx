@@ -56,7 +56,7 @@ export function PasoMonto(props: PasoMontoProps) {
         {props.error && <p role="alert" className="text-center text-xs font-bold text-gold-dark">{props.error}</p>}
       </div>
       <div className="flex flex-col gap-3 px-4 pb-5 pt-3">
-        <CalculatorKeypad onTecla={calc.presionar} />
+        <CalculatorKeypad onTecla={calc.presionar} hayOperacion={calc.operacion !== null} />
         <Button variant="mint" size="lg" fullWidth disabled={!calc.esValido || props.guardando}
           onClick={props.onGuardar} icon={<Check size={21} strokeWidth={2.6} />}>
           {props.guardando ? 'Guardando…' : 'Guardar'}
