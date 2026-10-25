@@ -21,8 +21,8 @@ interface PageContainerProps {
 export function PageContainer({ children, floatingAction, showNav = true }: PageContainerProps) {
   return (
     <div className="relative mx-auto flex h-dvh max-w-md flex-col overflow-hidden bg-light">
-      <main className="flex-1 overflow-y-auto px-5 pb-24">{children}</main>
-      {floatingAction && <div className="absolute bottom-28 right-5 z-10">{floatingAction}</div>}
+      <main className="flex-1 overflow-y-auto px-5 pb-28">{children}</main>
+      {floatingAction && <div className="absolute bottom-[92px] right-5 z-10">{floatingAction}</div>}
       {showNav && <BottomNav />}
     </div>
   );

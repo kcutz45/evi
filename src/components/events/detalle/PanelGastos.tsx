@@ -35,9 +35,9 @@ export function PanelGastos({ gastos, cargando, error, onAgregar }: PanelGastosP
         </Button>
       )}
       <FormAlert message={error} />
-      {cargando && <div aria-busy className="h-32 animate-pulse rounded-card bg-white/70" />}
+      {cargando && <div aria-busy className="h-32 animate-pulse rounded-card bg-surface/70" />}
       {!cargando && gastos.length === 0 && (
-        <p className="flex flex-col items-center gap-2 rounded-card bg-white px-5 py-6 text-center text-sm font-semibold text-muted">
+        <p className="flex flex-col items-center gap-2 rounded-card bg-surface px-5 py-6 text-center text-sm font-semibold text-muted">
           <Receipt size={30} strokeWidth={1.6} className="text-primary" aria-hidden />
           Todavía no hay gastos en este evento.
         </p>

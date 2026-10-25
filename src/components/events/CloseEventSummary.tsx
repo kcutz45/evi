@@ -25,7 +25,7 @@ export function CloseEventSummary({ planned, actual }: CloseEventSummaryProps) {
   const hasLeftover = difference >= 0;
 
   return (
-    <div className="mt-4 rounded-[22px] bg-white p-4 shadow-card">
+    <div className="mt-4 rounded-[22px] bg-surface p-4 shadow-card">
       <div className="grid grid-cols-2 gap-3.5">
         <Figure label="Planificado" value={formatCurrency(planned)} />
         <Figure label="Gasto real" value={formatCurrency(actual)} className="border-l border-line pl-3.5" />

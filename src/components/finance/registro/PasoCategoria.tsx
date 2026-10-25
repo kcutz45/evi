@@ -75,7 +75,7 @@ function Mosaico({ categoria, activa, onElegir }: MosaicoProps) {
     <button type="button" onClick={() => onElegir(categoria.id)} aria-pressed={activa}
       className={cn(
         'flex min-h-[96px] flex-col items-center justify-center gap-2 rounded-[18px] px-1 py-3 transition active:scale-95',
-        activa ? 'bg-primary text-white shadow-glow-primary' : 'bg-white text-dark shadow-card hover:ring-2 hover:ring-primary/30',
+        activa ? 'bg-primary text-white shadow-glow-primary' : 'bg-surface text-dark shadow-card hover:ring-2 hover:ring-primary/30',
       )}>
       <span className={cn('grid h-11 w-11 place-items-center rounded-full',
         activa ? 'bg-white/20' : categoria.kind === 'ingreso' ? 'bg-mint-soft text-mint-dark' : 'bg-primary-soft text-primary')}>

@@ -27,7 +27,7 @@ export function DesgloseCategorias({ slices }: { slices: CategorySlice[] }) {
       </div>
       <ul className="flex flex-col gap-2">
         {slices.map((s) => (
-          <li key={s.categoryId} className="flex items-center gap-3 rounded-[18px] bg-white p-3.5 shadow-card">
+          <li key={s.categoryId} className="flex items-center gap-3 rounded-[18px] bg-surface p-3.5 shadow-card">
             <span className="grid h-10 w-10 flex-none place-items-center rounded-tile bg-primary-soft text-primary">
               <AppIcon name={s.icon} size={19} />
             </span>

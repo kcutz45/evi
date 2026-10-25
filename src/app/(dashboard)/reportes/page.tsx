@@ -38,8 +38,8 @@ export default function ReportesPage() {
         <FormAlert message={r.error} />
         {cargando && (
           <>
-            <div aria-busy className="h-32 animate-pulse rounded-card bg-white/70" />
-            <div aria-busy className="h-44 animate-pulse rounded-card bg-white/70" />
+            <div aria-busy className="h-32 animate-pulse rounded-card bg-surface/70" />
+            <div aria-busy className="h-44 animate-pulse rounded-card bg-surface/70" />
           </>
         )}
         {!cargando && !r.error && (

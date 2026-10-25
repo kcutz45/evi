@@ -41,7 +41,7 @@ type SelectorDeMesProps = Pick<MonthHeaderProps, 'etiqueta' | 'puedeAvanzar' | '
 // "‹ Octubre 2026 ›": también lo usa el Reporte mensual.
 export function SelectorDeMes(props: SelectorDeMesProps) {
   return (
-    <div className="flex items-center justify-between rounded-[18px] bg-white p-2 shadow-card">
+    <div className="flex items-center justify-between rounded-[18px] bg-surface p-2 shadow-card">
       <BotonMes etiqueta="Mes anterior" onClick={props.onAnterior}><ChevronLeft size={19} strokeWidth={2.3} /></BotonMes>
       <span className="text-[15.5px] font-black tracking-tight">{props.etiqueta}</span>
       <BotonMes etiqueta="Mes siguiente" onClick={props.onSiguiente} deshabilitado={!props.puedeAvanzar}>
@@ -69,7 +69,7 @@ function BotonMes({ etiqueta, onClick, deshabilitado = false, children }: BotonM
 
 function Total({ titulo, monto, isLoading, esIngreso = false }: { titulo: string; monto: number; isLoading: boolean; esIngreso?: boolean }) {
   return (
-    <div className="rounded-[18px] bg-white px-4 py-3 shadow-card">
+    <div className="rounded-[18px] bg-surface px-4 py-3 shadow-card">
       <span className="text-xs font-extrabold uppercase tracking-wider text-muted-soft">{titulo}</span>
       <p className={cn('tabular mt-0.5 text-lg font-black tracking-tight', esIngreso ? 'text-mint-dark' : 'text-dark',
         isLoading && 'animate-pulse text-line')}>

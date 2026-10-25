@@ -1,17 +1,87 @@
 /*
  * globals.css — mínimo a propósito: casi todo vive en Tailwind.
+ *
+ * Aquí viven los colores que cambian con el tema (claro / oscuro) como
+ * canales RGB, para que Tailwind pueda agregarles opacidad. La paleta
+ * oscura sale del diseño "EVI Dashboard Oscuro". La clase .dark la pone
+ * en <html> el script de lib/tema.ts antes de pintar (sin parpadeo).
  */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
+  :root {
+    --c-fondo: 245 242 255;        /* #F5F2FF */
+    --c-superficie: 255 255 255;   /* #FFFFFF */
+    --c-ink: 26 16 53;             /* #1A1035 */
+    --c-muted: 111 102 155;        /* #6F669B */
+    --c-muted-soft: 139 131 173;   /* #8B83AD */
+    --c-muted-faint: 164 156 196;  /* #A49CC4 */
+    --c-line: 235 229 252;         /* #EBE5FC */
+    --c-track: 242 238 255;        /* #F2EEFF */
+    --c-primary-soft: 239 233 255; /* #EFE9FF */
+    --c-mint-soft: 225 251 241;    /* #E1FBF1 */
+    --c-mint-dark: 14 143 99;      /* #0E8F63 */
+    --c-gold-soft: 255 243 216;    /* #FFF3D8 */
+    --c-gold-dark: 138 98 7;       /* #8A6207 */
+    --c-gold-ink: 91 71 18;        /* #5B4712 */
+    --c-closed: 239 235 250;       /* #EFEBFA */
+    --c-closed-ink: 75 67 112;     /* #4B4370 */
+    --c-closed-badge: 220 213 240; /* #DCD5F0 */
+    color-scheme: light;
+  }
+
+  .dark {
+    --c-fondo: 18 11 36;           /* #120B24 */
+    --c-superficie: 36 26 77;      /* #241A4D */
+    --c-ink: 245 242 255;          /* #F5F2FF */
+    --c-muted: 167 158 208;        /* #A79ED0 */
+    --c-muted-soft: 154 146 189;   /* #9A92BD */
+    --c-muted-faint: 126 118 166;  /* #7E76A6 */
+    --c-line: 56 42 102;           /* #382A66 */
+    --c-track: 49 36 95;           /* #31245F */
+    --c-primary-soft: 49 36 95;    /* #31245F */
+    --c-mint-soft: 22 62 64;       /* menta sobre noche */
+    --c-mint-dark: 46 230 168;     /* #2EE6A8: legible sobre oscuro */
+    --c-gold-soft: 62 50 40;
+    --c-gold-dark: 255 209 102;    /* #FFD166 */
+    --c-gold-ink: 255 226 156;
+    --c-closed: 31 20 64;          /* #1F1440 */
+    --c-closed-ink: 196 174 255;   /* #C4AEFF */
+    --c-closed-badge: 46 34 88;    /* #2E2258 */
+    color-scheme: dark;
+  }
+
   body {
-    @apply bg-light text-dark antialiased;
+    @apply bg-light text-dark antialiased transition-colors duration-300;
   }
 
   /* Los montos se alinean por dígito en listas y tarjetas. */
   .tabular {
     font-variant-numeric: tabular-nums;
+  }
+}
+
+@layer utilities {
+  /* En oscuro, el morado de marca se aclara para leerse como texto
+     (#A98BFF del diseño). Los botones morados no cambian. */
+  .dark .text-primary {
+    color: #a98bff;
+  }
+
+  /* Vidrio esmerilado (referencia "Total balance"): tarjetas y chips
+     sobre el fondo morado. */
+  .vidrio {
+    @apply border border-white/15 bg-white/10 backdrop-blur-md;
+  }
+
+  /* Boleto con muescas a los lados (referencias "Recept" y "Boarding
+     pass"): se recortan dos medios círculos con una máscara. */
+  .boleto {
+    -webkit-mask: radial-gradient(circle 12px at 0 var(--muesca, 50%), transparent 98%, #000) left / 51% 100% no-repeat,
+      radial-gradient(circle 12px at 100% var(--muesca, 50%), transparent 98%, #000) right / 51% 100% no-repeat;
+    mask: radial-gradient(circle 12px at 0 var(--muesca, 50%), transparent 98%, #000) left / 51% 100% no-repeat,
+      radial-gradient(circle 12px at 100% var(--muesca, 50%), transparent 98%, #000) right / 51% 100% no-repeat;
   }
 }

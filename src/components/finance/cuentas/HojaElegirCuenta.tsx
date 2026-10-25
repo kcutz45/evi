@@ -33,7 +33,7 @@ export function HojaElegirCuenta(props: HojaElegirCuentaProps) {
         {props.cuentas.map((c) => (
           <li key={c.id}>
             <button type="button" disabled={props.ocupado} onClick={() => props.onElegir(c.id)}
-              className="flex w-full items-center gap-3 rounded-card bg-white p-3.5 text-left shadow-card transition hover:ring-2 hover:ring-primary/30 disabled:opacity-50">
+              className="flex w-full items-center gap-3 rounded-card bg-surface p-3.5 text-left shadow-card transition hover:ring-2 hover:ring-primary/30 disabled:opacity-50">
               <span className="grid h-10 w-10 flex-none place-items-center rounded-tile bg-primary-soft text-primary">
                 <AppIcon name={c.icono} size={20} />
               </span>

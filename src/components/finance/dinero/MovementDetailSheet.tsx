@@ -39,7 +39,7 @@ export function MovementDetailSheet({ movimiento: m, ocupado, error, onEditar, o
 
   return (
     <div className="fixed inset-0 z-50 flex flex-col justify-end">
-      <button type="button" aria-label="Cerrar detalle" onClick={onCerrar} className="absolute inset-0 bg-dark/60" />
+      <button type="button" aria-label="Cerrar detalle" onClick={onCerrar} className="absolute inset-0 bg-black/60" />
       <div role="dialog" aria-modal="true" aria-label="Detalle del movimiento"
         className="relative mx-auto w-full max-w-md animate-sheet-in rounded-t-sheet bg-light px-5 pb-6 pt-2 motion-reduce:animate-none">
         <div aria-hidden className="mx-auto mb-4 h-[5px] w-11 rounded-full bg-line" />
@@ -72,7 +72,7 @@ export function MovementDetailSheet({ movimiento: m, ocupado, error, onEditar, o
 // Categoría, fecha, cuenta, evento y nota del movimiento.
 function Datos({ m }: { m: MovementDetalle }) {
   return (
-    <dl className="mt-5 flex flex-col divide-y divide-line rounded-card bg-white px-4 shadow-card">
+    <dl className="mt-5 flex flex-col divide-y divide-line rounded-card bg-surface px-4 shadow-card">
       <Fila etiqueta="Categoría" valor={m.categoryName} />
       <Fila etiqueta="Fecha" valor={fechaLarga(m.occurredOn)} />
       {m.accountName && <Fila etiqueta={m.type === 'ingreso' ? 'Entró a' : 'Salió de'} valor={m.accountName} />}

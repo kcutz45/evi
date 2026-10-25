@@ -11,6 +11,7 @@
  */
 import { Check, Minus, Plus } from 'lucide-react';
 import { AppIcon } from '@/components/ui/AppIcon';
+import { Brillo } from '@/components/ui/Brillo';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { toPercent } from '@/lib/budget';
@@ -31,6 +32,7 @@ export function MetaDestacada({ meta, onAbonar, onRetirar }: { meta: Meta } & Ac
   const frac = avance(meta);
   return (
     <Card variant="hero" className="p-5">
+      <Brillo />
       <div className="relative flex items-center gap-4">
         <svg width="92" height="92" viewBox="0 0 92 92" role="img" aria-label={`${toPercent(frac)}% ahorrado`} className="flex-none -rotate-90">
           <circle cx="46" cy="46" r={RADIO} strokeWidth="9" fill="none" className="stroke-white/20" />
@@ -61,7 +63,7 @@ export function TarjetaMeta({ meta, onAbonar, onRetirar }: { meta: Meta } & Acci
   const frac = avance(meta);
   const cumplida = meta.estado === 'completada';
   return (
-    <li className="flex flex-col gap-2.5 rounded-card bg-white p-4 shadow-card">
+    <li className="flex flex-col gap-2.5 rounded-card bg-surface p-4 shadow-card">
       <div className="flex items-center gap-3">
         <span className="grid h-10 w-10 flex-none place-items-center rounded-tile bg-primary-soft text-primary">
           <AppIcon name={meta.icono} size={20} />

@@ -46,7 +46,7 @@ export default function PorCobrarPage() {
       <div className="flex flex-col gap-3">
         <FormAlert message={deudas.error ?? deudas.errorAccion} />
         {deudas.isLoading && Array.from({ length: FILAS_DE_CARGA }, (_, i) => (
-          <div key={i} aria-busy className="h-32 animate-pulse rounded-card bg-white/70" />
+          <div key={i} aria-busy className="h-32 animate-pulse rounded-card bg-surface/70" />
         ))}
         {!deudas.isLoading && personas.length === 0 && <SinDeudas />}
         {personas.map((p) => <TarjetaPersona key={p.clave} persona={p} {...acciones} />)}
@@ -81,7 +81,7 @@ function useCobroConCuenta(alternarCobro: (deuda: PorCobrar, cuentaId?: string |
 
 function SinDeudas() {
   return (
-    <div className="flex flex-col items-center gap-3 rounded-card bg-white px-6 py-10 text-center shadow-card">
+    <div className="flex flex-col items-center gap-3 rounded-card bg-surface px-6 py-10 text-center shadow-card">
       <HandCoins size={38} strokeWidth={1.6} className="text-gold-dark" aria-hidden />
       <p className="text-sm font-bold leading-relaxed text-muted">
         Nadie te debe nada. Cuando pagués una cuenta de varios, tocá <strong>«Dividir esta cuenta»</strong> al

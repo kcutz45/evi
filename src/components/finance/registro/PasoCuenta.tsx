@@ -45,7 +45,7 @@ interface OpcionProps {
 function Opcion({ elegida, onClick, icono, titulo, detalle }: OpcionProps) {
   return (
     <button type="button" onClick={onClick} aria-pressed={elegida}
-      className={cn('flex items-center gap-3 rounded-card bg-white p-3.5 text-left shadow-card transition active:scale-[0.99]',
+      className={cn('flex items-center gap-3 rounded-card bg-surface p-3.5 text-left shadow-card transition active:scale-[0.99]',
         elegida && 'ring-2 ring-primary')}>
       <span className="grid h-11 w-11 flex-none place-items-center rounded-tile bg-primary-soft text-primary">
         <AppIcon name={icono} size={21} />

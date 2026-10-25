@@ -17,7 +17,9 @@
  */
 import type { ReactNode } from 'react';
 import { ArrowDown, ArrowUp, Eye, EyeOff, HandCoins } from 'lucide-react';
+import { Brillo } from '@/components/ui/Brillo';
 import { Card } from '@/components/ui/Card';
+import { MontoGrande } from '@/components/ui/MontoGrande';
 import { formatCurrency } from '@/lib/formatCurrency';
 
 const HIDDEN_AMOUNT = 'Q ••••••';
@@ -39,7 +41,7 @@ export function BalanceCard(props: BalanceCardProps) {
 
   return (
     <Card variant="hero" className="p-5">
-      <div aria-hidden className="absolute -right-10 -top-10 h-36 w-36 rounded-full bg-white/[0.07]" />
+      <Brillo />
       <div className="relative flex items-center justify-between">
         <span className="text-[13px] font-bold uppercase tracking-wider text-white/70">
           Balance de {monthLabel}
@@ -48,20 +50,18 @@ export function BalanceCard(props: BalanceCardProps) {
           type="button"
           onClick={onToggleHidden}
           aria-label={isHidden ? 'Mostrar montos' : 'Ocultar montos'}
-          className="grid h-8 w-8 place-items-center rounded-xl bg-white/15 hover:bg-white/25"
+          className="vidrio grid h-9 w-9 place-items-center rounded-full hover:bg-white/20"
         >
           {isHidden ? <EyeOff size={17} /> : <Eye size={17} />}
         </button>
       </div>
-      <p className="tabular relative mt-2.5 text-[40px] font-black leading-none tracking-tighter text-mint">
-        {show(balance)}
-      </p>
-      <div className="relative mt-5 grid grid-cols-2 gap-3">
+      <MontoGrande monto={balance} oculto={isHidden} className="relative mt-3 text-[44px] text-mint" />
+      <div className="relative mt-5 grid grid-cols-2 gap-2.5">
         <BalanceFigure label="Ingresos" value={show(income)} icon={<ArrowUp size={15} />} />
         <BalanceFigure label="Egresos" value={show(expense)} icon={<ArrowDown size={15} />} />
       </div>
       {prestado > 0 && (
-        <p className="relative mt-4 flex items-center gap-2 border-t border-white/15 pt-3 text-[12.5px] font-bold text-white/80">
+        <p className="vidrio relative mt-3 flex items-center gap-2 rounded-2xl px-3 py-2.5 text-[12.5px] font-bold text-white/85">
           <HandCoins size={15} className="flex-none text-gold" aria-hidden />
           <span>Tenés <strong className="tabular font-black text-white">{show(prestado)}</strong> prestados: vuelven cuando te paguen.</span>
         </p>
@@ -72,7 +72,7 @@ export function BalanceCard(props: BalanceCardProps) {
 
 function BalanceFigure({ label, value, icon }: { label: string; value: string; icon: ReactNode }) {
   return (
-    <div className="flex flex-col gap-0.5">
+    <div className="vidrio flex flex-col gap-0.5 rounded-2xl px-3 py-2.5">
       <span className="inline-flex items-center gap-1 text-xs font-bold text-white/70">
         {icon}
         {label}

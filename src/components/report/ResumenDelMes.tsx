@@ -25,7 +25,7 @@ export function ResumenDelMes({ mayor, total, promedioDiario, desdeEventos }: Re
   return (
     <section className="flex flex-col gap-2.5">
       <h2 className="text-lg font-black tracking-tight">Tu resumen</h2>
-      <div className="flex gap-3 rounded-card bg-white p-4 shadow-card">
+      <div className="flex gap-3 rounded-card bg-surface p-4 shadow-card">
         <span className="grid h-10 w-10 flex-none place-items-center rounded-tile bg-gold/25 text-gold-dark">
           <Lightbulb size={20} aria-hidden />
         </span>

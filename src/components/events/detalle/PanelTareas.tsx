@@ -31,11 +31,11 @@ interface PanelTareasProps {
 }
 
 export function PanelTareas(props: PanelTareasProps) {
-  if (props.cargando) return <div aria-busy className="h-32 animate-pulse rounded-card bg-white/70" />;
+  if (props.cargando) return <div aria-busy className="h-32 animate-pulse rounded-card bg-surface/70" />;
   return (
     <div className="flex flex-col gap-3">
       <FormAlert message={props.error} />
-      <div className="rounded-card bg-white/60 p-2">
+      <div className="rounded-card bg-surface/60 p-2">
         <Checklist tasks={props.tareas} disabled={props.soloLectura} onToggle={props.onAlternar} />
       </div>
       {!props.soloLectura && <NuevaTarea onAgregar={props.onAgregar} />}
@@ -55,7 +55,7 @@ function NuevaTarea({ onAgregar }: { onAgregar: (titulo: string) => Promise<bool
   };
 
   return (
-    <form onSubmit={enviar} className="flex items-center gap-2 rounded-card bg-white p-2 pl-4 shadow-card">
+    <form onSubmit={enviar} className="flex items-center gap-2 rounded-card bg-surface p-2 pl-4 shadow-card">
       <label htmlFor="nueva-tarea" className="sr-only">Nueva tarea</label>
       <input id="nueva-tarea" value={titulo} onChange={(e) => setTitulo(e.target.value)} maxLength={TITULO_TAREA_MAX}
         placeholder="Agregar tarea (ej. Comprar hielo)"

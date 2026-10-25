@@ -46,7 +46,7 @@ export function DetallesOpcionales(props: DetallesOpcionalesProps) {
       </button>
       {abierto && (
         <div ref={panel} className="flex flex-col gap-2 pb-1">
-          <label className="flex items-center gap-2 rounded-tile bg-white px-3.5 py-3">
+          <label className="flex items-center gap-2 rounded-tile bg-surface px-3.5 py-3">
             <NotebookPen size={17} className="flex-none text-muted-faint" aria-hidden />
             <span className="sr-only">Nota</span>
             <input type="text" value={props.nota} maxLength={140} onChange={(e) => props.onNota(e.target.value)}

@@ -49,7 +49,7 @@ export function HojaNuevaMeta({ guardando, error, onCrear, onCerrar }: HojaNueva
         {ICONOS_META.map((i) => (
           <button key={i} type="button" role="radio" aria-checked={icono === i} aria-label={i} onClick={() => setIcono(i)}
             className={cn('grid aspect-square place-items-center rounded-tile transition active:scale-95',
-              icono === i ? 'bg-primary text-white shadow-glow-primary' : 'bg-white text-primary shadow-card')}>
+              icono === i ? 'bg-primary text-white shadow-glow-primary' : 'bg-surface text-primary shadow-card')}>
             <AppIcon name={i} size={20} />
           </button>
         ))}

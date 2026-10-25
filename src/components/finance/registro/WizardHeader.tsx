@@ -28,13 +28,13 @@ export function WizardHeader(props: WizardHeaderProps) {
       <div className="flex items-center gap-3">
         <button type="button" onClick={props.onVolver ?? props.onCerrar}
           aria-label={puedeVolver ? 'Volver al paso anterior' : 'Cerrar sin guardar'}
-          className="grid h-10 w-10 flex-none place-items-center rounded-[14px] bg-white shadow-card hover:bg-primary-soft">
+          className="grid h-10 w-10 flex-none place-items-center rounded-[14px] bg-surface shadow-card hover:bg-primary-soft">
           {puedeVolver ? <ArrowLeft size={20} strokeWidth={2.2} /> : <X size={20} strokeWidth={2.2} />}
         </button>
         <Progreso actual={props.numeroDePaso} total={props.totalDePasos} />
         {puedeVolver && (
           <button type="button" onClick={props.onCerrar} aria-label="Cerrar sin guardar"
-            className="grid h-10 w-10 flex-none place-items-center rounded-[14px] text-muted-soft hover:bg-white">
+            className="grid h-10 w-10 flex-none place-items-center rounded-[14px] text-muted-soft hover:bg-surface">
             <X size={20} strokeWidth={2.2} />
           </button>
         )}

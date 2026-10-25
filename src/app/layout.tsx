@@ -6,12 +6,19 @@
  * POR QUÉ EXISTE: next/font descarga Nunito en el build y la sirve
  *            desde nuestro dominio: sin parpadeo de fuente y sin
  *            pedirle nada a Google en cada visita.
+ *
+ * TEMA:      SCRIPT_TEMA pone la clase .dark antes de pintar (si el
+ *            usuario eligió oscuro o es su horario) y VigilanteTema la
+ *            mantiene al día. suppressHydrationWarning: esa clase la pone
+ *            el script, no React, y no debe tomarse como error.
  * ---------------------------------------------------------------
  */
 import type { Metadata, Viewport } from 'next';
 import { Nunito } from 'next/font/google';
 import type { ReactNode } from 'react';
-import { colors } from '@/styles/tokens';
+import { VigilanteTema } from '@/components/layout/VigilanteTema';
+import { SCRIPT_TEMA } from '@/lib/tema';
+import { marca } from '@/styles/tokens';
 import '@/styles/globals.css';
 
 const nunito = Nunito({
@@ -26,15 +33,21 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: colors.primary.DEFAULT,
+  themeColor: marca.primary,
   width: 'device-width',
   initialScale: 1,
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="es-GT" className={nunito.variable}>
-      <body className="font-sans">{children}</body>
+    <html lang="es-GT" className={nunito.variable} suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: SCRIPT_TEMA }} />
+      </head>
+      <body className="font-sans">
+        <VigilanteTema />
+        {children}
+      </body>
     </html>
   );
 }

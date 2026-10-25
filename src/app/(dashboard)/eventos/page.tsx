@@ -52,7 +52,7 @@ export default function EventosPage() {
       <div className="flex flex-col gap-3">
         <FormAlert message={eventos.error} />
         {eventos.isLoading && Array.from({ length: FILAS_DE_CARGA }, (_, i) => (
-          <div key={i} aria-busy className="h-44 animate-pulse rounded-card bg-white/70" />
+          <div key={i} aria-busy className="h-44 animate-pulse rounded-card bg-surface/70" />
         ))}
         {vacio && <EventsEmptyState onCreate={() => setCreandoNuevo(true)} />}
         {activos.map((e) => <EventCard key={e.id} event={e} />)}

@@ -21,11 +21,11 @@ export function TeDebenCard({ resumen }: { resumen: ResumenPorCobrar }) {
 
   return (
     <Link href={RUTA_POR_COBRAR}
-      className="mt-3 flex items-center gap-3 rounded-card bg-gold/25 px-4 py-3.5 transition hover:bg-gold/35">
-      <span className="grid h-11 w-11 flex-none place-items-center rounded-tile bg-gold text-gold-ink">
+      className="boleto mt-3 flex items-center gap-3 rounded-card bg-gold/25 px-5 py-3.5 transition hover:bg-gold/35">
+      <span className="grid h-11 w-11 flex-none place-items-center rounded-tile bg-gold text-noche">
         <HandCoins size={22} aria-hidden />
       </span>
-      <span className="flex flex-1 flex-col">
+      <span className="flex flex-1 flex-col border-l-2 border-dashed border-gold/50 pl-3">
         <span className="text-xs font-extrabold uppercase tracking-wider text-gold-ink">Te deben</span>
         <span className="tabular text-xl font-black tracking-tight text-dark">{formatCurrency(resumen.total)}</span>
         <span className="text-xs font-bold text-gold-ink">{personas} · tocá para cobrar</span>

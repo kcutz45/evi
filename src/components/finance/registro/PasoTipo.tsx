@@ -42,7 +42,7 @@ export function PasoTipo({ onElegir }: { onElegir: (tipo: MovementType) => void 
     <div className="flex animate-step-in flex-col gap-3 px-5 motion-reduce:animate-none">
       {OPCIONES.map(({ tipo, titulo, ejemplo, Icono, estiloIcono }) => (
         <button key={tipo} type="button" onClick={() => onElegir(tipo)}
-          className="flex min-h-[112px] items-center gap-4 rounded-card bg-white p-5 text-left shadow-card transition active:scale-[0.98] hover:ring-2 hover:ring-primary/30">
+          className="flex min-h-[112px] items-center gap-4 rounded-card bg-surface p-5 text-left shadow-card transition active:scale-[0.98] hover:ring-2 hover:ring-primary/30">
           <span className={cn('grid h-14 w-14 flex-none place-items-center rounded-tile', estiloIcono)}>
             <Icono size={28} strokeWidth={2.4} aria-hidden />
           </span>

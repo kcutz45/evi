@@ -30,7 +30,7 @@ export function PestanasEvento({ activa, tareasPendientes, gastos, onCambiar }: 
         <button key={o.id} type="button" role="tab" id={`tab-${o.id}`} aria-selected={activa === o.id}
           aria-controls={`panel-${o.id}`} onClick={() => onCambiar(o.id)}
           className={cn('flex items-center justify-center gap-2 rounded-[13px] py-2.5 text-sm font-black transition',
-            activa === o.id ? 'bg-white text-dark shadow-card' : 'text-muted hover:text-dark')}>
+            activa === o.id ? 'bg-surface text-dark shadow-card' : 'text-muted hover:text-dark')}>
           {o.texto}
           {o.cuenta > 0 && (
             <span className="tabular rounded-full bg-primary-soft px-2 py-0.5 text-[11px] font-black text-primary">

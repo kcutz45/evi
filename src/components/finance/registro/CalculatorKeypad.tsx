@@ -48,7 +48,7 @@ export function CalculatorKeypad({ onTecla, conOperaciones = false }: Calculator
             <button key={tecla} type="button" onClick={() => onTecla(tecla)}
               aria-label={NOMBRE_ACCESIBLE[tecla] ?? tecla}
               className={cn('grid h-[52px] place-items-center rounded-[16px] text-2xl font-extrabold transition active:scale-95',
-                esAccion ? 'bg-primary-soft text-primary hover:bg-line' : 'bg-white text-dark shadow-card hover:bg-primary-soft')}>
+                esAccion ? 'bg-primary-soft text-primary hover:bg-line' : 'bg-surface text-dark shadow-card hover:bg-primary-soft')}>
               {tecla === 'del' ? <Delete size={24} strokeWidth={2} aria-hidden /> : tecla}
             </button>
           );

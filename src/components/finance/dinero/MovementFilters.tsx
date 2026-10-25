@@ -33,7 +33,7 @@ export function MovementFilters({ filtro, categorias, onCambiar }: MovementFilte
           <button key={etiqueta} type="button" role="radio" aria-checked={filtro.tipo === valor}
             onClick={() => onCambiar({ tipo: valor, categoriaId: null })}
             className={cn('rounded-[12px] py-2 text-sm font-extrabold transition-colors',
-              filtro.tipo === valor ? 'bg-white text-dark shadow-card' : 'text-muted')}>
+              filtro.tipo === valor ? 'bg-surface text-dark shadow-card' : 'text-muted')}>
             {etiqueta}
           </button>
         ))}
@@ -58,7 +58,7 @@ function Chip({ activo, onClick, children }: { activo: boolean; onClick: () => v
   return (
     <button type="button" onClick={onClick} aria-pressed={activo}
       className={cn('flex-none rounded-full px-3.5 py-1.5 text-[13px] font-extrabold transition-colors',
-        activo ? 'bg-primary text-white' : 'bg-white text-muted shadow-card')}>
+        activo ? 'bg-primary text-white' : 'bg-surface text-muted shadow-card')}>
       {children}
     </button>
   );

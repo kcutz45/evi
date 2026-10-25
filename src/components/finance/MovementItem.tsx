@@ -22,7 +22,7 @@ interface MovementItemProps {
   onSelect?: () => void;
 }
 
-const FILA = 'flex w-full items-center gap-3 rounded-[18px] bg-white p-3.5 text-left shadow-card';
+const FILA = 'flex w-full items-center gap-3 rounded-[18px] bg-surface p-3.5 text-left shadow-card';
 
 export function MovementItem({ movement, onSelect }: MovementItemProps) {
   if (!onSelect) return <li className={FILA}><Contenido movement={movement} /></li>;

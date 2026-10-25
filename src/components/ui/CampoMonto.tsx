@@ -24,7 +24,7 @@ export function CampoMonto({ etiqueta, valor, onCambiar, autoFocus = false }: Ca
   return (
     <div className="flex flex-col gap-1.5">
       <label htmlFor={id} className="text-sm font-bold text-muted">{etiqueta}</label>
-      <div className="flex items-center gap-1 rounded-tile bg-white px-4 py-3 ring-1 ring-transparent focus-within:ring-primary">
+      <div className="flex items-center gap-1 rounded-tile bg-surface px-4 py-3 ring-1 ring-transparent focus-within:ring-primary">
         <span className="text-2xl font-black text-muted-soft" aria-hidden>Q</span>
         <input id={id} type="text" inputMode="decimal" autoComplete="off" value={valor} autoFocus={autoFocus}
           onChange={(e) => onCambiar(e.target.value)} placeholder="0.00"

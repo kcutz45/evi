@@ -82,7 +82,7 @@ function ChipCategoria({ categoria, onCambiar }: { categoria: Category; onCambia
   return (
     <div className="flex items-center justify-center">
       <button type="button" onClick={onCambiar}
-        className="flex items-center gap-2 rounded-full bg-white py-1.5 pl-1.5 pr-3.5 shadow-card hover:ring-2 hover:ring-primary/30">
+        className="flex items-center gap-2 rounded-full bg-surface py-1.5 pl-1.5 pr-3.5 shadow-card hover:ring-2 hover:ring-primary/30">
         <span className="grid h-8 w-8 place-items-center rounded-full bg-primary-soft text-primary">
           <AppIcon name={categoria.icon} size={17} />
         </span>

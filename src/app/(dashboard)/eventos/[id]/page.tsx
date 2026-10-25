@@ -44,7 +44,7 @@ export default function EventoPage() {
   const evento = ev.evento.data;
 
   if (ev.evento.isLoading && !evento) {
-    return <PageContainer><div aria-busy className="mt-16 h-64 animate-pulse rounded-card bg-white/70" /></PageContainer>;
+    return <PageContainer><div aria-busy className="mt-16 h-64 animate-pulse rounded-card bg-surface/70" /></PageContainer>;
   }
   if (!evento) {
     return (

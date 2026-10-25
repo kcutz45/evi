@@ -27,7 +27,7 @@ export function SelectorDeCuenta({ titulo, cuentas, elegida, onElegir }: Selecto
         {cuentas.map((c) => (
           <button key={c.id} type="button" aria-pressed={elegida === c.id} onClick={() => onElegir(c.id)}
             className={cn('flex items-center gap-1.5 rounded-full px-3.5 py-2 text-[13px] font-extrabold transition',
-              elegida === c.id ? 'bg-primary text-white shadow-glow-primary' : 'bg-white text-dark shadow-card')}>
+              elegida === c.id ? 'bg-primary text-white shadow-glow-primary' : 'bg-surface text-dark shadow-card')}>
             <AppIcon name={c.icono} size={15} /> {c.nombre}
           </button>
         ))}

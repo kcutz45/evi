@@ -25,7 +25,7 @@ interface AccionProps {
 
 export function TarjetaPersona({ persona, ocupadoId, onAlternar }: { persona: DeudaDePersona } & AccionProps) {
   return (
-    <section className="rounded-card bg-white p-4 shadow-card">
+    <section className="rounded-card bg-surface p-4 shadow-card">
       <header className="flex items-center gap-3">
         <span className="grid h-10 w-10 flex-none place-items-center rounded-full bg-gold/30 text-gold-ink">
           <UserRound size={20} aria-hidden />
@@ -73,7 +73,7 @@ export function ListaCobradas({ deudas, ocupadoId, onAlternar }: { deudas: PorCo
         <ChevronDown size={15} className={cn('transition-transform', abierta && 'rotate-180')} aria-hidden />
       </button>
       {abierta && (
-        <ul className="flex flex-col divide-y divide-line rounded-card bg-white px-4 shadow-card">
+        <ul className="flex flex-col divide-y divide-line rounded-card bg-surface px-4 shadow-card">
           {deudas.map((d) => (
             <FilaDeuda key={d.id} deuda={{ ...d, concepto: `${d.nombre} · ${d.concepto}` }}
               ocupadoId={ocupadoId} onAlternar={onAlternar} />

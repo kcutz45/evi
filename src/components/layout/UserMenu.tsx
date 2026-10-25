@@ -22,6 +22,7 @@ import { planLabel } from '@/lib/text';
 import type { AuthResultado } from '@/types/auth';
 import type { PlanName } from '@/types/database';
 import { UserAvatar } from './Header';
+import { MenuTema } from './MenuTema';
 
 interface UserMenuProps {
   nombre: string;
@@ -51,11 +52,12 @@ export function UserMenu({ nombre, plan, onLogout }: UserMenuProps) {
           {/* Capa invisible: tocar fuera del menú lo cierra. */}
           <button type="button" aria-label="Cerrar menú" onClick={() => setAbierto(false)}
             className="fixed inset-0 z-30 cursor-default" />
-          <div role="menu" className="absolute right-0 top-full z-40 mt-2 w-60 rounded-card bg-white p-2 shadow-float">
+          <div role="menu" className="absolute right-0 top-full z-40 mt-2 w-64 rounded-card bg-surface p-2 shadow-float">
             <div className="flex flex-col gap-1.5 border-b border-line px-3 pb-3 pt-2">
               <span className="truncate text-base font-black tracking-tight">{nombre || 'Tu cuenta'}</span>
               {plan && <Badge tone="mint" className="self-start">Plan {planLabel(plan)}</Badge>}
             </div>
+            <MenuTema />
             <button type="button" role="menuitem" onClick={cerrarSesion} disabled={saliendo}
               className="mt-1 flex w-full items-center gap-2.5 rounded-xl px-3 py-2.5 text-sm font-extrabold text-dark hover:bg-light disabled:opacity-50">
               <LogOut size={17} className="text-muted" aria-hidden />

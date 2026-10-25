@@ -1,7 +1,7 @@
 # EVI_SPEC.md — EVI
 
 > **Documento de arquitectura y especificación técnica del MVP**
-> Versión 1.9 · 24 de octubre de 2026
+> Versión 1.10 · 24 de octubre de 2026
 > Proyecto académico — Licenciatura en Informática e Inteligencia de Negocios, UMES
 > Equipo: 3 integrantes · Plazo: 8 semanas · Inversión de infraestructura: ≈ Q300
 
@@ -161,7 +161,8 @@ Prueba rápida: *¿puedo mover este componente a otro proyecto con otra base de 
 │       └── /categorizar      # Único punto que habla con Gemini
 │
 ├── /components
-│   ├── /ui                   # Button, Card, Input, Badge, AppIcon, Hoja, CampoMonto
+│   ├── /ui                   # Button, Card, Input, Badge, AppIcon, Hoja, CampoMonto,
+│   │                         # MontoGrande, Brillo
 │   ├── /finance              # BalanceCard, MovementItem, MovementList, AddMovementButton,
 │   │   │                     # DashboardSections, EventPicker, MonthlyChart
 │   │   └── /registro         # RegistroWizard, WizardHeader, PasoTipo, PasoCategoria,
@@ -809,6 +810,7 @@ END IF;
 | Reporte mensual | ✅ Mes a mes: total gastado y comparación con el mes anterior (dorado si subió, nunca rojo), dona por categoría, desglose con barras, "Tu resumen" con promedio diario y cuánto vino de eventos cerrados. Solo gastos confirmados por `accounting_date` (§4d), igual que el balance |
 | Mis cuentas | ✅ `/cuentas` (total, lista, nueva cuenta, transferir, ajustar saldo, quitar), tarjeta "Tu dinero hoy" en Inicio, cuenta en el registro y en el detalle de Dinero, cobro a una cuenta. Migración probada en PostgreSQL (26 verificaciones, incluida la seguridad entre usuarios). **Requiere aplicar** `migrations/20261024c_cuentas_y_metas.sql` |
 | Metas de ahorro | ✅ `/metas`: total ahorrado, meta principal con anillo de avance, demás metas con barra, mensaje de ánimo, nueva meta (nombre, ícono, objetivo, fecha opcional), **abonar y retirar desde una cuenta** (atajos Q50/Q100/Q200). Tarjeta "Mis metas" en Inicio. Usa la misma migración de cuentas |
+| Modo oscuro y estilo visual | ✅ Menú del avatar → **Apariencia**: Claro, Oscuro (de una vez) u **Horario** programable (ej. 18:00–06:00, cambia solo cada minuto). Se guarda en el celular; un script en <head> lo aplica antes de pintar. Paleta oscura del diseño "EVI Dashboard Oscuro". Estilo de las referencias: barra de navegación flotante tipo cápsula, centavos chicos en los montos grandes, resplandor y vidrio en las tarjetas moradas, recibos tipo boleto ("¡Listo!" y "Te deben") |
 | Landing y planes | Pendiente |
 | Servicio de telemetría | ✅ Conectado: `signup_*`, `login_succeeded`, `movement_created` (con `seconds_to_complete`), `event_created`, `event_task_completed`, `budget_alert_shown`, `budget_exceeded`, `event_closed`, `expenses_transferred`, `monthly_report_viewed` · pendientes: `onboarding_completed` y eventos de las pantallas por construir |
 | Configuración de PWA y despliegue en Vercel | Pendiente |
@@ -924,6 +926,7 @@ Una funcionalidad está lista cuando cumple **todo** lo siguiente:
 | 2026-10-24 | 1.7 | Reporte mensual (§3, pantallas complementarias): total y comparación, dona, desglose por categoría y resumen; cuenta solo lo confirmado por `accounting_date` (§4d). Telemetría `monthly_report_viewed`. En Inicio, la tarjeta del balance muestra "Tenés Q… prestados" (lo pendiente de cobrar, que no es ingreso al cobrarse) |
 | 2026-10-24 | 1.8 | **Alcance:** se aprueban "Mis cuentas" y "Metas conectadas a cuentas" (§0). Tablas `accounts`, `account_transfers`, `savings_contributions`; columnas `movements.account_id`, `receivables.collected_account_id`, `savings_goals.icon`; vista `vw_account_balances`; `create_split_expense` recibe la cuenta; "Efectivo" automático para cada usuario (schema.sql §12). Pantalla `/cuentas`. Telemetría `account_created`, `transfer_created`, `savings_contribution_added` |
 | 2026-10-24 | 1.9 | Metas de ahorro (§0, alcance congelado): pantalla `/metas` según el diseño, abonos y retiros desde una cuenta, tarjeta en Inicio. Telemetría `savings_goal_created` y `savings_contribution_added` |
+| 2026-10-24 | 1.10 | Modo oscuro (claro / oscuro / horario programable) en el menú del avatar. Los colores que cambian con el tema pasan a variables CSS (`styles/globals.css`); `bg-white` → `bg-surface`. Estilo visual tomado de referencias: navegación flotante, montos con centavos chicos, resplandor, vidrio y boletos |
 
 ---
 

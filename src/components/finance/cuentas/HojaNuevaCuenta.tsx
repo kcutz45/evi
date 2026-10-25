@@ -45,7 +45,7 @@ export function HojaNuevaCuenta({ guardando, error, onCrear, onCerrar }: HojaNue
         {TIPOS_DE_CUENTA.map((t) => (
           <button key={t.tipo} type="button" role="radio" aria-checked={tipo === t.tipo} onClick={() => setTipo(t.tipo)}
             className={cn('flex items-center gap-2 rounded-tile px-3 py-3 text-sm font-extrabold transition active:scale-95',
-              tipo === t.tipo ? 'bg-primary text-white shadow-glow-primary' : 'bg-white text-dark shadow-card')}>
+              tipo === t.tipo ? 'bg-primary text-white shadow-glow-primary' : 'bg-surface text-dark shadow-card')}>
             <AppIcon name={t.icono} size={18} /> {t.etiqueta}
           </button>
         ))}

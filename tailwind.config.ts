@@ -12,6 +12,8 @@ import type { Config } from 'tailwindcss';
 import { colors } from './src/styles/tokens';
 
 const config: Config = {
+  // Modo oscuro por clase: lib/tema.ts pone .dark en <html>.
+  darkMode: 'class',
   content: ['./src/**/*.{ts,tsx}'],
   theme: {
     extend: {

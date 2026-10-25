@@ -13,7 +13,7 @@ import { cn } from '@/lib/cn';
 type CardVariant = 'surface' | 'muted' | 'hero';
 
 const VARIANTS: Record<CardVariant, string> = {
-  surface: 'bg-white shadow-card',
+  surface: 'bg-surface shadow-card',
   muted: 'bg-closed',
   hero: 'relative overflow-hidden bg-hero text-white',
 };

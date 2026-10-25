@@ -41,7 +41,7 @@ export function PasoNuevaCategoria({ esIngreso, creando, error, onCrear }: PasoN
   return (
     <div className="flex min-h-0 flex-1 animate-step-in flex-col motion-reduce:animate-none">
       <div className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto px-5 pb-4">
-        <label className="flex items-center gap-3 rounded-card bg-white p-3 shadow-card">
+        <label className="flex items-center gap-3 rounded-card bg-surface p-3 shadow-card">
           <span className={cn('grid h-12 w-12 flex-none place-items-center rounded-full', tono)}>
             <AppIcon name={icono} size={24} />
           </span>
@@ -72,7 +72,7 @@ function SelectorIcono({ elegido, onElegir }: { elegido: string; onElegir: (icon
           <button key={nombreIcono} type="button" role="radio" aria-checked={elegido === nombreIcono}
             aria-label={nombreIcono} onClick={() => onElegir(nombreIcono)}
             className={cn('grid aspect-square place-items-center rounded-tile transition active:scale-95',
-              elegido === nombreIcono ? 'bg-primary text-white shadow-glow-primary' : 'bg-white text-primary shadow-card')}>
+              elegido === nombreIcono ? 'bg-primary text-white shadow-glow-primary' : 'bg-surface text-primary shadow-card')}>
             <AppIcon name={nombreIcono} size={20} />
           </button>
         ))}

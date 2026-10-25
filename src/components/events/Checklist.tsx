@@ -50,7 +50,7 @@ interface ChecklistItemProps {
 function ChecklistItem({ task, disabled, onToggle }: ChecklistItemProps) {
   return (
     <li>
-      <label className="flex cursor-pointer items-center gap-3 rounded-tile px-2 py-2.5 hover:bg-white">
+      <label className="flex cursor-pointer items-center gap-3 rounded-tile px-2 py-2.5 hover:bg-surface">
         <input
           type="checkbox"
           checked={task.isDone}
@@ -63,7 +63,7 @@ function ChecklistItem({ task, disabled, onToggle }: ChecklistItemProps) {
           className={cn(
             'grid h-6 w-6 flex-none place-items-center rounded-lg border-2 transition-colors',
             'peer-focus-visible:ring-2 peer-focus-visible:ring-primary',
-            task.isDone ? 'border-mint bg-mint text-mint-ink' : 'border-line bg-white text-transparent',
+            task.isDone ? 'border-mint bg-mint text-mint-ink' : 'border-line bg-surface text-transparent',
           )}
         >
           <Check size={15} strokeWidth={3} />

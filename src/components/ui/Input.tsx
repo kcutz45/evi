@@ -37,7 +37,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
       {label && <label htmlFor={inputId} className="text-sm font-bold text-muted">{label}</label>}
       <div
         className={cn(
-          'flex items-center gap-2 rounded-tile bg-white px-3.5 py-3 ring-1 ring-transparent',
+          'flex items-center gap-2 rounded-tile bg-surface px-3.5 py-3 ring-1 ring-transparent',
           'focus-within:ring-primary',
           error && 'ring-gold',
         )}

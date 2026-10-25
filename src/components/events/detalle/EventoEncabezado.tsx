@@ -57,7 +57,7 @@ function TarjetaPresupuesto({ evento }: { evento: EventoDetalle }) {
   const activo = evento.status === 'activo';
 
   return (
-    <section aria-label="Presupuesto" className="rounded-card bg-white p-4 shadow-card">
+    <section aria-label="Presupuesto" className="rounded-card bg-surface p-4 shadow-card">
       <div className="flex items-baseline justify-between">
         <span className="text-[13px] font-extrabold text-muted">{activo ? 'Llevás gastado' : 'Gastaste'}</span>
         <span className="text-[13px] font-bold text-muted-soft">

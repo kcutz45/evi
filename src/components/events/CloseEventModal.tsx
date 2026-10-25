@@ -40,13 +40,13 @@ export function CloseEventModal(props: CloseEventModalProps) {
   return (
     <div className="fixed inset-0 z-50 flex flex-col justify-end">
       <button type="button" aria-label="Cancelar cierre" onClick={props.onCancel}
-        className="absolute inset-0 bg-dark/70 backdrop-blur-[1.5px]" />
+        className="absolute inset-0 bg-black/70 backdrop-blur-[1.5px]" />
       <div role="dialog" aria-modal="true" aria-labelledby="close-event-title"
         className="relative mx-auto max-h-full w-full max-w-md animate-sheet-in overflow-y-auto rounded-t-sheet bg-light px-5 pb-6 pt-2 shadow-float motion-reduce:animate-none">
         <div aria-hidden className="mx-auto mb-3.5 h-[5px] w-11 rounded-full bg-line" />
         <ModalTitle eventName={props.eventName} />
         <CloseEventSummary planned={props.planned} actual={props.actual} />
-        <div className="mt-2.5 rounded-[22px] bg-white px-4 py-3.5 shadow-card">
+        <div className="mt-2.5 rounded-[22px] bg-surface px-4 py-3.5 shadow-card">
           <TransferAnimation />
           <p className="mt-0.5 border-t border-line px-0.5 pt-3 text-center text-[15px] font-bold leading-normal text-closed-ink">
             {props.expensesCount === 1 ? 'El ' : 'Los '}

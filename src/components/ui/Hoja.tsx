@@ -25,7 +25,7 @@ export function Hoja({ titulo, subtitulo, onCerrar, children }: HojaProps) {
   const idTitulo = useId();
   return (
     <div className="fixed inset-0 z-50 flex flex-col justify-end">
-      <button type="button" aria-label="Cerrar" onClick={onCerrar} className="absolute inset-0 bg-dark/60" />
+      <button type="button" aria-label="Cerrar" onClick={onCerrar} className="absolute inset-0 bg-black/60" />
       <div role="dialog" aria-modal="true" aria-labelledby={idTitulo}
         className="relative mx-auto max-h-[88dvh] w-full max-w-md animate-sheet-in overflow-y-auto rounded-t-sheet bg-light px-5 pb-6 pt-2 shadow-float motion-reduce:animate-none">
         <div aria-hidden className="mx-auto mb-3.5 h-[5px] w-11 rounded-full bg-line" />

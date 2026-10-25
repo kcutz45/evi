@@ -10,7 +10,9 @@
  */
 import { ChevronRight } from 'lucide-react';
 import { AppIcon } from '@/components/ui/AppIcon';
+import { Brillo } from '@/components/ui/Brillo';
 import { Card } from '@/components/ui/Card';
+import { MontoGrande } from '@/components/ui/MontoGrande';
 import { cn } from '@/lib/cn';
 import { formatCurrency } from '@/lib/formatCurrency';
 import type { Cuenta } from '@/types/account';
@@ -18,9 +20,10 @@ import type { Cuenta } from '@/types/account';
 export function TotalCuentas({ total, cuentas }: { total: number; cuentas: number }) {
   return (
     <Card variant="hero" className="p-5">
-      <span className="text-[13px] font-bold uppercase tracking-wider text-white/70">Tu dinero hoy</span>
-      <p className="tabular mt-2 text-[38px] font-black leading-none tracking-tighter text-mint">{formatCurrency(total)}</p>
-      <p className="mt-2 text-[12.5px] font-bold text-white/80">
+      <Brillo />
+      <span className="relative text-[13px] font-bold uppercase tracking-wider text-white/70">Tu dinero hoy</span>
+      <MontoGrande monto={total} className="relative mt-2 text-[42px] text-mint" />
+      <p className="vidrio relative mt-3 rounded-2xl px-3 py-2.5 text-[12.5px] font-bold text-white/85">
         Sumando {cuentas === 1 ? 'tu cuenta' : `tus ${cuentas} cuentas`}. Lo que te deben y lo apartado en metas no está aquí.
       </p>
     </Card>
@@ -33,7 +36,7 @@ export function ListaCuentas({ cuentas, onElegir }: { cuentas: Cuenta[]; onElegi
       {cuentas.map((c) => (
         <li key={c.id}>
           <button type="button" onClick={() => onElegir(c)}
-            className="flex w-full items-center gap-3 rounded-[18px] bg-white p-3.5 text-left shadow-card transition hover:ring-2 hover:ring-primary/30 active:scale-[0.99]">
+            className="flex w-full items-center gap-3 rounded-[18px] bg-surface p-3.5 text-left shadow-card transition hover:ring-2 hover:ring-primary/30 active:scale-[0.99]">
             <span className="grid h-[42px] w-[42px] flex-none place-items-center rounded-tile bg-primary-soft text-primary">
               <AppIcon name={c.icono} size={20} />
             </span>

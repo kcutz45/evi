@@ -25,7 +25,7 @@ export function TuDineroCard({ total, cuentas, isHidden }: TuDineroCardProps) {
   const detalle = cuentas === 1 ? 'en 1 cuenta' : `en ${cuentas} cuentas`;
   return (
     <Link href={RUTA_CUENTAS}
-      className="mt-3 flex items-center gap-3 rounded-card bg-white px-4 py-3.5 shadow-card transition hover:ring-2 hover:ring-primary/30">
+      className="mt-3 flex items-center gap-3 rounded-card bg-surface px-4 py-3.5 shadow-card transition hover:ring-2 hover:ring-primary/30">
       <span className="grid h-11 w-11 flex-none place-items-center rounded-tile bg-primary-soft text-primary">
         <Wallet size={22} aria-hidden />
       </span>

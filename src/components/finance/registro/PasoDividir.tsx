@@ -77,7 +77,7 @@ interface FilaDeudorProps {
 
 function FilaDeudor({ fila, numero, puedeQuitar, onNombre, onMonto, onQuitar }: FilaDeudorProps) {
   return (
-    <li className="flex items-center gap-2 rounded-tile bg-white p-2 pl-3 shadow-card">
+    <li className="flex items-center gap-2 rounded-tile bg-surface p-2 pl-3 shadow-card">
       <UserRound size={18} className="flex-none text-primary" aria-hidden />
       <input type="text" value={fila.nombre} maxLength={60} placeholder={`Persona ${numero}`}
         aria-label={`Nombre de la persona ${numero}`} onChange={(e) => onNombre(e.target.value)}

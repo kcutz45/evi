@@ -23,7 +23,7 @@ export function MovementList({ movements, isLoading = false }: MovementListProps
     return (
       <ul aria-busy className="flex flex-col gap-2.5">
         {Array.from({ length: SKELETON_ROWS }, (_, i) => (
-          <li key={i} className="h-[70px] animate-pulse rounded-[18px] bg-white/70" />
+          <li key={i} className="h-[70px] animate-pulse rounded-[18px] bg-surface/70" />
         ))}
       </ul>
     );
@@ -31,7 +31,7 @@ export function MovementList({ movements, isLoading = false }: MovementListProps
 
   if (movements.length === 0) {
     return (
-      <p className="rounded-[18px] bg-white p-5 text-center text-sm font-semibold text-muted">
+      <p className="rounded-[18px] bg-surface p-5 text-center text-sm font-semibold text-muted">
         Todavía no registrás movimientos este mes. Tocá <strong className="text-primary">+</strong> para
         agregar el primero.
       </p>

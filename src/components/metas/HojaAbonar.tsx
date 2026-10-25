@@ -53,7 +53,7 @@ export function HojaAbonar(props: HojaAbonarProps) {
         <div className="flex gap-2">
           {ATAJOS.map((a) => (
             <button key={a} type="button" onClick={() => setTexto(String(a))}
-              className="flex-1 rounded-full bg-white py-2 text-sm font-black text-primary shadow-card active:scale-95">Q{a}</button>
+              className="flex-1 rounded-full bg-surface py-2 text-sm font-black text-primary shadow-card active:scale-95">Q{a}</button>
           ))}
         </div>
       )}

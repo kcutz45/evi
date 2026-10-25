@@ -32,7 +32,7 @@ export function PasoCalculadora({ montoInicial, onUsar }: PasoCalculadoraProps) 
 
   return (
     <div className="flex min-h-0 flex-1 animate-step-in flex-col motion-reduce:animate-none">
-      <div className="mx-5 flex flex-1 flex-col items-end justify-end gap-2 rounded-card bg-dark px-5 py-5 text-white"
+      <div className="mx-5 flex flex-1 flex-col items-end justify-end gap-2 rounded-card bg-noche px-5 py-5 text-white"
         aria-live="polite">
         <span className="min-h-6 break-all text-right text-lg font-bold text-white/60">{calc.operacion ?? ' '}</span>
         <output className={cn('tabular text-right text-5xl font-black leading-none tracking-tighter',

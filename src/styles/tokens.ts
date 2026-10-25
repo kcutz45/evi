@@ -9,30 +9,56 @@
  *            que necesitan el color como texto, también los importan
  *            de aquí. Así un cambio de marca se hace en UN archivo.
  *
- * DEPENDE DE: nada.
- * USADO EN:   tailwind.config.ts, lib/chartColors.ts
+ * MODO OSCURO: los colores que cambian entre claro y oscuro (fondo,
+ *            superficies, texto, líneas, tonos suaves) son variables
+ *            CSS definidas en styles/globals.css (:root y .dark). Los
+ *            de marca (morado, menta, dorado) son fijos en ambos modos.
+ *
+ * DEPENDE DE: styles/globals.css (variables --c-*).
+ * USADO EN:   tailwind.config.ts, lib/report.ts, app/layout.tsx
  * ---------------------------------------------------------------
  */
 
+// Color que cambia con el tema: Tailwind le agrega la opacidad (bg-surface/70).
+const tema = (variable: string) => `rgb(var(--c-${variable}) / <alpha-value>)`;
+
+// Colores de marca en hex: iguales en claro y oscuro.
+export const marca = {
+  primary: '#6C3BF4',
+  primaryDark: '#5528DC',
+  primaryDeep: '#4A21C4',
+  mint: '#2EE6A8',
+  mintInk: '#08301F',
+  gold: '#FFD166',
+  noche: '#1A1035',
+  mutedFaint: '#A49CC4',
+} as const;
+
 export const colors = {
-  primary: { DEFAULT: '#6C3BF4', dark: '#5528DC', deep: '#4A21C4', soft: '#EFE9FF' },
-  mint: { DEFAULT: '#2EE6A8', dark: '#0E8F63', ink: '#08301F', soft: '#E1FBF1' },
-  gold: { DEFAULT: '#FFD166', dark: '#8A6207', ink: '#5B4712', soft: '#FFF3D8' },
-  dark: '#1A1035',
-  light: '#F5F2FF',
-  muted: { DEFAULT: '#6F669B', soft: '#8B83AD', faint: '#A49CC4' },
-  line: '#EBE5FC',
-  track: '#F2EEFF',
-  closed: { DEFAULT: '#EFEBFA', ink: '#4B4370', badge: '#DCD5F0' },
+  primary: { DEFAULT: marca.primary, dark: marca.primaryDark, deep: marca.primaryDeep, soft: tema('primary-soft') },
+  mint: { DEFAULT: marca.mint, dark: tema('mint-dark'), ink: marca.mintInk, soft: tema('mint-soft') },
+  gold: { DEFAULT: marca.gold, dark: tema('gold-dark'), ink: tema('gold-ink'), soft: tema('gold-soft') },
+  // Texto principal ("tinta"): casi negro en claro, casi blanco en oscuro.
+  dark: tema('ink'),
+  // Fondo de la app.
+  light: tema('fondo'),
+  // Tarjetas, hojas y campos (antes bg-white).
+  surface: tema('superficie'),
+  // Siempre oscuro, en ambos modos (pantalla de la calculadora).
+  noche: marca.noche,
+  muted: { DEFAULT: tema('muted'), soft: tema('muted-soft'), faint: tema('muted-faint') },
+  line: tema('line'),
+  track: tema('track'),
+  closed: { DEFAULT: tema('closed'), ink: tema('closed-ink'), badge: tema('closed-badge') },
 } as const;
 
 // Paleta categórica para la dona del reporte mensual. El orden importa:
 // la categoría con más gasto siempre toma el primer color (la marca).
 export const chartPalette = [
-  colors.primary.DEFAULT,
-  colors.mint.DEFAULT,
-  colors.gold.DEFAULT,
-  colors.primary.deep,
-  colors.mint.dark,
-  colors.muted.faint,
+  marca.primary,
+  marca.mint,
+  marca.gold,
+  marca.primaryDeep,
+  '#0E8F63',
+  marca.mutedFaint,
 ] as const;

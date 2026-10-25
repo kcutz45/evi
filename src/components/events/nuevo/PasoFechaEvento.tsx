@@ -34,7 +34,7 @@ export function PasoFechaEvento({ w }: { w: EventoWizardEstado }) {
         {atajos().map((a) => (
           <button key={a.etiqueta} type="button" onClick={() => w.setFecha(a.fecha)} aria-pressed={w.fecha === a.fecha}
             className={cn('rounded-full px-4 py-2 text-[13px] font-extrabold transition active:scale-95',
-              w.fecha === a.fecha ? 'bg-primary text-white shadow-glow-primary' : 'bg-white text-primary shadow-card')}>
+              w.fecha === a.fecha ? 'bg-primary text-white shadow-glow-primary' : 'bg-surface text-primary shadow-card')}>
             {a.etiqueta}
           </button>
         ))}

@@ -27,7 +27,7 @@ export function MovementDayGroups({ grupos, isLoading, hayFiltro, onElegir }: Mo
     return (
       <div aria-busy className="flex flex-col gap-2.5">
         {Array.from({ length: FILAS_DE_CARGA }, (_, i) => (
-          <div key={i} className="h-[70px] animate-pulse rounded-[18px] bg-white/70" />
+          <div key={i} className="h-[70px] animate-pulse rounded-[18px] bg-surface/70" />
         ))}
       </div>
     );
@@ -53,7 +53,7 @@ export function MovementDayGroups({ grupos, isLoading, hayFiltro, onElegir }: Mo
 
 function ListaVacia({ hayFiltro }: { hayFiltro: boolean }) {
   return (
-    <div className="flex flex-col items-center gap-3 rounded-card bg-white px-6 py-10 text-center shadow-card">
+    <div className="flex flex-col items-center gap-3 rounded-card bg-surface px-6 py-10 text-center shadow-card">
       <Inbox size={36} strokeWidth={1.6} className="text-muted-faint" aria-hidden />
       <p className="text-sm font-bold text-muted">
         {hayFiltro

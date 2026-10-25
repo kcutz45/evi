@@ -22,7 +22,7 @@ interface TotalGastadoProps {
 
 export function TotalGastado({ total, comparacion, nombreMesAnterior }: TotalGastadoProps) {
   return (
-    <section className="flex flex-col rounded-card bg-white p-[18px] shadow-card">
+    <section className="flex flex-col rounded-card bg-surface p-[18px] shadow-card">
       <span className="text-[13px] font-extrabold text-muted">Total gastado</span>
       <span className="tabular mt-1 text-[34px] font-black leading-none tracking-tighter">{formatCurrency(total)}</span>
       <Chip comparacion={comparacion} nombreMesAnterior={nombreMesAnterior} />

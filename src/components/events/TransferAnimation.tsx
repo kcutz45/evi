@@ -43,7 +43,7 @@ export function TransferAnimation() {
             Q
           </span>
         ))}
-        <span className="absolute left-1/2 top-1/2 grid h-[26px] w-[26px] -translate-x-1/2 -translate-y-1/2 place-items-center rounded-[10px] bg-white text-muted-faint">
+        <span className="absolute left-1/2 top-1/2 grid h-[26px] w-[26px] -translate-x-1/2 -translate-y-1/2 place-items-center rounded-[10px] bg-surface text-muted-faint">
           <ArrowRight size={16} strokeWidth={2.6} />
         </span>
       </div>

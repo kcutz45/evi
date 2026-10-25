@@ -29,7 +29,7 @@ export function EventCard({ event }: { event: EventSummary }) {
   const showAlert = getBudgetStatus(usage) !== 'ok';
 
   return (
-    <Link href={`/eventos/${event.id}`} className="block rounded-card bg-white p-4 shadow-card">
+    <Link href={`/eventos/${event.id}`} className="block rounded-card bg-surface p-4 shadow-card">
       <div className="flex items-start gap-3">
         <span className="grid h-[42px] w-[42px] flex-none place-items-center rounded-tile bg-primary/10 text-primary">
           <AppIcon name={event.icon} size={21} strokeWidth={1.9} />

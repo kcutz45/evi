@@ -43,13 +43,15 @@ export function PasoListo({ esEdicion, monto, categoria, esIngreso, evento, teDe
   return (
     <button type="button" onClick={onListo} aria-label="Volver al inicio"
       className="flex h-full w-full flex-col items-center justify-center gap-4 bg-mint px-8 text-center text-mint-ink">
-      <span className="grid h-24 w-24 animate-pop place-items-center rounded-full bg-white text-mint-dark shadow-glow-mint motion-reduce:animate-none">
+      <span className="grid h-24 w-24 animate-pop place-items-center rounded-full bg-surface text-mint-dark shadow-glow-mint motion-reduce:animate-none">
         <Check size={52} strokeWidth={3} aria-hidden />
       </span>
-      <span role="status" className="flex flex-col gap-1">
-        <span className="text-sm font-extrabold uppercase tracking-widest">{titulo}</span>
+      {/* Recibo con muescas (referencias "Recept" y "Boarding pass"). */}
+      <span role="status" className="boleto flex w-full max-w-xs flex-col gap-1 rounded-card bg-surface px-5 py-5 text-dark shadow-float [--muesca:68%]">
+        <span className="text-xs font-extrabold uppercase tracking-widest text-muted">{titulo}</span>
         <span className="tabular text-5xl font-black tracking-tighter">{monto}</span>
-        <span className="text-base font-bold">en {categoria}</span>
+        <span aria-hidden className="my-3 border-t-2 border-dashed border-line" />
+        <span className="text-base font-bold text-muted">en <strong className="font-black text-dark">{categoria}</strong></span>
       </span>
       {teDeben && (
         <span className="max-w-xs rounded-tile bg-white/40 px-4 py-3 text-sm font-bold leading-snug">
