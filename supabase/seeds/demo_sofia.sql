@@ -1,28 +1,29 @@
--- =====================================================================
--- demo_sofia.sql — EVI · DATOS FICTICIOS DE PRUEBA
--- ---------------------------------------------------------------------
--- PROPÓSITO: Llenar la cuenta de Sofía con 3 meses de datos realistas
---            para probar TODAS las pantallas: Inicio, Dinero, Reporte,
---            Eventos (activos, con alerta, excedido y cerrados), Te deben,
---            Mis cuentas, transferencias y Metas.
---
--- REQUISITOS:
---   1. La cuenta de Sofía ya existe (se registró en la app).
---   2. Ya se aplicó migrations/20261024c_cuentas_y_metas.sql.
---
--- CÓMO SE USA: SQL Editor de Supabase → pegar todo → Run.
---   * Busca a Sofía por correo (cambiá v_correo si hace falta) o, si no,
---     por un perfil cuyo nombre empiece con "Sof".
---   * Se puede correr varias veces: borra lo que creó la vez anterior
---     (todo va marcado con metadata.seed = 'sofia-demo') y lo vuelve a
---     crear. NO toca nada que Sofía haya registrado a mano.
---   * Las fechas son relativas a HOY: mes actual, anterior y antepasado.
---
--- POR QUÉ ASÍ: los datos pasan por los mismos triggers y funciones que
---   la app (estado pendiente/confirmado, cierre de eventos, cuentas
---   divididas, saldo de metas). Para eso se simula la sesión de Sofía
---   con request.jwt.claims, como hace Supabase con un usuario real.
--- =====================================================================
+
+/*
+   demo_sofia.sql — EVI · DATOS FICTICIOS DE PRUEBA
+   ---------------------------------------------------------------------
+   PROPÓSITO: Llenar la cuenta de Sofía con 3 meses de datos realistas
+              para probar TODAS las pantallas: Inicio, Dinero, Reporte,
+              Eventos (activos, con alerta, excedido y cerrados), Te deben,
+              Mis cuentas, transferencias y Metas.
+   
+   REQUISITOS:
+     1. La cuenta de Sofía ya existe (se registró en la app).
+     2. Ya se aplicó migrations/20261024c_cuentas_y_metas.sql.
+   
+   CÓMO SE USA: SQL Editor de Supabase → pegar todo → Run.
+     * Busca a Sofía por correo (cambiá v_correo si hace falta) o, si no,
+       por un perfil cuyo nombre empiece con "Sof".
+     * Se puede correr varias veces: borra lo que creó la vez anterior
+       (todo va marcado con metadata.seed = 'sofia-demo') y lo vuelve a
+       crear. NO toca nada que Sofía haya registrado a mano.
+     * Las fechas son relativas a HOY: mes actual, anterior y antepasado.
+   
+   POR QUÉ ASÍ: los datos pasan por los mismos triggers y funciones que
+     la app (estado pendiente/confirmado, cierre de eventos, cuentas
+     divididas, saldo de metas). Para eso se simula la sesión de Sofía
+     con request.jwt.claims, como hace Supabase con un usuario real.
+*/
 
 -- ---------------------------------------------------------------------
 -- Ayudantes temporales (solo existen durante esta ejecución).
@@ -72,7 +73,7 @@ begin
     end if;
   end if;
   if v_user is null then
-    raise exception 'No encontré a Sofía. Poné su correo en v_correo (línea 52)';
+    raise exception 'No encontré a Sofía. Poné su correo en v_correo (busca v_correo más abajo)';
   end if;
   raise notice 'Cargando datos para el usuario %', v_user;
 
