@@ -1,7 +1,7 @@
 # EVI_SPEC.md — EVI
 
 > **Documento de arquitectura y especificación técnica del MVP**
-> Versión 1.11 · 31 de octubre de 2026
+> Versión 1.12 · 31 de octubre de 2026
 > Proyecto académico — Licenciatura en Informática e Inteligencia de Negocios, UMES
 > Equipo: 3 integrantes · Plazo: 8 semanas · Inversión de infraestructura: ≈ Q300
 
@@ -156,6 +156,8 @@ Prueba rápida: *¿puedo mover este componente a otro proyecto con otra base de 
 │   │   ├── /dinero
 │   │   ├── /eventos
 │   │   │   └── /[id]
+│   │   ├── /cuentas
+│   │   │   └── /[id]         # Historial de una cuenta
 │   │   └── /reportes
 │   ├── /demo                 # TEMPORAL: vitrina de componentes con datos simulados.
 │   │                         #   Se borra antes de la beta (semana 7)
@@ -176,8 +178,9 @@ Prueba rápida: *¿puedo mover este componente a otro proyecto con otra base de 
 │   │   ├── /nuevo            # EventoWizard, PasoNombreEvento, PasoFechaEvento, PasoPresupuesto
 │   │   └── /detalle          # EventoEncabezado, PestanasEvento, PanelTareas, PanelGastos
 │   ├── /report               # TotalGastado, DesgloseCategorias, ResumenDelMes
-│   ├── /finance/cuentas      # TuDineroCard, ListaCuentas, HojaNuevaCuenta, HojaTransferir,
-│   │                         # HojaAjustarSaldo, HojaElegirCuenta
+│   ├── /finance/cuentas      # TuDineroCard, ListaCuentas (+ EncabezadoCuenta), HojaNuevaCuenta,
+│   │                         # HojaTransferir, HojaAjustarSaldo, HojaElegirCuenta,
+│   │                         # SelectorDeCuenta, HistorialCuenta, OpcionesCuenta
 │   ├── /landing              # LandingHeader, Hero, MockupCelular, ProblemaYBeneficios,
 │   │                         # Precios, ListaEspera, TelemetriaLanding
 │   ├── /metas                # MetaDestacada, TarjetaMeta, HojaAbonar, HojaNuevaMeta, MetasCard
@@ -934,6 +937,7 @@ Una funcionalidad está lista cuando cumple **todo** lo siguiente:
 | 2026-10-24 | 1.9 | Metas de ahorro (§0, alcance congelado): pantalla `/metas` según el diseño, abonos y retiros desde una cuenta, tarjeta en Inicio. Telemetría `savings_goal_created` y `savings_contribution_added` |
 | 2026-10-24 | 1.10 | Modo oscuro (claro / oscuro / horario programable) en el menú del avatar. Los colores que cambian con el tema pasan a variables CSS (`styles/globals.css`); `bg-white` → `bg-surface`. Estilo visual tomado de referencias: navegación flotante, montos con centavos chicos, resplandor, vidrio y boletos |
 | 2026-10-31 | 1.11 | Landing pública en `/` (smoke test con lista de espera y telemetría) y "¿Olvidaste tu contraseña?" (`/recuperar`, `/auth/confirm`, `/nueva-contrasena`). El logo de las pantallas de acceso vuelve a la landing |
+| 2026-10-31 | 1.12 | Historial por cuenta (`/cuentas/[id]`): gastos, ingresos, cobros, transferencias y abonos a metas con el saldo después de cada uno. "Corregir saldo" pasa a "Opciones de la cuenta" y pide confirmar viendo la diferencia (antes bastaba tocar la cuenta) |
 
 ---
 

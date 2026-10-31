@@ -11,6 +11,7 @@
  */
 import {
   Banknote,
+  ArrowLeftRight,
   Briefcase,
   Bus,
   Cake,
@@ -26,6 +27,7 @@ import {
   Globe,
   GraduationCap,
   HeartPulse,
+  HandCoins,
   House,
   Landmark,
   Laptop,
@@ -47,6 +49,7 @@ import {
 } from 'lucide-react';
 
 const ICONS: Record<string, LucideIcon> = {
+  'arrow-left-right': ArrowLeftRight,
   banknote: Banknote,
   briefcase: Briefcase,
   bus: Bus,
@@ -62,6 +65,7 @@ const ICONS: Record<string, LucideIcon> = {
   globe: Globe,
   'graduation-cap': GraduationCap,
   'heart-pulse': HeartPulse,
+  'hand-coins': HandCoins,
   house: House,
   landmark: Landmark,
   laptop: Laptop,

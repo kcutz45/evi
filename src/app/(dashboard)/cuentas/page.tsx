@@ -19,7 +19,6 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { ArrowLeft, ArrowLeftRight, Plus } from 'lucide-react';
 import { FormAlert } from '@/components/auth/AuthHeading';
-import { HojaAjustarSaldo } from '@/components/finance/cuentas/HojaAjustarSaldo';
 import { HojaNuevaCuenta } from '@/components/finance/cuentas/HojaNuevaCuenta';
 import { HojaTransferir } from '@/components/finance/cuentas/HojaTransferir';
 import { ListaCuentas, TotalCuentas } from '@/components/finance/cuentas/ListaCuentas';
@@ -28,9 +27,8 @@ import { PageContainer } from '@/components/layout/PageContainer';
 import { Button } from '@/components/ui/Button';
 import { useAccounts } from '@/hooks/useAccounts';
 import { RUTA_INICIO } from '@/lib/routes';
-import type { Cuenta } from '@/types/account';
 
-type HojaAbierta = { tipo: 'nueva' } | { tipo: 'transferir' } | { tipo: 'ajustar'; cuenta: Cuenta } | null;
+type HojaAbierta = { tipo: 'nueva' } | { tipo: 'transferir' } | null;
 
 export default function CuentasPage() {
   const c = useAccounts();
@@ -46,7 +44,7 @@ export default function CuentasPage() {
       <Link href={RUTA_INICIO} className="mt-4 inline-flex items-center gap-1.5 text-sm font-extrabold text-primary">
         <ArrowLeft size={17} aria-hidden /> Inicio
       </Link>
-      <Header title="Mis cuentas" subtitle="Dónde tenés tu dinero. Tocá una cuenta para ajustar su saldo." />
+      <Header title="Mis cuentas" subtitle="Dónde tenés tu dinero. Tocá una cuenta para ver su historial." />
       <div className="flex flex-col gap-4">
         <FormAlert message={c.error && !hoja ? c.error : null} />
         {c.isLoading ? <div aria-busy className="h-32 animate-pulse rounded-card bg-primary/20" /> : (
@@ -61,11 +59,10 @@ export default function CuentasPage() {
             Transferir
           </Button>
         </div>
-        <ListaCuentas cuentas={c.data} onElegir={(cuenta) => setHoja({ tipo: 'ajustar', cuenta })} />
+        <ListaCuentas cuentas={c.data} />
       </div>
       {hoja?.tipo === 'nueva' && <HojaNuevaCuenta {...comun} onCrear={c.crear} />}
       {hoja?.tipo === 'transferir' && <HojaTransferir {...comun} cuentas={c.data} onTransferir={c.transferir} />}
-      {hoja?.tipo === 'ajustar' && <HojaAjustarSaldo {...comun} cuenta={hoja.cuenta} onAjustar={c.ajustar} onQuitar={c.quitar} />}
     </PageContainer>
   );
 }
