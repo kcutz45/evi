@@ -30,7 +30,7 @@ interface BalanceSectionProps {
   isHidden: boolean;
   onToggleHidden: () => void;
   onRetry: () => void;
-  prestado?: number;
+  dinero: number | null;
 }
 
 export function BalanceSection(props: BalanceSectionProps) {
@@ -41,7 +41,7 @@ export function BalanceSection(props: BalanceSectionProps) {
   return (
     <BalanceCard monthLabel={props.monthLabel} balance={props.balance} income={props.income}
       expense={props.expense} isHidden={props.isHidden} onToggleHidden={props.onToggleHidden}
-      prestado={props.prestado} />
+      dinero={props.dinero} />
   );
 }
 

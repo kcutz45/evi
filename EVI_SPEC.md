@@ -1,7 +1,7 @@
 # EVI_SPEC.md — EVI
 
 > **Documento de arquitectura y especificación técnica del MVP**
-> Versión 1.12 · 31 de octubre de 2026
+> Versión 1.13 · 31 de octubre de 2026
 > Proyecto académico — Licenciatura en Informática e Inteligencia de Negocios, UMES
 > Equipo: 3 integrantes · Plazo: 8 semanas · Inversión de infraestructura: ≈ Q300
 
@@ -178,7 +178,7 @@ Prueba rápida: *¿puedo mover este componente a otro proyecto con otra base de 
 │   │   ├── /nuevo            # EventoWizard, PasoNombreEvento, PasoFechaEvento, PasoPresupuesto
 │   │   └── /detalle          # EventoEncabezado, PestanasEvento, PanelTareas, PanelGastos
 │   ├── /report               # TotalGastado, DesgloseCategorias, ResumenDelMes
-│   ├── /finance/cuentas      # TuDineroCard, ListaCuentas (+ EncabezadoCuenta), HojaNuevaCuenta,
+│   ├── /finance/cuentas      # ListaCuentas (+ EncabezadoCuenta), HojaNuevaCuenta,
 │   │                         # HojaTransferir, HojaAjustarSaldo, HojaElegirCuenta,
 │   │                         # SelectorDeCuenta, HistorialCuenta, HojaOpcionesCuenta
 │   ├── /landing              # LandingHeader, Hero, MockupCelular, ProblemaYBeneficios,
@@ -938,6 +938,7 @@ Una funcionalidad está lista cuando cumple **todo** lo siguiente:
 | 2026-10-24 | 1.10 | Modo oscuro (claro / oscuro / horario programable) en el menú del avatar. Los colores que cambian con el tema pasan a variables CSS (`styles/globals.css`); `bg-white` → `bg-surface`. Estilo visual tomado de referencias: navegación flotante, montos con centavos chicos, resplandor, vidrio y boletos |
 | 2026-10-31 | 1.11 | Landing pública en `/` (smoke test con lista de espera y telemetría) y "¿Olvidaste tu contraseña?" (`/recuperar`, `/auth/confirm`, `/nueva-contrasena`). El logo de las pantallas de acceso vuelve a la landing |
 | 2026-10-31 | 1.12 | Historial por cuenta (`/cuentas/[id]`): gastos, ingresos, cobros, transferencias y abonos a metas con el saldo después de cada uno. "Corregir saldo" pasa a "Opciones de la cuenta" (tuerquita en la tarjeta de la cuenta) y pide confirmar viendo la diferencia (antes bastaba tocar la cuenta) |
+| 2026-10-31 | 1.13 | Inicio: el número principal pasa a ser **Tu dinero** (suma de las cuentas) con "Entró / Salió en <mes>" y "Este mes te quedan" (ingresos − gastos) debajo; se quita la tarjeta aparte "Tu dinero hoy". Las reglas no cambian: los gastos de eventos activos cuentan en el mes al cerrar el evento (§4d) |
 
 ---
 

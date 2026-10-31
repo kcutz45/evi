@@ -24,7 +24,6 @@
 import { useCallback, useState } from 'react';
 import { AddMovementButton } from '@/components/finance/AddMovementButton';
 import { BalanceSection, RecentMovementsSection } from '@/components/finance/DashboardSections';
-import { TuDineroCard } from '@/components/finance/cuentas/TuDineroCard';
 import { TeDebenCard } from '@/components/finance/porCobrar/TeDebenCard';
 import { RegistroWizard } from '@/components/finance/registro/RegistroWizard';
 import { Header } from '@/components/layout/Header';
@@ -65,9 +64,9 @@ export default function InicioPage() {
       <Header eyebrow={saludoGT()} title={nombre || 'qué gusto verte'}
         action={<UserMenu nombre={nombre} plan={perfil?.plan ?? null} onLogout={cerrarSesion} />} />
       <BalanceSection monthLabel={nombreDelMes(resumen.inicioDeMes)} {...resumen.data}
-        isLoading={resumen.isLoading} error={resumen.error} isHidden={isHidden} prestado={teDeben.data.total}
+        isLoading={resumen.isLoading || cuentas.isLoading} error={resumen.error} isHidden={isHidden}
+        dinero={cuentas.error || cuentas.data.length === 0 ? null : cuentas.total}
         onToggleHidden={() => setIsHidden((oculto) => !oculto)} onRetry={resumen.recargar} />
-      <TuDineroCard total={cuentas.total} cuentas={cuentas.data.length} isHidden={isHidden} />
       <TeDebenCard resumen={teDeben.data} />
       <MetasCard metas={metas.data.length} totalAhorrado={metas.totalAhorrado} isHidden={isHidden} />
       <RecentMovementsSection movements={movimientos.data} isLoading={movimientos.isLoading}
