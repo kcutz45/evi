@@ -15,7 +15,7 @@ import type { FormEvent } from 'react';
 import { CircleCheck, Mail } from 'lucide-react';
 import { FormAlert } from '@/components/auth/AuthHeading';
 import { useListaEspera } from '@/hooks/useListaEspera';
-import { LogoEvi } from './LandingHeader';
+import { MarcaEvi } from './LandingHeader';
 
 export function ListaEspera() {
   const lista = useListaEspera();
@@ -58,7 +58,7 @@ export function ListaEspera() {
 export function PieLanding() {
   return (
     <footer className="mx-auto flex max-w-5xl flex-col items-center gap-3 px-4 pb-10 pt-4 text-center sm:flex-row sm:justify-between">
-      <LogoEvi />
+      <MarcaEvi />
       <p className="text-xs font-bold text-muted-soft">EVI · Guatemala, 2026 · Proyecto académico UMES</p>
     </footer>
   );

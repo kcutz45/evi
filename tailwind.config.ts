@@ -18,8 +18,13 @@ const config: Config = {
   theme: {
     extend: {
       colors,
+      // Outfit es más ancha que la anterior: la guía de marca usa peso 800
+      // como máximo y un espaciado de -0.02em. Así font-black y
+      // tracking-tight(er) se ven como en la guía en toda la app.
+      fontWeight: { black: '800' },
+      letterSpacing: { tighter: '-0.03em', tight: '-0.015em' },
       fontFamily: {
-        sans: ['var(--font-nunito)', 'system-ui', 'sans-serif'],
+        sans: ['var(--font-outfit)', 'system-ui', 'sans-serif'],
       },
       borderRadius: {
         card: '20px',

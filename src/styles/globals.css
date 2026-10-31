@@ -14,10 +14,11 @@
   :root {
     --c-fondo: 245 242 255;        /* #F5F2FF */
     --c-superficie: 255 255 255;   /* #FFFFFF */
-    --c-ink: 26 16 53;             /* #1A1035 */
-    --c-muted: 111 102 155;        /* #6F669B */
-    --c-muted-soft: 139 131 173;   /* #8B83AD */
-    --c-muted-faint: 164 156 196;  /* #A49CC4 */
+    /* Textos en grises cálidos (guía de marca "Mayúsculas con estilo"). */
+    --c-ink: 20 20 19;             /* #141413 */
+    --c-muted: 74 69 65;           /* #4A4541 */
+    --c-muted-soft: 107 101 96;    /* #6B6560 */
+    --c-muted-faint: 163 157 152;  /* #A39D98 */
     --c-line: 235 229 252;         /* #EBE5FC */
     --c-track: 242 238 255;        /* #F2EEFF */
     --c-primary-soft: 239 233 255; /* #EFE9FF */

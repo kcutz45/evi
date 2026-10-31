@@ -11,13 +11,15 @@
  */
 import Link from 'next/link';
 import { LogIn } from 'lucide-react';
+import { IsotipoEvi, LogoEvi } from '@/components/ui/Logo';
 import { RUTA_LOGIN, RUTA_REGISTRO } from '@/lib/routes';
 
-export function LogoEvi() {
+// Marca completa (isotipo + logotipo): la versión de la guía para la landing.
+export function MarcaEvi() {
   return (
     <span className="flex items-center gap-2">
-      <span className="grid h-9 w-9 place-items-center rounded-xl bg-primary text-lg font-black text-white shadow-glow-primary">E</span>
-      <span className="text-xl font-black tracking-tighter text-dark">EVI</span>
+      <IsotipoEvi className="h-7 w-7" />
+      <LogoEvi className="w-[62px]" />
     </span>
   );
 }
@@ -26,7 +28,7 @@ export function LandingHeader() {
   return (
     <header className="sticky top-0 z-30 border-b border-line/60 bg-light/80 backdrop-blur-md">
       <div className="mx-auto flex max-w-5xl items-center justify-between gap-3 px-4 py-3">
-        <Link href="#inicio" aria-label="EVI, ir al inicio de la página"><LogoEvi /></Link>
+        <Link href="#inicio" aria-label="EVI, ir al inicio de la página"><MarcaEvi /></Link>
         <nav aria-label="Secciones" className="hidden items-center gap-6 text-sm font-extrabold text-muted md:flex">
           <a href="#beneficios" className="hover:text-primary">Beneficios</a>
           <a href="#precios" className="hover:text-primary">Precios</a>

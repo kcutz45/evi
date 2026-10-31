@@ -3,7 +3,8 @@
  * ---------------------------------------------------------------
  * PROPÓSITO: Marco HTML de toda la app: idioma, tipografía y estilos.
  *
- * POR QUÉ EXISTE: next/font descarga Nunito en el build y la sirve
+ * POR QUÉ EXISTE: next/font descarga Outfit (tipografía de la guía de
+ *            marca "Mayúsculas con estilo", 31/10/2026) en el build y la sirve
  *            desde nuestro dominio: sin parpadeo de fuente y sin
  *            pedirle nada a Google en cada visita.
  *
@@ -14,17 +15,17 @@
  * ---------------------------------------------------------------
  */
 import type { Metadata, Viewport } from 'next';
-import { Nunito } from 'next/font/google';
+import { Outfit } from 'next/font/google';
 import type { ReactNode } from 'react';
 import { VigilanteTema } from '@/components/layout/VigilanteTema';
 import { SCRIPT_TEMA } from '@/lib/tema';
 import { marca } from '@/styles/tokens';
 import '@/styles/globals.css';
 
-const nunito = Nunito({
+const outfit = Outfit({
   subsets: ['latin'],
-  weight: ['400', '600', '700', '800', '900'],
-  variable: '--font-nunito',
+  weight: ['300', '400', '500', '600', '700', '800'],
+  variable: '--font-outfit',
 });
 
 export const metadata: Metadata = {
@@ -40,7 +41,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="es-GT" className={nunito.variable} suppressHydrationWarning>
+    <html lang="es-GT" className={outfit.variable} suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: SCRIPT_TEMA }} />
       </head>
