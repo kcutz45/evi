@@ -3,7 +3,8 @@
  * ---------------------------------------------------------------
  * PROPÓSITO: Portero de la app. Corre ANTES de cada página:
  *            - Sin sesión en una ruta del grupo (dashboard) → /login.
- *            - Con sesión en /login o /registro → /inicio.
+ *            - Con sesión en /login, /registro, /recuperar o en la
+ *              landing (/) → /inicio: ya es cliente, no necesita verla.
  *            - En todos los casos, renueva el token si venció.
  *
  * POR QUÉ EXISTE: Proteger en el servidor evita el "parpadeo" de una
@@ -18,7 +19,7 @@
  * ---------------------------------------------------------------
  */
 import { NextResponse, type NextRequest } from 'next/server';
-import { RUTA_INICIO, RUTA_LOGIN, RUTAS_DE_AUTH, RUTAS_PROTEGIDAS, coincideCon } from '@/lib/routes';
+import { RUTA_INICIO, RUTA_LANDING, RUTA_LOGIN, RUTAS_DE_AUTH, RUTAS_PROTEGIDAS, coincideCon } from '@/lib/routes';
 import { actualizarSesion, copiarCookies } from '@/lib/supabaseMiddleware';
 
 function redirigir(request: NextRequest, destino: string, response: NextResponse) {
@@ -35,7 +36,7 @@ export async function middleware(request: NextRequest) {
   if (!user && coincideCon(pathname, RUTAS_PROTEGIDAS)) {
     return redirigir(request, RUTA_LOGIN, response);
   }
-  if (user && coincideCon(pathname, RUTAS_DE_AUTH)) {
+  if (user && (pathname === RUTA_LANDING || coincideCon(pathname, RUTAS_DE_AUTH))) {
     return redirigir(request, RUTA_INICIO, response);
   }
   return response;

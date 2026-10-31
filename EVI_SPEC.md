@@ -1,7 +1,7 @@
 # EVI_SPEC.md — EVI
 
 > **Documento de arquitectura y especificación técnica del MVP**
-> Versión 1.10 · 24 de octubre de 2026
+> Versión 1.11 · 31 de octubre de 2026
 > Proyecto académico — Licenciatura en Informática e Inteligencia de Negocios, UMES
 > Equipo: 3 integrantes · Plazo: 8 semanas · Inversión de infraestructura: ≈ Q300
 
@@ -144,11 +144,13 @@ Prueba rápida: *¿puedo mover este componente a otro proyecto con otra base de 
 ```
 /src
 ├── /app                      # Rutas de Next.js (App Router)
-│   ├── /(marketing)
-│   │   └── page.tsx          # Landing pública
+│   ├── page.tsx              # Landing pública (/)
 │   ├── /(auth)
 │   │   ├── /login
-│   │   └── /registro
+│   │   ├── /registro
+│   │   ├── /recuperar
+│   │   └── /nueva-contrasena
+│   ├── /auth/confirm         # Enlaces de los correos de Supabase
 │   ├── /(dashboard)          # Rutas protegidas
 │   │   ├── /inicio
 │   │   ├── /dinero
@@ -176,6 +178,8 @@ Prueba rápida: *¿puedo mover este componente a otro proyecto con otra base de 
 │   ├── /report               # TotalGastado, DesgloseCategorias, ResumenDelMes
 │   ├── /finance/cuentas      # TuDineroCard, ListaCuentas, HojaNuevaCuenta, HojaTransferir,
 │   │                         # HojaAjustarSaldo, HojaElegirCuenta
+│   ├── /landing              # LandingHeader, Hero, MockupCelular, ProblemaYBeneficios,
+│   │                         # Precios, ListaEspera, TelemetriaLanding
 │   ├── /metas                # MetaDestacada, TarjetaMeta, HojaAbonar, HojaNuevaMeta, MetasCard
 │   ├── /finance/porCobrar    # TeDebenCard, DeudasList (TarjetaPersona, ListaCobradas)
 │   ├── /finance/dinero       # MonthHeader, MovementFilters, MovementDayGroups,
@@ -811,7 +815,9 @@ END IF;
 | Mis cuentas | ✅ `/cuentas` (total, lista, nueva cuenta, transferir, ajustar saldo, quitar), tarjeta "Tu dinero hoy" en Inicio, cuenta en el registro y en el detalle de Dinero, cobro a una cuenta. Migración probada en PostgreSQL (26 verificaciones, incluida la seguridad entre usuarios). **Requiere aplicar** `migrations/20261024c_cuentas_y_metas.sql` |
 | Metas de ahorro | ✅ `/metas`: total ahorrado, meta principal con anillo de avance, demás metas con barra, mensaje de ánimo, nueva meta (nombre, ícono, objetivo, fecha opcional), **abonar y retirar desde una cuenta** (atajos Q50/Q100/Q200). Tarjeta "Mis metas" en Inicio. Usa la misma migración de cuentas |
 | Modo oscuro y estilo visual | ✅ Menú del avatar → **Apariencia**: Claro, Oscuro (de una vez) u **Horario** programable (ej. 18:00–06:00, cambia solo cada minuto). Se guarda en el celular; un script en <head> lo aplica antes de pintar. Paleta oscura del diseño "EVI Dashboard Oscuro". Estilo de las referencias: barra de navegación flotante tipo cápsula, centavos chicos en los montos grandes, resplandor y vidrio en las tarjetas moradas, recibos tipo boleto ("¡Listo!" y "Te deben") |
-| Landing y planes | Pendiente |
+| Landing (§3, pantalla 1) | ✅ `/` pública: hero con celular de muestra, Sin EVI / Con EVI, beneficios, precios (Q0 · Q50 · Q150) y lista de espera (tabla `waitlist`, correo repetido = éxito). Botón **Iniciar sesión** arriba y "Ya tengo cuenta" en el hero. Con sesión, el middleware manda a `/inicio`. Telemetría `landing_viewed`, `landing_section_viewed`, `waitlist_submitted` |
+| Recuperar contraseña | ✅ "¿Olvidaste tu contraseña?" en el login → `/recuperar` (correo) → enlace → `/auth/confirm` (abre la sesión; acepta `?code` y `?token_hash`) → `/nueva-contrasena`. Requiere agregar `<sitio>/auth/confirm` en Supabase → Authentication → URL Configuration → Redirect URLs |
+| Planes (pantalla de pago) | Pendiente |
 | Servicio de telemetría | ✅ Conectado: `signup_*`, `login_succeeded`, `movement_created` (con `seconds_to_complete`), `event_created`, `event_task_completed`, `budget_alert_shown`, `budget_exceeded`, `event_closed`, `expenses_transferred`, `monthly_report_viewed` · pendientes: `onboarding_completed` y eventos de las pantallas por construir |
 | Configuración de PWA y despliegue en Vercel | Pendiente |
 
@@ -927,6 +933,7 @@ Una funcionalidad está lista cuando cumple **todo** lo siguiente:
 | 2026-10-24 | 1.8 | **Alcance:** se aprueban "Mis cuentas" y "Metas conectadas a cuentas" (§0). Tablas `accounts`, `account_transfers`, `savings_contributions`; columnas `movements.account_id`, `receivables.collected_account_id`, `savings_goals.icon`; vista `vw_account_balances`; `create_split_expense` recibe la cuenta; "Efectivo" automático para cada usuario (schema.sql §12). Pantalla `/cuentas`. Telemetría `account_created`, `transfer_created`, `savings_contribution_added` |
 | 2026-10-24 | 1.9 | Metas de ahorro (§0, alcance congelado): pantalla `/metas` según el diseño, abonos y retiros desde una cuenta, tarjeta en Inicio. Telemetría `savings_goal_created` y `savings_contribution_added` |
 | 2026-10-24 | 1.10 | Modo oscuro (claro / oscuro / horario programable) en el menú del avatar. Los colores que cambian con el tema pasan a variables CSS (`styles/globals.css`); `bg-white` → `bg-surface`. Estilo visual tomado de referencias: navegación flotante, montos con centavos chicos, resplandor, vidrio y boletos |
+| 2026-10-31 | 1.11 | Landing pública en `/` (smoke test con lista de espera y telemetría) y "¿Olvidaste tu contraseña?" (`/recuperar`, `/auth/confirm`, `/nueva-contrasena`). El logo de las pantallas de acceso vuelve a la landing |
 
 ---
 

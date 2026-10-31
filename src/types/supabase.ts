@@ -33,6 +33,7 @@ import type {
   EventTaskUpdate,
   EventUpdate,
   MonthlySummaryRow,
+  PlanName,
   MovementInsert,
   MovementRow,
   MovementUpdate,
@@ -62,6 +63,8 @@ import type { SavingsContributionInsert, SavingsContributionRow } from './goal';
 // Solo las llaves foráneas entre tablas de `public`: supabase-js las usa
 // para tipar selects anidados como select('*, categories(name, icon)').
 // Los nombres son los que Postgres pone por defecto: <tabla>_<columna>_fkey.
+type WaitlistInsert = { email: string; plan_interest?: PlanName | null; source?: string | null };
+
 export type Database = {
   public: {
     Tables: {
@@ -148,6 +151,8 @@ export type Database = {
         Update: never;
         Relationships: [];
       };
+      // Lista de espera de la landing: solo INSERT público (sin SELECT).
+      waitlist: { Row: Record<string, never>; Insert: WaitlistInsert; Update: never; Relationships: [] };
       // Sin SELECT por API: Row vacía para que nadie intente leerla.
       analytics_events: {
         Row: Record<string, never>;

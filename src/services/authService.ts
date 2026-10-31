@@ -104,3 +104,18 @@ export function escucharCierreDeSesion(alCerrar: () => void): () => void {
   });
   return () => data.subscription.unsubscribe();
 }
+
+// "¿Olvidaste tu contraseña?": Supabase manda un correo con un enlace
+// que vuelve a /auth/confirm y de ahí a /nueva-contrasena. Si el correo
+// no existe, Supabase igual responde bien: así nadie puede averiguar qué
+// correos tienen cuenta.
+export async function pedirRecuperacion(correo: string, volverA: string): Promise<void> {
+  const { error } = await supabase.auth.resetPasswordForEmail(correo, { redirectTo: volverA });
+  if (error) fallar(error);
+}
+
+// Solo funciona con la sesión que abre el enlace del correo.
+export async function cambiarContrasena(nueva: string): Promise<void> {
+  const { error } = await supabase.auth.updateUser({ password: nueva });
+  if (error) fallar(error);
+}

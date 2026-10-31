@@ -17,6 +17,10 @@
 export const RUTA_INICIO = '/inicio';
 export const RUTA_LOGIN = '/login';
 export const RUTA_REGISTRO = '/registro';
+export const RUTA_RECUPERAR = '/recuperar';
+// Fuera de las dos listas: se llega CON la sesión que abre el enlace del correo.
+export const RUTA_NUEVA_CONTRASENA = '/nueva-contrasena';
+export const RUTA_LANDING = '/';
 export const RUTA_POR_COBRAR = '/por-cobrar';
 export const RUTA_CUENTAS = '/cuentas';
 export const RUTA_METAS = '/metas';
@@ -25,7 +29,7 @@ export const RUTA_METAS = '/metas';
 export const RUTAS_PROTEGIDAS = [RUTA_INICIO, '/dinero', '/eventos', '/reportes', RUTA_POR_COBRAR, RUTA_CUENTAS, RUTA_METAS];
 
 // Quien ya tiene sesión no necesita ver estas: se le manda a /inicio.
-export const RUTAS_DE_AUTH = [RUTA_LOGIN, RUTA_REGISTRO];
+export const RUTAS_DE_AUTH = [RUTA_LOGIN, RUTA_REGISTRO, RUTA_RECUPERAR];
 
 // Navegación COMPLETA (recarga la página) para los cambios de sesión:
 // login, registro y cierre de sesión. Con router.replace() + refresh()

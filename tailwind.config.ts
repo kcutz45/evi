@@ -58,6 +58,11 @@ const config: Config = {
           '70%': { transform: 'scale(1.08)', opacity: '1' },
           '100%': { transform: 'scale(1)', opacity: '1' },
         },
+        // El celular de la landing flota suavemente.
+        flota: {
+          '0%, 100%': { transform: 'translateY(0)' },
+          '50%': { transform: 'translateY(-12px)' },
+        },
         // Cada paso del registro entra deslizándose desde la derecha.
         'step-in': {
           from: { transform: 'translateX(24px)', opacity: '0' },
@@ -71,6 +76,7 @@ const config: Config = {
         dash: 'dash 1.4s linear infinite',
         pop: 'pop 0.45s cubic-bezier(0.22,1,0.36,1) both',
         'step-in': 'step-in 0.28s cubic-bezier(0.22,1,0.36,1) both',
+        flota: 'flota 5s ease-in-out infinite',
       },
     },
   },

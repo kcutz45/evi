@@ -19,7 +19,7 @@ import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { useAuth } from '@/hooks/useAuth';
 import { useZodForm } from '@/hooks/useZodForm';
-import { RUTA_INICIO, RUTA_REGISTRO, navegarConRecarga } from '@/lib/routes';
+import { RUTA_INICIO, RUTA_RECUPERAR, RUTA_REGISTRO, navegarConRecarga } from '@/lib/routes';
 import { loginSchema } from '@/types/auth';
 import { AuthHeading, FormAlert } from './AuthHeading';
 import { PasswordInput } from './PasswordInput';
@@ -51,6 +51,9 @@ export function LoginForm() {
       <PasswordInput label="Contraseña" autoComplete="current-password" value={form.valores.contrasena}
         error={form.errores.contrasena} onChange={(e) => form.cambiar('contrasena', e.target.value)}
         onBlur={() => form.salir('contrasena')} />
+      <Link href={RUTA_RECUPERAR} className="-mt-2 self-end text-[13px] font-extrabold text-primary">
+        ¿Olvidaste tu contraseña?
+      </Link>
       <FormAlert message={aviso} />
       <Button type="submit" size="lg" fullWidth disabled={isSending}>
         {isSending ? 'Entrando…' : 'Iniciar sesión'}

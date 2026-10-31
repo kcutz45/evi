@@ -43,7 +43,19 @@ export const loginSchema = z.object({
   contrasena: z.string().min(1, 'Escribí tu contraseña'),
 });
 
+export const recuperarSchema = z.object({ correo });
+
+// Contraseña nueva: misma regla que al registrarse, escrita dos veces.
+// (Que las dos coincidan lo revisa el formulario: useZodForm trabaja
+// campo por campo.)
+export const nuevaContrasenaSchema = z.object({
+  contrasena: z.string().min(PASSWORD_MIN_LENGTH, `Mínimo ${PASSWORD_MIN_LENGTH} caracteres`),
+  repetir: z.string().min(1, 'Escribila otra vez'),
+});
+
 export type RegistroDatos = z.infer<typeof registroSchema>;
+export type RecuperarDatos = z.infer<typeof recuperarSchema>;
+export type NuevaContrasenaDatos = z.infer<typeof nuevaContrasenaSchema>;
 export type LoginDatos = z.infer<typeof loginSchema>;
 
 // requiereConfirmacion: Supabase creó la cuenta pero no abrió sesión

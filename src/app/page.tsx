@@ -1,18 +1,45 @@
 /**
- * page.tsx (raíz)
+ * page.tsx (raíz) — Landing pública
  * ---------------------------------------------------------------
- * TEMPORAL: mientras no exista la landing (app/(marketing)/page.tsx),
- *           la raíz manda a /inicio. Si no hay sesión, el middleware
- *           redirige a /login. Es también a donde llega el usuario
- *           después de confirmar su correo desde el enlace de Supabase.
- *           Borrar este archivo cuando se cree la landing: ambos usan "/".
+ * PROPÓSITO: Página de inicio de EVI (§3, pantalla 1): propuesta de
+ *            valor, Sin EVI / Con EVI, beneficios, precios y lista de
+ *            espera. Arriba, "Iniciar sesión" para quien ya tiene cuenta.
  *
- * NOTA:     /demo sigue disponible escribiendo la ruta a mano.
+ * POR QUÉ EXISTE: Es el smoke test: valida si la gente quiere EVI antes
+ *            de terminarlo. Es estática (rápida y buena para buscadores);
+ *            solo el formulario y la telemetría corren en el navegador.
+ *            Quien ya tiene sesión no la ve: el middleware lo manda a
+ *            /inicio (así también funciona el enlace de confirmar correo).
+ *
+ * NOTA:      /demo sigue disponible escribiendo la ruta a mano.
  * ---------------------------------------------------------------
  */
-import { redirect } from 'next/navigation';
-import { RUTA_INICIO } from '@/lib/routes';
+import type { Metadata } from 'next';
+import { Hero } from '@/components/landing/Hero';
+import { LandingHeader } from '@/components/landing/LandingHeader';
+import { ListaEspera, PieLanding } from '@/components/landing/ListaEspera';
+import { Precios } from '@/components/landing/Precios';
+import { Beneficios, ProblemaSolucion } from '@/components/landing/ProblemaYBeneficios';
+import { TelemetriaLanding } from '@/components/landing/TelemetriaLanding';
 
-export default function RootPage() {
-  redirect(RUTA_INICIO);
+export const metadata: Metadata = {
+  title: 'EVI — Tus eventos y tu dinero, en un solo lugar',
+  description: 'Organizá tus eventos y llevá tus quetzales al día desde la misma app. Gratis para empezar, hecho en Guatemala.',
+};
+
+export default function LandingPage() {
+  return (
+    <div className="min-h-dvh bg-light">
+      <LandingHeader />
+      <main>
+        <Hero />
+        <ProblemaSolucion />
+        <Beneficios />
+        <Precios />
+        <ListaEspera />
+      </main>
+      <PieLanding />
+      <TelemetriaLanding />
+    </div>
+  );
 }

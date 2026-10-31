@@ -24,6 +24,9 @@ const MENSAJES: Record<string, string> = {
   over_email_send_rate_limit: 'Demasiados intentos. Esperá unos minutos y probá de nuevo.',
   over_request_rate_limit: 'Demasiados intentos. Esperá unos minutos y probá de nuevo.',
   signup_disabled: 'El registro de cuentas está desactivado por ahora.',
+  same_password: 'La contraseña nueva tiene que ser distinta de la anterior.',
+  session_not_found: 'El enlace ya venció. Pedí uno nuevo.',
+  otp_expired: 'El enlace ya venció. Pedí uno nuevo.',
 };
 
 const MENSAJE_GENERICO = 'No pudimos completar la acción. Intentá de nuevo.';
