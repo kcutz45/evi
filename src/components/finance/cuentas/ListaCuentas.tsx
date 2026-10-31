@@ -10,7 +10,7 @@
  * ---------------------------------------------------------------
  */
 import Link from 'next/link';
-import { ChevronRight } from 'lucide-react';
+import { ChevronRight, Settings } from 'lucide-react';
 import { AppIcon } from '@/components/ui/AppIcon';
 import { Brillo } from '@/components/ui/Brillo';
 import { Card } from '@/components/ui/Card';
@@ -55,15 +55,29 @@ export function ListaCuentas({ cuentas }: { cuentas: Cuenta[] }) {
   );
 }
 
+interface EncabezadoCuentaProps {
+  cuenta: Cuenta;
+  entro: number;
+  salio: number;
+  // La tuerquita abre "Opciones de la cuenta" (corregir saldo, quitar).
+  onOpciones: () => void;
+}
+
 // Encabezado del historial de UNA cuenta: nombre, saldo y lo que entró
 // y salió (de lo que muestra el historial).
-export function EncabezadoCuenta({ cuenta, entro, salio }: { cuenta: Cuenta; entro: number; salio: number }) {
+export function EncabezadoCuenta({ cuenta, entro, salio, onOpciones }: EncabezadoCuentaProps) {
   return (
     <Card variant="hero" className="p-5">
       <Brillo />
-      <span className="relative flex items-center gap-2 text-[13px] font-bold uppercase tracking-wider text-white/75">
-        <AppIcon name={cuenta.icono} size={16} /> {cuenta.nombre}
-      </span>
+      <div className="relative flex items-center justify-between gap-2">
+        <span className="flex items-center gap-2 text-[13px] font-bold uppercase tracking-wider text-white/75">
+          <AppIcon name={cuenta.icono} size={16} /> {cuenta.nombre}
+        </span>
+        <button type="button" onClick={onOpciones} aria-label="Opciones de la cuenta"
+          className="vidrio grid h-9 w-9 flex-none place-items-center rounded-full transition hover:bg-white/20 hover:rotate-45">
+          <Settings size={18} aria-hidden />
+        </button>
+      </div>
       <MontoGrande monto={cuenta.saldo} className="relative mt-2 text-[42px] text-mint" />
       <div className="relative mt-4 grid grid-cols-2 gap-2.5">
         <span className="vidrio flex flex-col rounded-2xl px-3 py-2.5">
