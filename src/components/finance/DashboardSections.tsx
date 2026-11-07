@@ -54,7 +54,7 @@ interface RecentMovementsSectionProps {
 
 export function RecentMovementsSection({ movements, isLoading, error, onRetry }: RecentMovementsSectionProps) {
   return (
-    <section className="mt-6 flex flex-col gap-3">
+    <section className="mt-6 flex flex-col gap-3 lg:mt-0">
       <div className="flex items-baseline justify-between">
         <h2 className="text-lg font-black tracking-tight">Últimos movimientos</h2>
         <Link href="/dinero" className="text-[13px] font-extrabold text-primary">Ver todo</Link>

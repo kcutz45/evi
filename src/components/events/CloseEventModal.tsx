@@ -38,12 +38,12 @@ export function CloseEventModal(props: CloseEventModalProps) {
   if (!props.isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex flex-col justify-end">
+    <div className="hoja-marco">
       <button type="button" aria-label="Cancelar cierre" onClick={props.onCancel}
         className="absolute inset-0 bg-black/70 backdrop-blur-[1.5px]" />
       <div role="dialog" aria-modal="true" aria-labelledby="close-event-title"
-        className="relative mx-auto max-h-full w-full max-w-md animate-sheet-in overflow-y-auto rounded-t-sheet bg-light px-5 pb-6 pt-2 shadow-float motion-reduce:animate-none">
-        <div aria-hidden className="mx-auto mb-3.5 h-[5px] w-11 rounded-full bg-line" />
+        className="hoja-panel max-h-full overflow-y-auto px-5 pb-6 pt-2 md:pt-5">
+        <div aria-hidden className="mx-auto mb-3.5 h-[5px] w-11 rounded-full bg-line md:hidden" />
         <ModalTitle eventName={props.eventName} />
         <CloseEventSummary planned={props.planned} actual={props.actual} />
         <div className="mt-2.5 rounded-[22px] bg-surface px-4 py-3.5 shadow-card">

@@ -63,13 +63,13 @@ export default function DineroPage() {
   return (
     <PageContainer floatingAction={<AddMovementButton onClick={a.abrirCrear} />}>
       <Header title="Dinero" subtitle="Todo lo que entró y salió, mes a mes." />
-      <div className="flex flex-col gap-4">
-        <MonthHeader etiqueta={etiquetaDeMes(mes)} puedeAvanzar={mes < mesActual} onAnterior={() => cambiarMes(-1)}
-          onSiguiente={() => cambiarMes(1)} ingresos={resumen.data.income} egresos={resumen.data.expense}
-          isLoading={resumen.isLoading} />
-        <MovementFilters filtro={filtro} categorias={categoriasPresentes(lista.data)} onCambiar={setFiltro} />
-        {lista.error && <p role="alert" className="text-sm font-bold text-gold-dark">{lista.error}</p>}
-        <MovementDayGroups grupos={agruparPorDia(filtrarMovimientos(lista.data, filtro))}
+      <div className="flex flex-col gap-4 lg:grid lg:grid-cols-[340px_minmax(0,1fr)] lg:items-start lg:gap-6">
+        <div className="flex min-w-0 flex-col gap-4 lg:sticky lg:top-0">
+          <MonthHeader etiqueta={etiquetaDeMes(mes)} puedeAvanzar={mes < mesActual} onAnterior={() => cambiarMes(-1)}
+            onSiguiente={() => cambiarMes(1)} ingresos={resumen.data.income} egresos={resumen.data.expense} isLoading={resumen.isLoading} />
+          <MovementFilters filtro={filtro} categorias={categoriasPresentes(lista.data)} onCambiar={setFiltro} />
+        </div>
+        <MovementDayGroups grupos={agruparPorDia(filtrarMovimientos(lista.data, filtro))} error={lista.error}
           isLoading={lista.isLoading} hayFiltro={filtro.tipo !== null || filtro.categoriaId !== null} onElegir={a.setSeleccionado} />
       </div>
       {a.seleccionado && !a.wizard && (

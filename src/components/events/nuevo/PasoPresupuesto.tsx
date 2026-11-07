@@ -14,7 +14,7 @@ import { cn } from '@/lib/cn';
 
 export function PasoPresupuesto({ calc }: { calc: ReturnType<typeof useCalculator> }) {
   return (
-    <div className="flex min-h-0 flex-1 flex-col justify-between gap-3 px-4">
+    <div className="flex min-h-0 flex-1 flex-col justify-between gap-3 overflow-y-auto px-4 bajo:flex-row bajo:items-center">
       <div className="flex flex-1 flex-col items-center justify-center" aria-live="polite">
         <output className={cn('tabular text-[52px] font-black leading-none tracking-tighter',
           calc.estaVacio ? 'text-line' : 'text-dark')}>

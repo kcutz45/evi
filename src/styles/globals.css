@@ -64,6 +64,18 @@
   }
 }
 
+@layer components {
+  /* Hojas: suben desde abajo en el celular; desde tablet son una ventana
+     centrada (una hoja pegada abajo se ve perdida en pantalla grande). */
+  .hoja-marco {
+    @apply fixed inset-0 z-50 flex flex-col justify-end md:items-center md:justify-center md:p-6;
+  }
+
+  .hoja-panel {
+    @apply relative mx-auto w-full max-w-md animate-sheet-in rounded-t-sheet bg-light shadow-float motion-reduce:animate-none md:mx-0 md:rounded-sheet;
+  }
+}
+
 @layer utilities {
   /* En oscuro, el morado de marca se aclara para leerse como texto
      (#A98BFF del diseño). Los botones morados no cambian. */

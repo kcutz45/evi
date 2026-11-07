@@ -49,7 +49,9 @@ export default function PorCobrarPage() {
           <div key={i} aria-busy className="h-32 animate-pulse rounded-card bg-surface/70" />
         ))}
         {!deudas.isLoading && personas.length === 0 && <SinDeudas />}
-        {personas.map((p) => <TarjetaPersona key={p.clave} persona={p} {...acciones} />)}
+        <div className="grid items-start gap-3 empty:hidden md:grid-cols-2">
+          {personas.map((p) => <TarjetaPersona key={p.clave} persona={p} {...acciones} />)}
+        </div>
         <ListaCobradas deudas={cobradas(deudas.data)} {...acciones} />
       </div>
       {cobro.deuda && (

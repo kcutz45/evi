@@ -49,12 +49,12 @@ export default function EventosPage() {
       <AddMovementButton label="Crear evento" onClick={() => setCreandoNuevo(true)} />
     )}>
       <Header title="Mis eventos" subtitle="Presupuesto y tareas de cada plan." />
-      <div className="flex flex-col gap-3">
-        <FormAlert message={eventos.error} />
+      <div className="grid gap-3 md:grid-cols-2">
+        <div className="empty:hidden md:col-span-2"><FormAlert message={eventos.error} /></div>
         {eventos.isLoading && Array.from({ length: FILAS_DE_CARGA }, (_, i) => (
           <div key={i} aria-busy className="h-44 animate-pulse rounded-card bg-surface/70" />
         ))}
-        {vacio && <EventsEmptyState onCreate={() => setCreandoNuevo(true)} />}
+        {vacio && <div className="md:col-span-2"><EventsEmptyState onCreate={() => setCreandoNuevo(true)} /></div>}
         {activos.map((e) => <EventCard key={e.id} event={e} />)}
         <Cerrados eventos={cerrados} />
       </div>
@@ -69,8 +69,8 @@ export default function EventosPage() {
 function Cerrados({ eventos }: { eventos: EventoDetalle[] }) {
   if (eventos.length === 0) return null;
   return (
-    <section className="mt-3 flex flex-col gap-2.5">
-      <h2 className="text-xs font-black uppercase tracking-widest text-muted-soft">Cerrados</h2>
+    <section className="mt-3 grid gap-2.5 md:col-span-2 md:grid-cols-2">
+      <h2 className="text-xs font-black uppercase tracking-widest text-muted-soft md:col-span-2">Cerrados</h2>
       {eventos.map((e) => <ClosedEventCard key={e.id} event={e} />)}
     </section>
   );

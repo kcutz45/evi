@@ -31,7 +31,7 @@ export function PasoCalculadora({ montoInicial, onUsar }: PasoCalculadoraProps) 
   const calc = useCalculator(montoInicial ?? undefined);
 
   return (
-    <div className="flex min-h-0 flex-1 animate-step-in flex-col motion-reduce:animate-none">
+    <div className="flex min-h-0 flex-1 animate-step-in flex-col motion-reduce:animate-none bajo:flex-row">
       <div className="mx-5 flex flex-1 flex-col items-end justify-end gap-2 rounded-card bg-noche px-5 py-5 text-white"
         aria-live="polite">
         <span className="min-h-6 break-all text-right text-lg font-bold text-white/60">{calc.operacion ?? ' '}</span>
@@ -40,7 +40,7 @@ export function PasoCalculadora({ montoInicial, onUsar }: PasoCalculadoraProps) 
           {calc.total}
         </output>
       </div>
-      <div className="flex flex-col gap-3 px-4 pb-5 pt-4">
+      <div className="flex flex-col gap-3 px-4 pb-5 pt-4 bajo:w-1/2 bajo:gap-2 bajo:overflow-y-auto bajo:pb-2 bajo:pt-0">
         <CalculatorKeypad onTecla={calc.presionar} conOperaciones />
         <Button variant="mint" size="lg" fullWidth disabled={!calc.esValido}
           onClick={() => calc.valor !== null && onUsar(calc.valor)} icon={<CornerDownLeft size={20} strokeWidth={2.6} />}>

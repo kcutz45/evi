@@ -43,7 +43,7 @@ interface PasoMontoProps {
 export function PasoMonto(props: PasoMontoProps) {
   const { calc } = props;
   return (
-    <div className="flex min-h-0 flex-1 animate-step-in flex-col motion-reduce:animate-none">
+    <div className="flex min-h-0 flex-1 animate-step-in flex-col motion-reduce:animate-none bajo:flex-row">
       <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto px-5">
         {props.categoria && <ChipCategoria categoria={props.categoria} onCambiar={props.onCambiarCategoria} />}
         <div className="flex flex-col items-center py-2" aria-live="polite">
@@ -67,7 +67,7 @@ export function PasoMonto(props: PasoMontoProps) {
         <DetallesOpcionales {...props.detalles} />
         {props.error && <p role="alert" className="text-center text-xs font-bold text-gold-dark">{props.error}</p>}
       </div>
-      <div className="flex flex-col gap-3 px-4 pb-5 pt-3">
+      <div className="flex flex-col gap-3 px-4 pb-5 pt-3 bajo:w-1/2 bajo:gap-2 bajo:overflow-y-auto bajo:pb-2 bajo:pt-0">
         <CalculatorKeypad onTecla={calc.presionar} />
         <Button variant="mint" size="lg" fullWidth disabled={!calc.esValido || props.guardando}
           onClick={props.onGuardar} icon={<Check size={21} strokeWidth={2.6} />}>

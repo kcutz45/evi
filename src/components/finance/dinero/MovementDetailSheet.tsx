@@ -38,11 +38,11 @@ export function MovementDetailSheet({ movimiento: m, ocupado, error, onEditar, o
   const esIngreso = m.type === 'ingreso';
 
   return (
-    <div className="fixed inset-0 z-50 flex flex-col justify-end">
+    <div className="hoja-marco">
       <button type="button" aria-label="Cerrar detalle" onClick={onCerrar} className="absolute inset-0 bg-black/60" />
       <div role="dialog" aria-modal="true" aria-label="Detalle del movimiento"
-        className="relative mx-auto w-full max-w-md animate-sheet-in rounded-t-sheet bg-light px-5 pb-6 pt-2 motion-reduce:animate-none">
-        <div aria-hidden className="mx-auto mb-4 h-[5px] w-11 rounded-full bg-line" />
+        className="hoja-panel max-h-[92dvh] overflow-y-auto px-5 pb-6 pt-2 md:pt-5">
+        <div aria-hidden className="mx-auto mb-4 h-[5px] w-11 rounded-full bg-line md:hidden" />
         <div className="flex flex-col items-center gap-2 text-center">
           <span className={cn('grid h-14 w-14 place-items-center rounded-tile',
             esIngreso ? 'bg-mint-soft text-mint-dark' : 'bg-primary-soft text-primary')}>

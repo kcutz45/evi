@@ -35,14 +35,14 @@ import { useActiveEvents } from '@/hooks/useActiveEvents';
 import { useAuth } from '@/hooks/useAuth';
 import { useCategories } from '@/hooks/useCategories';
 import { useCategoryUsage } from '@/hooks/useCategoryUsage';
-import { useGoals } from '@/hooks/useGoals';
+import { useGoals, type EstadoMetas } from '@/hooks/useGoals';
 import { useMonthlySummary } from '@/hooks/useMonthlySummary';
 import { useMovements } from '@/hooks/useMovements';
 import { useReceivablesSummary } from '@/hooks/useReceivables';
 import { nombreDelMes, saludoGT } from '@/lib/dates';
 import type { Category } from '@/types/category';
 import type { MovementDraft } from '@/types/movement';
-import type { Deudor } from '@/types/receivable';
+import type { Deudor, ResumenPorCobrar } from '@/types/receivable';
 
 export default function InicioPage() {
   const { perfil, cerrarSesion } = useAuth();
@@ -63,14 +63,17 @@ export default function InicioPage() {
     <PageContainer floatingAction={<AddMovementButton onClick={registro.abrir} />}>
       <Header eyebrow={saludoGT()} title={nombre || 'qué gusto verte'}
         action={<UserMenu nombre={nombre} plan={perfil?.plan ?? null} onLogout={cerrarSesion} />} />
-      <BalanceSection monthLabel={nombreDelMes(resumen.inicioDeMes)} {...resumen.data}
-        isLoading={resumen.isLoading || cuentas.isLoading} error={resumen.error} isHidden={isHidden}
-        dinero={cuentas.error || cuentas.data.length === 0 ? null : cuentas.total}
-        onToggleHidden={() => setIsHidden((oculto) => !oculto)} onRetry={resumen.recargar} />
-      <TeDebenCard resumen={teDeben.data} />
-      <MetasCard metas={metas.data.length} totalAhorrado={metas.totalAhorrado} isHidden={isHidden} />
-      <RecentMovementsSection movements={movimientos.data} isLoading={movimientos.isLoading}
-        error={movimientos.error} onRetry={movimientos.recargar} />
+      <div className="lg:grid lg:grid-cols-2 lg:items-start lg:gap-6">
+        <div>
+          <BalanceSection monthLabel={nombreDelMes(resumen.inicioDeMes)} {...resumen.data}
+            isLoading={resumen.isLoading || cuentas.isLoading} error={resumen.error} isHidden={isHidden}
+            dinero={cuentas.error || cuentas.data.length === 0 ? null : cuentas.total}
+            onToggleHidden={() => setIsHidden((oculto) => !oculto)} onRetry={resumen.recargar} />
+          <TarjetasDeInicio teDeben={teDeben.data} metas={metas} isHidden={isHidden} />
+        </div>
+        <RecentMovementsSection movements={movimientos.data} isLoading={movimientos.isLoading}
+          error={movimientos.error} onRetry={movimientos.recargar} />
+      </div>
       {registro.abierto && (
         <RegistroWizard categorias={categorias} onCrearCategoria={cats.crear} creandoCategoria={cats.creando}
           errorCategoria={cats.errorCrear} usos={usos.data} eventosActivos={eventos}
@@ -78,6 +81,16 @@ export default function InicioPage() {
           onGuardar={registro.guardar} onCerrar={registro.cerrar} />
       )}
     </PageContainer>
+  );
+}
+
+// "Te deben" y "Mis metas": lado a lado en tablet, una sobre otra en PC.
+function TarjetasDeInicio({ teDeben, metas, isHidden }: { teDeben: ResumenPorCobrar; metas: EstadoMetas; isHidden: boolean }) {
+  return (
+    <div className="md:grid md:grid-cols-2 md:gap-3 lg:grid-cols-1 lg:gap-0">
+      <TeDebenCard resumen={teDeben} />
+      <MetasCard metas={metas.data.length} totalAhorrado={metas.totalAhorrado} isHidden={isHidden} />
+    </div>
   );
 }
 

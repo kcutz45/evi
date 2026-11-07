@@ -17,12 +17,14 @@ const FILAS_DE_CARGA = 4;
 
 interface MovementDayGroupsProps {
   grupos: GrupoDelDia[];
+  error?: string | null;
   isLoading: boolean;
   hayFiltro: boolean;
   onElegir: (mov: MovementDetalle) => void;
 }
 
-export function MovementDayGroups({ grupos, isLoading, hayFiltro, onElegir }: MovementDayGroupsProps) {
+export function MovementDayGroups({ grupos, error, isLoading, hayFiltro, onElegir }: MovementDayGroupsProps) {
+  if (error) return <p role="alert" className="text-sm font-bold text-gold-dark">{error}</p>;
   if (isLoading) {
     return (
       <div aria-busy className="flex flex-col gap-2.5">

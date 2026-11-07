@@ -45,19 +45,21 @@ export default function CuentasPage() {
         <ArrowLeft size={17} aria-hidden /> Inicio
       </Link>
       <Header title="Mis cuentas" subtitle="Dónde tenés tu dinero. Tocá una cuenta para ver su historial." />
-      <div className="flex flex-col gap-4">
-        <FormAlert message={c.error && !hoja ? c.error : null} />
-        {c.isLoading ? <div aria-busy className="h-32 animate-pulse rounded-card bg-primary/20" /> : (
-          <TotalCuentas total={c.total} cuentas={c.data.length} />
-        )}
-        <div className="grid grid-cols-2 gap-2.5">
-          <Button variant="soft" icon={<Plus size={18} strokeWidth={2.6} />} onClick={() => setHoja({ tipo: 'nueva' })}>
-            Nueva cuenta
-          </Button>
-          <Button variant="soft" icon={<ArrowLeftRight size={18} strokeWidth={2.4} />} disabled={c.data.length < 2}
-            onClick={() => setHoja({ tipo: 'transferir' })}>
-            Transferir
-          </Button>
+      <div className="flex flex-col gap-4 lg:grid lg:grid-cols-2 lg:items-start lg:gap-6">
+        <div className="flex min-w-0 flex-col gap-4">
+          <FormAlert message={c.error && !hoja ? c.error : null} />
+          {c.isLoading ? <div aria-busy className="h-32 animate-pulse rounded-card bg-primary/20" /> : (
+            <TotalCuentas total={c.total} cuentas={c.data.length} />
+          )}
+          <div className="grid grid-cols-2 gap-2.5">
+            <Button variant="soft" icon={<Plus size={18} strokeWidth={2.6} />} onClick={() => setHoja({ tipo: 'nueva' })}>
+              Nueva cuenta
+            </Button>
+            <Button variant="soft" icon={<ArrowLeftRight size={18} strokeWidth={2.4} />} disabled={c.data.length < 2}
+              onClick={() => setHoja({ tipo: 'transferir' })}>
+              Transferir
+            </Button>
+          </div>
         </div>
         <ListaCuentas cuentas={c.data} />
       </div>

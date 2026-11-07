@@ -44,12 +44,16 @@ export default function ReportesPage() {
         )}
         {!cargando && !r.error && (
           <>
-            <TotalGastado total={r.total} comparacion={r.comparacion} nombreMesAnterior={nombreDelMes(r.mesAnterior)} />
-            <MonthlyChart slices={r.slices} />
-            <DesgloseCategorias slices={r.slices} />
-            {r.mayor && (
-              <ResumenDelMes mayor={r.mayor} total={r.total} promedioDiario={r.promedioMayor} desdeEventos={r.desdeEventos} />
-            )}
+            <div className="grid items-stretch gap-4 lg:grid-cols-2">
+              <TotalGastado total={r.total} comparacion={r.comparacion} nombreMesAnterior={nombreDelMes(r.mesAnterior)} />
+              <MonthlyChart slices={r.slices} />
+            </div>
+            <div className="grid items-start gap-4 lg:grid-cols-2">
+              <DesgloseCategorias slices={r.slices} />
+              {r.mayor && (
+                <ResumenDelMes mayor={r.mayor} total={r.total} promedioDiario={r.promedioMayor} desdeEventos={r.desdeEventos} />
+              )}
+            </div>
           </>
         )}
       </div>

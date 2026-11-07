@@ -68,24 +68,26 @@ function DetalleEvento({ evento, ev }: { evento: EventoDetalle; ev: EstadoEvento
 
   return (
     <PageContainer>
-      <EventoEncabezado evento={evento} />
-      <div className="flex flex-col gap-3 pb-4">
-        <PestanasEvento activa={pestana} tareasPendientes={pendientes} gastos={ev.gastos.data.length} onCambiar={setPestana} />
-        <div role="tabpanel" id={`panel-${pestana}`} aria-labelledby={`tab-${pestana}`}>
-          {pestana === 'tareas' ? (
-            <PanelTareas tareas={tareas.data} cargando={tareas.isLoading} error={tareas.error ?? tareas.errorTarea}
-              soloLectura={!activo} onAlternar={tareas.alternar} onAgregar={tareas.agregar} />
-          ) : (
-            <PanelGastos gastos={ev.gastos.data} cargando={ev.gastos.isLoading} error={ev.gastos.error}
-              onAgregar={activo ? registro.abrir : null} />
+      <div className="lg:grid lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)] lg:items-start lg:gap-6">
+        <EventoEncabezado evento={evento} />
+        <div className="flex min-w-0 flex-col gap-3 pb-4 lg:pt-[52px]">
+          <PestanasEvento activa={pestana} tareasPendientes={pendientes} gastos={ev.gastos.data.length} onCambiar={setPestana} />
+          <div role="tabpanel" id={`panel-${pestana}`} aria-labelledby={`tab-${pestana}`}>
+            {pestana === 'tareas' ? (
+              <PanelTareas tareas={tareas.data} cargando={tareas.isLoading} error={tareas.error ?? tareas.errorTarea}
+                soloLectura={!activo} onAlternar={tareas.alternar} onAgregar={tareas.agregar} />
+            ) : (
+              <PanelGastos gastos={ev.gastos.data} cargando={ev.gastos.isLoading} error={ev.gastos.error}
+                onAgregar={activo ? registro.abrir : null} />
+            )}
+          </div>
+          {activo && (
+            <Button variant="mint" size="lg" fullWidth className="mt-2" onClick={cierre.abrir}
+              icon={<CircleCheck size={20} strokeWidth={2.4} />}>
+              Cerrar evento
+            </Button>
           )}
         </div>
-        {activo && (
-          <Button variant="mint" size="lg" fullWidth className="mt-2" onClick={cierre.abrir}
-            icon={<CircleCheck size={20} strokeWidth={2.4} />}>
-            Cerrar evento
-          </Button>
-        )}
       </div>
       <CloseEventModal isOpen={cierre.abierto} eventName={evento.name} planned={evento.plannedBudget}
         actual={evento.spentAmount} expensesCount={evento.expensesCount}

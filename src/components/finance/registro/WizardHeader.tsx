@@ -24,7 +24,7 @@ interface WizardHeaderProps {
 export function WizardHeader(props: WizardHeaderProps) {
   const puedeVolver = props.onVolver !== null;
   return (
-    <header className="flex flex-col gap-4 px-5 pb-4 pt-4">
+    <header className="flex flex-col gap-4 px-5 pb-4 pt-4 bajo:gap-1 bajo:pb-2 bajo:pt-2">
       <div className="flex items-center gap-3">
         <button type="button" onClick={props.onVolver ?? props.onCerrar}
           aria-label={puedeVolver ? 'Volver al paso anterior' : 'Cerrar sin guardar'}
@@ -40,8 +40,8 @@ export function WizardHeader(props: WizardHeaderProps) {
         )}
       </div>
       <div className="flex flex-col gap-1">
-        <h2 className="text-[26px] font-black leading-tight tracking-tight">{props.titulo}</h2>
-        <p className="text-sm font-semibold text-muted">{props.subtitulo}</p>
+        <h2 className="text-[26px] font-black leading-tight tracking-tight bajo:text-lg">{props.titulo}</h2>
+        <p className="text-sm font-semibold text-muted bajo:hidden">{props.subtitulo}</p>
       </div>
     </header>
   );

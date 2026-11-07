@@ -24,11 +24,11 @@ interface HojaProps {
 export function Hoja({ titulo, subtitulo, onCerrar, children }: HojaProps) {
   const idTitulo = useId();
   return (
-    <div className="fixed inset-0 z-50 flex flex-col justify-end">
+    <div className="hoja-marco">
       <button type="button" aria-label="Cerrar" onClick={onCerrar} className="absolute inset-0 bg-black/60" />
       <div role="dialog" aria-modal="true" aria-labelledby={idTitulo}
-        className="relative mx-auto max-h-[88dvh] w-full max-w-md animate-sheet-in overflow-y-auto rounded-t-sheet bg-light px-5 pb-6 pt-2 shadow-float motion-reduce:animate-none">
-        <div aria-hidden className="mx-auto mb-3.5 h-[5px] w-11 rounded-full bg-line" />
+        className="hoja-panel max-h-[88dvh] overflow-y-auto px-5 pb-6 pt-2 md:pt-5">
+        <div aria-hidden className="mx-auto mb-3.5 h-[5px] w-11 rounded-full bg-line md:hidden" />
         <h2 id={idTitulo} className="text-xl font-black tracking-tight">{titulo}</h2>
         {subtitulo && <p className="mt-0.5 text-[13px] font-semibold text-muted">{subtitulo}</p>}
         <div className="mt-4 flex flex-col gap-3">{children}</div>

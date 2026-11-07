@@ -28,6 +28,30 @@ import { PageContainer } from '@/components/layout/PageContainer';
 import { useAccounts } from '@/hooks/useAccounts';
 import { useHistorialCuenta } from '@/hooks/useHistorialCuenta';
 import { RUTA_CUENTAS } from '@/lib/routes';
+import type { Cuenta } from '@/types/account';
+
+interface ContenidoCuentaProps {
+  cuenta: Cuenta;
+  historial: ReturnType<typeof useHistorialCuenta>;
+  error: string | null;
+  onOpciones: () => void;
+}
+
+// En PC, la tarjeta queda fija a la izquierda y los movimientos a la derecha.
+function ContenidoCuenta({ cuenta, historial, error, onOpciones }: ContenidoCuentaProps) {
+  return (
+    <div className="flex flex-col gap-4 lg:grid lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)] lg:items-start lg:gap-6">
+      <div className="lg:sticky lg:top-0">
+        <EncabezadoCuenta cuenta={cuenta} entro={historial.totales.entro} salio={historial.totales.salio} onOpciones={onOpciones} />
+      </div>
+      <div className="flex min-w-0 flex-col gap-4">
+        <h2 className="text-lg font-black tracking-tight">Movimientos</h2>
+        <FormAlert message={historial.error ?? error} />
+        <HistorialCuenta grupos={historial.grupos} cargando={historial.isLoading} saldoInicial={cuenta.saldoInicial} />
+      </div>
+    </div>
+  );
+}
 
 export default function CuentaPage() {
   const { id } = useParams<{ id: string }>();
@@ -53,13 +77,7 @@ export default function CuentaPage() {
       {c.isLoading && <div aria-busy className="h-44 animate-pulse rounded-card bg-primary/20" />}
       {!c.isLoading && !cuenta && <FormAlert message={c.error ?? 'No encontramos esta cuenta.'} />}
       {cuenta && (
-        <div className="flex flex-col gap-4">
-          <EncabezadoCuenta cuenta={cuenta} entro={historial.totales.entro} salio={historial.totales.salio}
-            onOpciones={() => setHoja('opciones')} />
-          <h2 className="text-lg font-black tracking-tight">Movimientos</h2>
-          <FormAlert message={historial.error ?? (hoja ? null : c.error)} />
-          <HistorialCuenta grupos={historial.grupos} cargando={historial.isLoading} saldoInicial={cuenta.saldoInicial} />
-        </div>
+        <ContenidoCuenta cuenta={cuenta} historial={historial} error={hoja ? null : c.error} onOpciones={() => setHoja('opciones')} />
       )}
       {cuenta && hoja === 'opciones' && (
         <HojaOpcionesCuenta nombre={cuenta.nombre} ocupado={c.guardando} onCorregir={() => setHoja('corregir')}

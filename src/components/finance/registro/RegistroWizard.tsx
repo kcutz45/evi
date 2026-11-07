@@ -9,8 +9,8 @@
  * POR QUÉ EXISTE: Reemplaza al formulario de una sola pantalla, que a
  *            varios usuarios se les complicó (24/10/2026). Une los pasos;
  *            el estado vive en useRegistroWizard y useDivision, y guardar
- *            es trabajo de la página (onGuardar). En escritorio se ve como
- *            columna de celular centrada (max-w-md): MVP móvil primero.
+ *            es trabajo de la página (onGuardar). En tablet y PC se abre
+ *            como ventana centrada (PantallaPasoAPaso).
  *
  * DEPENDE DE: hooks/useRegistroWizard.ts, hooks/useDivision.ts y los
  *            Paso*.tsx de esta carpeta
@@ -20,6 +20,7 @@
 'use client';
 
 import { useState } from 'react';
+import { PantallaPasoAPaso } from '@/components/ui/PantallaPasoAPaso';
 import { useDivision, type Division } from '@/hooks/useDivision';
 import {
   PASOS_NUMERADOS, useRegistroWizard, type ValoresIniciales,
@@ -74,20 +75,18 @@ export function RegistroWizard(props: RegistroWizardProps) {
   const esPrimero = w.paso === (props.eventoFijo ? 'categoria' : 'tipo');
 
   return (
-    <div className="fixed inset-0 z-50 bg-light">
-      <div className="mx-auto flex h-dvh max-w-md flex-col">
-        {w.paso === 'listo' ? (
-          <Exito w={w} g={g} division={division} props={props} esEdicion={esEdicion} />
-        ) : (
-          <>
-            <WizardHeader numeroDePaso={w.numeroDePaso} totalDePasos={PASOS_NUMERADOS.length}
-              {...textosDelPaso(w.paso, w.tipo, esEdicion)} onVolver={esPrimero ? null : w.volver}
-              onCerrar={props.onCerrar} />
-            <CuerpoDelPaso w={w} g={g} division={division} props={props} esEdicion={esEdicion} />
-          </>
-        )}
-      </div>
-    </div>
+    <PantallaPasoAPaso>
+      {w.paso === 'listo' ? (
+        <Exito w={w} g={g} division={division} props={props} esEdicion={esEdicion} />
+      ) : (
+        <>
+          <WizardHeader numeroDePaso={w.numeroDePaso} totalDePasos={PASOS_NUMERADOS.length}
+            {...textosDelPaso(w.paso, w.tipo, esEdicion)} onVolver={esPrimero ? null : w.volver}
+            onCerrar={props.onCerrar} />
+          <CuerpoDelPaso w={w} g={g} division={division} props={props} esEdicion={esEdicion} />
+        </>
+      )}
+    </PantallaPasoAPaso>
   );
 }
 

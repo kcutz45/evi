@@ -35,7 +35,7 @@ export function CalculatorKeypad({ onTecla, conOperaciones = false }: Calculator
         <div className="grid grid-cols-4 gap-2">
           {OPERADORES.map((op) => (
             <button key={op} type="button" onClick={() => onTecla(op)} aria-label={NOMBRE_ACCESIBLE[op]}
-              className="h-12 rounded-[14px] bg-primary text-2xl font-black text-white transition active:scale-95 hover:bg-primary-dark">
+              className="h-12 rounded-[14px] bg-primary bajo:h-9 text-2xl font-black text-white transition active:scale-95 hover:bg-primary-dark">
               {op}
             </button>
           ))}
@@ -47,7 +47,7 @@ export function CalculatorKeypad({ onTecla, conOperaciones = false }: Calculator
           return (
             <button key={tecla} type="button" onClick={() => onTecla(tecla)}
               aria-label={NOMBRE_ACCESIBLE[tecla] ?? tecla}
-              className={cn('grid h-[52px] place-items-center rounded-[16px] text-2xl font-extrabold transition active:scale-95',
+              className={cn('grid h-[52px] place-items-center bajo:h-9 rounded-[16px] text-2xl font-extrabold transition active:scale-95',
                 esAccion ? 'bg-primary-soft text-primary hover:bg-line' : 'bg-surface text-dark shadow-card hover:bg-primary-soft')}>
               {tecla === 'del' ? <Delete size={24} strokeWidth={2} aria-hidden /> : tecla}
             </button>

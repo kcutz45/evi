@@ -21,6 +21,9 @@ const config: Config = {
       // Outfit es más ancha que la anterior: la guía de marca usa peso 800
       // como máximo y un espaciado de -0.02em. Así font-black y
       // tracking-tight(er) se ven como en la guía en toda la app.
+      // bajo: celular acostado. Con tan poca altura, teclado y monto no caben
+      // uno sobre otro y se ponen lado a lado.
+      screens: { bajo: { raw: '(max-height: 520px)' } },
       fontWeight: { black: '800' },
       letterSpacing: { tighter: '-0.03em', tight: '-0.015em' },
       fontFamily: {

@@ -56,13 +56,11 @@ export default function MetasPage() {
         <ArrowLeft size={17} aria-hidden /> Inicio
       </Link>
       <Header title="Mis metas" subtitle={principal ? `Llevás ${formatCurrency(metas.totalAhorrado)} ahorrados en total` : 'Todavía no tenés metas'} />
-      <div className="flex flex-col gap-3">
-        <FormAlert message={hoja ? null : metas.error} />
+      <div className="flex flex-col gap-3 lg:grid lg:grid-cols-2 lg:items-start lg:gap-4">
+        <div className="empty:hidden lg:col-span-2"><FormAlert message={hoja ? null : metas.error} /></div>
         {metas.isLoading && <div aria-busy className="h-44 animate-pulse rounded-card bg-primary/20" />}
-        {vacio && <MetasVacias onCrear={() => setHoja({ tipo: 'nueva' })} />}
-        {principal && <MetaDestacada meta={principal} {...acciones} />}
-        {resto.length > 0 && <ul className="flex flex-col gap-2.5">{resto.map((m) => <TarjetaMeta key={m.id} meta={m} {...acciones} />)}</ul>}
-        {principal && <p className="rounded-card bg-gold/25 px-4 py-3 text-[13px] font-bold text-gold-ink">{mensajeDeAnimo(metas.data)}</p>}
+        {vacio && <div className="lg:col-span-2"><MetasVacias onCrear={() => setHoja({ tipo: 'nueva' })} /></div>}
+        {principal && <ListaDeMetas principal={principal} resto={resto} animo={mensajeDeAnimo(metas.data)} {...acciones} />}
       </div>
       {hoja?.tipo === 'nueva' && <HojaNuevaMeta guardando={metas.guardando} error={metas.error} onCrear={metas.crear} onCerrar={cerrar} />}
       {hoja?.tipo === 'abono' && (
@@ -70,6 +68,29 @@ export default function MetasPage() {
           guardando={metas.guardando} error={metas.error} onGuardar={metas.abonar} onCerrar={cerrar} />
       )}
     </PageContainer>
+  );
+}
+
+interface ListaDeMetasProps {
+  principal: Meta;
+  resto: Meta[];
+  animo: string;
+  onAbonar: (meta: Meta) => void;
+  onRetirar: (meta: Meta) => void;
+}
+
+// En PC: la meta principal a la izquierda y las demás a la derecha.
+function ListaDeMetas({ principal, resto, animo, ...acciones }: ListaDeMetasProps) {
+  return (
+    <>
+      <div className="flex flex-col gap-3">
+        <MetaDestacada meta={principal} {...acciones} />
+        <p className="rounded-card bg-gold/25 px-4 py-3 text-[13px] font-bold text-gold-ink">{animo}</p>
+      </div>
+      {resto.length > 0 && (
+        <ul className="grid gap-2.5 md:grid-cols-2 lg:grid-cols-1">{resto.map((m) => <TarjetaMeta key={m.id} meta={m} {...acciones} />)}</ul>
+      )}
+    </>
   );
 }
 
