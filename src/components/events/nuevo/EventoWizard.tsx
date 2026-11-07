@@ -15,6 +15,7 @@
  */
 'use client';
 
+import type { FormEvent } from 'react';
 import { ArrowRight } from 'lucide-react';
 import { WizardHeader } from '@/components/finance/registro/WizardHeader';
 import { Button } from '@/components/ui/Button';
@@ -42,23 +43,34 @@ export function EventoWizard({ creando, error, onCrear, onCerrar }: EventoWizard
   const w = useEventoWizard();
   const esUltimo = w.paso === 'presupuesto';
 
+  const avanzar = () => {
+    if (!w.puedeAvanzar || creando) return;
+    if (esUltimo) onCrear(w.construir());
+    else w.siguiente();
+  };
+  const enviar = (e: FormEvent) => {
+    e.preventDefault();
+    avanzar();
+  };
+
   return (
     <PantallaPasoAPaso>
       <WizardHeader numeroDePaso={w.numeroDePaso} totalDePasos={PASOS_EVENTO.length} {...TEXTOS[w.paso]}
         onVolver={w.paso === 'nombre' ? null : w.volver} onCerrar={onCerrar} />
-      <div key={w.paso} className="flex min-h-0 flex-1 animate-step-in flex-col motion-reduce:animate-none">
-        {w.paso === 'nombre' && <PasoNombreEvento w={w} />}
-        {w.paso === 'fecha' && <PasoFechaEvento w={w} />}
-        {esUltimo && <PasoPresupuesto calc={w.presupuesto} />}
-      </div>
-      <div className="flex flex-col gap-2 px-5 pb-5 pt-3">
-        {esUltimo && error && <p role="alert" className="text-center text-xs font-bold text-gold-dark">{error}</p>}
-        <Button variant={esUltimo ? 'mint' : 'primary'} size="lg" fullWidth
-          disabled={!w.puedeAvanzar || creando} icon={esUltimo ? undefined : <ArrowRight size={20} strokeWidth={2.6} />}
-          onClick={esUltimo ? () => onCrear(w.construir()) : w.siguiente}>
-          {esUltimo ? (creando ? 'Creando…' : 'Crear evento') : 'Siguiente'}
-        </Button>
-      </div>
+      <form onSubmit={enviar} noValidate className="flex min-h-0 flex-1 flex-col">
+        <div key={w.paso} className="flex min-h-0 flex-1 animate-step-in flex-col motion-reduce:animate-none">
+          {w.paso === 'nombre' && <PasoNombreEvento w={w} />}
+          {w.paso === 'fecha' && <PasoFechaEvento w={w} />}
+          {esUltimo && <PasoPresupuesto calc={w.presupuesto} onEnter={avanzar} />}
+        </div>
+        <div className="flex flex-col gap-2 px-5 pb-5 pt-3">
+          {esUltimo && error && <p role="alert" className="text-center text-xs font-bold text-gold-dark">{error}</p>}
+          <Button type="submit" variant={esUltimo ? 'mint' : 'primary'} size="lg" fullWidth
+            disabled={!w.puedeAvanzar || creando} icon={esUltimo ? undefined : <ArrowRight size={20} strokeWidth={2.6} />}>
+            {esUltimo ? (creando ? 'Creando…' : 'Crear evento') : 'Siguiente'}
+          </Button>
+        </div>
+      </form>
     </PantallaPasoAPaso>
   );
 }

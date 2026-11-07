@@ -9,11 +9,15 @@
  *            calendario del celular. El calendario sigue disponible.
  * ---------------------------------------------------------------
  */
+'use client';
+
+import { useEffect, useRef } from 'react';
 import { MapPin } from 'lucide-react';
 import { Input } from '@/components/ui/Input';
 import type { EventoWizardEstado } from '@/hooks/useEventoWizard';
 import { cn } from '@/lib/cn';
 import { cuentaRegresiva, enDiasGT, fechaDeEvento, hoyGT, proximoSabadoGT } from '@/lib/dates';
+import { tieneMouse } from '@/lib/dispositivo';
 import { NOMBRE_EVENTO_MAX } from '@/types/event';
 
 const DIAS_SEMANA = 7;
@@ -28,6 +32,12 @@ function atajos() {
 }
 
 export function PasoFechaEvento({ w }: { w: EventoWizardEstado }) {
+  const campoFecha = useRef<HTMLInputElement>(null);
+  // En PC se escribe la fecha de una vez; en celular abriría el calendario solo.
+  useEffect(() => {
+    if (tieneMouse()) campoFecha.current?.focus();
+  }, []);
+
   return (
     <div className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto px-5 pb-4">
       <div className="flex flex-wrap gap-2">
@@ -39,7 +49,7 @@ export function PasoFechaEvento({ w }: { w: EventoWizardEstado }) {
           </button>
         ))}
       </div>
-      <Input label="O elegí otra fecha" type="date" value={w.fecha} min={hoyGT()}
+      <Input ref={campoFecha} label="O elegí otra fecha" type="date" value={w.fecha} min={hoyGT()}
         onChange={(e) => w.setFecha(e.target.value)} />
       {w.fecha && (
         <p className="rounded-tile bg-primary-soft px-4 py-3 text-center text-sm font-extrabold text-primary" aria-live="polite">

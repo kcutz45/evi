@@ -12,6 +12,7 @@
  * DEPENDE DE: hooks/useDivision.ts
  * ---------------------------------------------------------------
  */
+import type { FormEvent } from 'react';
 import { Check, Plus, UserRound, X } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import type { Division, FilaPersona } from '@/hooks/useDivision';
@@ -27,9 +28,12 @@ interface PasoDividirProps {
 }
 
 export function PasoDividir({ total, division: d, errorServidor, guardando, onGuardar }: PasoDividirProps) {
-  const miParteValida = d.miParte > 0;
+  const enviar = (e: FormEvent) => {
+    e.preventDefault();
+    onGuardar();
+  };
   return (
-    <div className="flex min-h-0 flex-1 animate-step-in flex-col motion-reduce:animate-none">
+    <form onSubmit={enviar} noValidate className="flex min-h-0 flex-1 animate-step-in flex-col motion-reduce:animate-none">
       <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto px-5 pb-4">
         <p className="text-sm font-bold text-muted">Total de la cuenta: <strong className="text-dark">{formatCurrency(total)}</strong></p>
         <ul className="flex flex-col gap-2">
@@ -46,22 +50,29 @@ export function PasoDividir({ total, division: d, errorServidor, guardando, onGu
           <Button variant="ghost" className="flex-1" onClick={d.repartirIgual}>Partes iguales</Button>
         </div>
       </div>
-      <div className="flex flex-col gap-3 border-t border-line bg-light px-5 pb-5 pt-3">
-        <div className="flex items-baseline justify-between">
-          <span className="text-sm font-extrabold text-muted">Tu parte (tu gasto)</span>
-          <span className={cn('tabular text-3xl font-black tracking-tighter', miParteValida ? 'text-dark' : 'text-gold-dark')}>
-            {formatCurrency(d.miParte)}
-          </span>
-        </div>
-        <p role={d.error || errorServidor ? 'alert' : undefined}
-          className={cn('text-xs font-bold leading-snug', d.error || errorServidor ? 'text-gold-dark' : 'text-muted-soft')}>
-          {errorServidor ?? d.error ?? `Lo demás (${formatCurrency(total - d.miParte)}) queda en «Te deben» hasta que te paguen.`}
-        </p>
-        <Button variant="mint" size="lg" fullWidth disabled={d.error !== null || guardando} onClick={onGuardar}
-          icon={<Check size={21} strokeWidth={2.6} />}>
-          {guardando ? 'Guardando…' : 'Guardar y anotar deudas'}
-        </Button>
+      <PieDividir total={total} division={d} errorServidor={errorServidor} guardando={guardando} />
+    </form>
+  );
+}
+
+function PieDividir({ total, division: d, errorServidor, guardando }: Omit<PasoDividirProps, 'onGuardar'>) {
+  const hayError = Boolean(d.error || errorServidor);
+  return (
+    <div className="flex flex-col gap-3 border-t border-line bg-light px-5 pb-5 pt-3">
+      <div className="flex items-baseline justify-between">
+        <span className="text-sm font-extrabold text-muted">Tu parte (tu gasto)</span>
+        <span className={cn('tabular text-3xl font-black tracking-tighter', d.miParte > 0 ? 'text-dark' : 'text-gold-dark')}>
+          {formatCurrency(d.miParte)}
+        </span>
       </div>
+      <p role={hayError ? 'alert' : undefined}
+        className={cn('text-xs font-bold leading-snug', hayError ? 'text-gold-dark' : 'text-muted-soft')}>
+        {errorServidor ?? d.error ?? `Lo demás (${formatCurrency(total - d.miParte)}) queda en «Te deben» hasta que te paguen.`}
+      </p>
+      <Button type="submit" variant="mint" size="lg" fullWidth disabled={d.error !== null || guardando}
+        icon={<Check size={21} strokeWidth={2.6} />}>
+        {guardando ? 'Guardando…' : 'Guardar y anotar deudas'}
+      </Button>
     </div>
   );
 }

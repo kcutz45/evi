@@ -9,11 +9,13 @@
  * ---------------------------------------------------------------
  */
 import { AppIcon, EVENT_ICON_NAMES } from '@/components/ui/AppIcon';
+import { useFocoConFlechas } from '@/hooks/useFocoConFlechas';
 import type { EventoWizardEstado } from '@/hooks/useEventoWizard';
 import { cn } from '@/lib/cn';
 import { NOMBRE_EVENTO_MAX } from '@/types/event';
 
 export function PasoNombreEvento({ w }: { w: EventoWizardEstado }) {
+  const iconos = useFocoConFlechas<HTMLDivElement>();
   return (
     <div className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto px-5 pb-4">
       <label className="flex items-center gap-3 rounded-card bg-surface p-3 shadow-card">
@@ -27,7 +29,7 @@ export function PasoNombreEvento({ w }: { w: EventoWizardEstado }) {
       </label>
       <section className="flex flex-col gap-2">
         <h3 className="text-xs font-black uppercase tracking-widest text-muted-soft">Elegí un ícono</h3>
-        <div role="radiogroup" aria-label="Ícono del evento" className="grid grid-cols-5 gap-2">
+        <div ref={iconos} role="radiogroup" aria-label="Ícono del evento" className="grid grid-cols-5 gap-2">
           {EVENT_ICON_NAMES.map((nombreIcono) => (
             <button key={nombreIcono} type="button" role="radio" aria-checked={w.icono === nombreIcono}
               aria-label={nombreIcono} onClick={() => w.setIcono(nombreIcono)}

@@ -19,6 +19,7 @@ import { Pencil, Trash2 } from 'lucide-react';
 import { FormAlert } from '@/components/auth/AuthHeading';
 import { AppIcon } from '@/components/ui/AppIcon';
 import { Button } from '@/components/ui/Button';
+import { MarcoHoja } from '@/components/ui/MarcoHoja';
 import { cn } from '@/lib/cn';
 import { fechaLarga } from '@/lib/dates';
 import { formatCurrency, formatSignedCurrency } from '@/lib/formatCurrency';
@@ -38,11 +39,7 @@ export function MovementDetailSheet({ movimiento: m, ocupado, error, onEditar, o
   const esIngreso = m.type === 'ingreso';
 
   return (
-    <div className="hoja-marco">
-      <button type="button" aria-label="Cerrar detalle" onClick={onCerrar} className="absolute inset-0 bg-black/60" />
-      <div role="dialog" aria-modal="true" aria-label="Detalle del movimiento"
-        className="hoja-panel max-h-[92dvh] overflow-y-auto px-5 pb-6 pt-2 md:pt-5">
-        <div aria-hidden className="mx-auto mb-4 h-[5px] w-11 rounded-full bg-line md:hidden" />
+    <MarcoHoja onCerrar={onCerrar} etiquetaCerrar="Cerrar detalle" etiqueta="Detalle del movimiento" clasePanel="max-h-[92dvh]">
         <div className="flex flex-col items-center gap-2 text-center">
           <span className={cn('grid h-14 w-14 place-items-center rounded-tile',
             esIngreso ? 'bg-mint-soft text-mint-dark' : 'bg-primary-soft text-primary')}>
@@ -64,8 +61,7 @@ export function MovementDetailSheet({ movimiento: m, ocupado, error, onEditar, o
             <Button icon={<Pencil size={17} aria-hidden />} onClick={onEditar}>Editar</Button>
           </div>
         )}
-      </div>
-    </div>
+    </MarcoHoja>
   );
 }
 

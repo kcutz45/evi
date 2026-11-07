@@ -68,7 +68,8 @@ export function PasoMonto(props: PasoMontoProps) {
         {props.error && <p role="alert" className="text-center text-xs font-bold text-gold-dark">{props.error}</p>}
       </div>
       <div className="flex flex-col gap-3 px-4 pb-5 pt-3 bajo:w-1/2 bajo:gap-2 bajo:overflow-y-auto bajo:pb-2 bajo:pt-0">
-        <CalculatorKeypad onTecla={calc.presionar} />
+        <CalculatorKeypad onTecla={calc.presionar} ayuda="Escribí con tu teclado · Enter guarda · Esc vuelve"
+          onEnter={() => calc.esValido && !props.guardando && props.onGuardar()} />
         <Button variant="mint" size="lg" fullWidth disabled={!calc.esValido || props.guardando}
           onClick={props.onGuardar} icon={<Check size={21} strokeWidth={2.6} />}>
           {props.guardando ? 'Guardando…' : 'Guardar'}

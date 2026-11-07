@@ -11,12 +11,18 @@
  *            altura) sigue a pantalla completa, aprovechando todo el ancho.
  * ---------------------------------------------------------------
  */
+'use client';
+
 import type { ReactNode } from 'react';
+import { useVentana } from '@/hooks/useVentana';
 
 export function PantallaPasoAPaso({ children }: { children: ReactNode }) {
+  // Esc lo maneja WizardHeader: vuelve un paso, no cierra todo.
+  const panel = useVentana<HTMLDivElement>();
   return (
     <div className="fixed inset-0 z-50 bg-light md:grid md:place-items-center md:bg-black/60 md:p-6 md:backdrop-blur-sm bajo:block bajo:bg-light bajo:p-0">
-      <div className="mx-auto flex h-dvh max-w-md flex-col md:h-[min(800px,100%)] md:w-full md:overflow-hidden md:rounded-sheet md:bg-light md:shadow-float bajo:h-dvh bajo:max-w-3xl bajo:rounded-none bajo:shadow-none">
+      <div ref={panel} tabIndex={-1} role="dialog" aria-modal="true" aria-label="Paso a paso"
+        className="mx-auto flex h-dvh max-w-md flex-col outline-none md:h-[min(800px,100%)] md:w-full md:overflow-hidden md:rounded-sheet md:bg-light md:shadow-float bajo:h-dvh bajo:max-w-3xl bajo:rounded-none bajo:shadow-none">
         {children}
       </div>
     </div>

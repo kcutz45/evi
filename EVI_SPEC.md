@@ -1,7 +1,7 @@
 # EVI_SPEC.md — EVI
 
 > **Documento de arquitectura y especificación técnica del MVP**
-> Versión 1.15 · 7 de noviembre de 2026
+> Versión 1.16 · 7 de noviembre de 2026
 > Proyecto académico — Licenciatura en Informática e Inteligencia de Negocios, UMES
 > Equipo: 3 integrantes · Plazo: 8 semanas · Inversión de infraestructura: ≈ Q300
 
@@ -166,7 +166,7 @@ Prueba rápida: *¿puedo mover este componente a otro proyecto con otra base de 
 │
 ├── /components
 │   ├── /ui                   # Button, Card, Input, Badge, AppIcon, Hoja, CampoMonto,
-│   │                         # MontoGrande, Brillo, Logo (LogoEvi, IsotipoEvi), PantallaPasoAPaso
+│   │                         # MontoGrande, Brillo, Logo (LogoEvi, IsotipoEvi), PantallaPasoAPaso, MarcoHoja
 │   ├── /finance              # BalanceCard, MovementItem, MovementList, AddMovementButton,
 │   │   │                     # DashboardSections, EventPicker, MonthlyChart
 │   │   └── /registro         # RegistroWizard, WizardHeader, PasoTipo, PasoCategoria,
@@ -287,7 +287,9 @@ const isNearLimit = usage >= BUDGET_ALERT_THRESHOLD;
 
 Radio de borde: 16–20 px. Tipografía **Outfit** (peso máximo 800, espaciado −0.02em en títulos). **Logotipo** "EVI" de trazo continuo (E de un solo trazo; V e I unidas arriba; trazo 52, radio 50) e **isotipo de flujo**, en `components/ui/Logo.tsx`: violeta sobre claro, blanco con la V menta sobre oscuro, blanco sobre violeta. Ícono de la pestaña: isotipo sobre violeta (`app/icon.svg`).
 
-**Tamaños de pantalla:** móvil primero. *Celular:* cápsula de navegación abajo y una columna; acostado (`bajo:`, alto ≤ 520 px) monto y teclado van lado a lado. *Tablet (≥ 768 px):* contenido hasta `max-w-2xl`, tarjetas en 2 columnas, hojas y flujos paso a paso como ventana centrada. *PC (≥ 1024 px):* barra lateral con las 6 secciones (incluye Cuentas y Metas), contenido hasta `max-w-5xl` y páginas en columnas. Moneda siempre `Q1,250.00`. Todo texto en español de Guatemala.
+**Tamaños de pantalla:** móvil primero. *Celular:* cápsula de navegación abajo y una columna; acostado (`bajo:`, alto ≤ 520 px) monto y teclado van lado a lado. *Tablet (≥ 768 px):* contenido hasta `max-w-2xl`, tarjetas en 2 columnas, hojas y flujos paso a paso como ventana centrada. *PC (≥ 1024 px):* barra lateral con las 6 secciones (incluye Cuentas y Metas), contenido hasta `max-w-5xl` y páginas en columnas.
+
+**Teclado (PC):** todo se puede usar sin mouse. Montos: números, punto o coma, Retroceso, `+ - * /` en la Calculadora y Enter (`useTecladoFisico`; la tecla dibujada se ilumina). Listas y cuadrículas: flechas, primeras letras y G/I en "¿Qué querés registrar?" (`useFocoConFlechas`). Ventanas: Enter envía, Esc vuelve o cierra, y Tab no se sale de la ventana (`useVentana`). Las ayudas de teclado solo se ven con mouse (variante `mouse:`); en pantallas táctiles no se enfoca nada solo, para no abrir el teclado. Moneda siempre `Q1,250.00`. Todo texto en español de Guatemala.
 
 ---
 
@@ -945,6 +947,7 @@ Una funcionalidad está lista cuando cumple **todo** lo siguiente:
 | 2026-10-31 | 1.13 | Inicio: el número principal pasa a ser **Tu dinero** (suma de las cuentas) con "Entró / Salió en <mes>" y "Este mes te quedan" (ingresos − gastos) debajo; se quita la tarjeta aparte "Tu dinero hoy". Las reglas no cambian: los gastos de eventos activos cuentan en el mes al cerrar el evento (§4d) |
 | 2026-10-31 | 1.14 | Guía de marca "Mayúsculas con estilo": logotipo de trazo continuo e isotipo de flujo (landing con isotipo, acceso con descriptor "EVENTOS Y DINERO", ícono de la pestaña), tipografía Outfit y textos en grises cálidos |
 | 2026-11-07 | 1.15 | App responsiva: celular (también acostado), tablet y PC. Barra lateral en PC, páginas en columnas, hojas y flujos paso a paso como ventana centrada desde tablet |
+| 2026-11-07 | 1.16 | Teclado físico en PC: montos, calculadora, categorías, cuentas, Enter y Esc en todos los formularios y ventanas, y foco dentro de las ventanas |
 
 ---
 

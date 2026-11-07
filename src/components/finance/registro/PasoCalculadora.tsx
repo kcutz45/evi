@@ -41,7 +41,8 @@ export function PasoCalculadora({ montoInicial, onUsar }: PasoCalculadoraProps) 
         </output>
       </div>
       <div className="flex flex-col gap-3 px-4 pb-5 pt-4 bajo:w-1/2 bajo:gap-2 bajo:overflow-y-auto bajo:pb-2 bajo:pt-0">
-        <CalculatorKeypad onTecla={calc.presionar} conOperaciones />
+        <CalculatorKeypad onTecla={calc.presionar} conOperaciones ayuda="Teclado: números y + − * / · Enter usa el resultado · Esc vuelve"
+          onEnter={() => calc.esValido && calc.valor !== null && onUsar(calc.valor)} />
         <Button variant="mint" size="lg" fullWidth disabled={!calc.esValido}
           onClick={() => calc.valor !== null && onUsar(calc.valor)} icon={<CornerDownLeft size={20} strokeWidth={2.6} />}>
           Usar este resultado

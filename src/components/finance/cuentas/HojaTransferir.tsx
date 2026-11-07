@@ -40,14 +40,13 @@ export function HojaTransferir({ cuentas, guardando, error, onTransferir, onCerr
   };
 
   return (
-    <Hoja titulo="Transferir" subtitulo="Mové dinero entre tus cuentas. No es gasto ni ingreso." onCerrar={onCerrar}>
+    <Hoja titulo="Transferir" subtitulo="Mové dinero entre tus cuentas. No es gasto ni ingreso." onCerrar={onCerrar} onEnviar={enviar}>
       <SelectorDeCuenta titulo="Sale de" cuentas={cuentas} elegida={desde} onElegir={setDesde} />
       <ArrowDown size={20} className="self-center text-primary" aria-hidden />
       <SelectorDeCuenta titulo="Llega a" cuentas={cuentas} elegida={hacia} onElegir={setHacia} />
       <CampoMonto etiqueta="¿Cuánto?" valor={texto} onCambiar={setTexto} />
       <FormAlert message={desde === hacia ? 'Elegí dos cuentas distintas' : error} />
-      <Button variant="mint" size="lg" fullWidth disabled={guardando || monto === null || monto <= 0 || desde === hacia}
-        onClick={enviar}>
+      <Button type="submit" variant="mint" size="lg" fullWidth disabled={guardando || monto === null || monto <= 0 || desde === hacia}>
         {guardando ? 'Transfiriendo…' : 'Transferir'}
       </Button>
     </Hoja>

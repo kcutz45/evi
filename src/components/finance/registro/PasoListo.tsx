@@ -41,7 +41,7 @@ export function PasoListo({ esEdicion, monto, categoria, esIngreso, evento, teDe
   }, [onListo, duracion]);
 
   return (
-    <button type="button" onClick={onListo} aria-label="Volver al inicio"
+    <button type="button" onClick={onListo} aria-label="Volver al inicio" autoFocus
       className="flex h-full w-full flex-col items-center justify-center gap-4 bg-mint px-8 text-center text-mint-ink">
       <span className="grid h-24 w-24 animate-pop place-items-center rounded-full bg-surface text-mint-dark shadow-glow-mint motion-reduce:animate-none">
         <Check size={52} strokeWidth={3} aria-hidden />

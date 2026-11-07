@@ -17,6 +17,7 @@ import { SelectorDeCuenta } from '@/components/finance/cuentas/SelectorDeCuenta'
 import { Button } from '@/components/ui/Button';
 import { CampoMonto } from '@/components/ui/CampoMonto';
 import { Hoja } from '@/components/ui/Hoja';
+import { tieneMouse } from '@/lib/dispositivo';
 import { formatCurrency, leerMonto } from '@/lib/formatCurrency';
 import { faltante } from '@/lib/metas';
 import type { Cuenta } from '@/types/account';
@@ -40,6 +41,8 @@ export function HojaAbonar(props: HojaAbonarProps) {
   const [cuentaId, setCuentaId] = useState<string | null>(props.cuentaPorDefecto);
   const [texto, setTexto] = useState('');
   const monto = leerMonto(texto);
+  // En PC se escribe de una vez; en celular no se abre el teclado solo.
+  const [tieneMouseAlAbrir] = useState(tieneMouse);
 
   const guardar = async () => {
     if (!monto || monto <= 0) return;
@@ -47,7 +50,7 @@ export function HojaAbonar(props: HojaAbonarProps) {
   };
 
   return (
-    <Hoja titulo={esRetiro ? `Retirar de ${meta.nombre}` : `Abonar a ${meta.nombre}`} onCerrar={props.onCerrar}
+    <Hoja titulo={esRetiro ? `Retirar de ${meta.nombre}` : `Abonar a ${meta.nombre}`} onCerrar={props.onCerrar} onEnviar={guardar}
       subtitulo={esRetiro ? `Llevás ${formatCurrency(meta.ahorrado)} ahorrados.` : `Te faltan ${formatCurrency(faltante(meta))}.`}>
       {!esRetiro && (
         <div className="flex gap-2">
@@ -57,13 +60,13 @@ export function HojaAbonar(props: HojaAbonarProps) {
           ))}
         </div>
       )}
-      <CampoMonto etiqueta="¿Cuánto?" valor={texto} onCambiar={setTexto} />
+      <CampoMonto etiqueta="¿Cuánto?" valor={texto} onCambiar={setTexto} autoFocus={tieneMouseAlAbrir} />
       {cuentas.length > 0 && (
         <SelectorDeCuenta titulo={esRetiro ? '¿A qué cuenta vuelve?' : '¿De qué cuenta sale?'} cuentas={cuentas}
           elegida={cuentaId} onElegir={setCuentaId} />
       )}
       <FormAlert message={texto && monto === null ? 'Escribí un monto válido, por ejemplo 150' : props.error} />
-      <Button variant="mint" size="lg" fullWidth disabled={props.guardando || !monto || monto <= 0} onClick={guardar}>
+      <Button type="submit" variant="mint" size="lg" fullWidth disabled={props.guardando || !monto || monto <= 0}>
         {props.guardando ? 'Guardando…' : esRetiro ? 'Retirar' : 'Abonar'}
       </Button>
     </Hoja>

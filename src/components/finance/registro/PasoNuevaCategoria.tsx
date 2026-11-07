@@ -16,10 +16,11 @@
  */
 'use client';
 
-import { useState } from 'react';
+import { useState, type FormEvent } from 'react';
 import { Check } from 'lucide-react';
 import { AppIcon, ICONOS_CATEGORIA } from '@/components/ui/AppIcon';
 import { Button } from '@/components/ui/Button';
+import { useFocoConFlechas } from '@/hooks/useFocoConFlechas';
 import { cn } from '@/lib/cn';
 import { NOMBRE_CATEGORIA_MAX } from '@/types/category';
 
@@ -37,9 +38,14 @@ export function PasoNuevaCategoria({ esIngreso, creando, error, onCrear }: PasoN
   // reaparece uno viejo al volver a abrir la pantalla.
   const [intento, setIntento] = useState(false);
   const tono = esIngreso ? 'bg-mint-soft text-mint-dark' : 'bg-primary-soft text-primary';
+  const enviar = (e: FormEvent) => {
+    e.preventDefault();
+    setIntento(true);
+    onCrear(nombre, icono);
+  };
 
   return (
-    <div className="flex min-h-0 flex-1 animate-step-in flex-col motion-reduce:animate-none">
+    <form onSubmit={enviar} noValidate className="flex min-h-0 flex-1 animate-step-in flex-col motion-reduce:animate-none">
       <div className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto px-5 pb-4">
         <label className="flex items-center gap-3 rounded-card bg-surface p-3 shadow-card">
           <span className={cn('grid h-12 w-12 flex-none place-items-center rounded-full', tono)}>
@@ -54,20 +60,21 @@ export function PasoNuevaCategoria({ esIngreso, creando, error, onCrear }: PasoN
       </div>
       <div className="flex flex-col gap-2 px-5 pb-5 pt-3">
         {intento && error && <p role="alert" className="text-center text-xs font-bold text-gold-dark">{error}</p>}
-        <Button variant="mint" size="lg" fullWidth disabled={nombre.trim() === '' || creando}
-          onClick={() => { setIntento(true); onCrear(nombre, icono); }} icon={<Check size={21} strokeWidth={2.6} />}>
+        <Button type="submit" variant="mint" size="lg" fullWidth disabled={nombre.trim() === '' || creando}
+          icon={<Check size={21} strokeWidth={2.6} />}>
           {creando ? 'Creando…' : 'Crear y usar'}
         </Button>
       </div>
-    </div>
+    </form>
   );
 }
 
 function SelectorIcono({ elegido, onElegir }: { elegido: string; onElegir: (icono: string) => void }) {
+  const iconos = useFocoConFlechas<HTMLDivElement>();
   return (
     <section className="flex flex-col gap-2">
       <h3 className="text-xs font-black uppercase tracking-widest text-muted-soft">Elegí un ícono</h3>
-      <div role="radiogroup" aria-label="Ícono" className="grid grid-cols-6 gap-2">
+      <div ref={iconos} role="radiogroup" aria-label="Ícono" className="grid grid-cols-6 gap-2">
         {ICONOS_CATEGORIA.map((nombreIcono) => (
           <button key={nombreIcono} type="button" role="radio" aria-checked={elegido === nombreIcono}
             aria-label={nombreIcono} onClick={() => onElegir(nombreIcono)}

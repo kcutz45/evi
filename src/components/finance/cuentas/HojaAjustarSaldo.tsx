@@ -42,10 +42,10 @@ export function HojaAjustarSaldo({ cuenta, guardando, error, onAjustar, onCerrar
 
   if (revisando && monto !== null) {
     return (
-      <Hoja titulo="¿Confirmás el cambio?" subtitulo={cuenta.nombre} onCerrar={onCerrar}>
+      <Hoja titulo="¿Confirmás el cambio?" subtitulo={cuenta.nombre} onCerrar={onCerrar} onEnviar={confirmar}>
         <Comparacion antes={cuenta.saldo} despues={monto} />
         <FormAlert message={error} />
-        <Button variant="mint" size="lg" fullWidth disabled={guardando} onClick={confirmar}>
+        <Button type="submit" variant="mint" size="lg" fullWidth disabled={guardando}>
           {guardando ? 'Guardando…' : 'Sí, corregir el saldo'}
         </Button>
         <Button variant="ghost" fullWidth disabled={guardando} onClick={() => setRevisando(false)}>Volver</Button>
@@ -54,14 +54,15 @@ export function HojaAjustarSaldo({ cuenta, guardando, error, onAjustar, onCerrar
   }
 
   return (
-    <Hoja titulo="Corregir saldo" subtitulo={`EVI calcula que en ${cuenta.nombre} tenés ${formatCurrency(cuenta.saldo)}.`} onCerrar={onCerrar}>
+    <Hoja titulo="Corregir saldo" subtitulo={`EVI calcula que en ${cuenta.nombre} tenés ${formatCurrency(cuenta.saldo)}.`} onCerrar={onCerrar}
+      onEnviar={() => setRevisando(true)}>
       <p className="flex items-start gap-2 rounded-tile bg-gold/25 px-3 py-2.5 text-[12.5px] font-bold text-gold-ink">
         <TriangleAlert size={16} className="mt-px flex-none text-gold-dark" aria-hidden />
         Usalo solo si el saldo no coincide con lo que tenés de verdad. Si fue un gasto, mejor registralo.
       </p>
       <CampoMonto etiqueta="¿Cuánto tenés hoy de verdad?" valor={texto} onCambiar={setTexto} autoFocus />
       <FormAlert message={texto && monto === null ? 'Escribí un monto válido, por ejemplo 1250.50' : null} />
-      <Button size="lg" fullWidth disabled={!cambia} onClick={() => setRevisando(true)}>Revisar el cambio</Button>
+      <Button type="submit" size="lg" fullWidth disabled={!cambia}>Revisar el cambio</Button>
     </Hoja>
   );
 }

@@ -58,6 +58,11 @@
     @apply bg-light text-dark antialiased transition-colors duration-300;
   }
 
+  /* Con teclado siempre se ve dónde está el foco (con mouse o dedo no). */
+  :focus-visible {
+    @apply outline outline-2 outline-offset-2 outline-primary;
+  }
+
   /* Los montos se alinean por dígito en listas y tarjetas. */
   .tabular {
     font-variant-numeric: tabular-nums;

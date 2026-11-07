@@ -17,6 +17,7 @@
 import { useState } from 'react';
 import { LogOut } from 'lucide-react';
 import { Badge } from '@/components/ui/Badge';
+import { useTeclaEsc } from '@/hooks/useTeclaEsc';
 import { RUTA_LOGIN, navegarConRecarga } from '@/lib/routes';
 import { planLabel } from '@/lib/text';
 import type { AuthResultado } from '@/types/auth';
@@ -33,6 +34,8 @@ interface UserMenuProps {
 export function UserMenu({ nombre, plan, onLogout }: UserMenuProps) {
   const [abierto, setAbierto] = useState(false);
   const [saliendo, setSaliendo] = useState(false);
+
+  useTeclaEsc(() => setAbierto(false), abierto);
 
   const cerrarSesion = async () => {
     setSaliendo(true);

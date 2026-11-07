@@ -17,6 +17,7 @@
 
 import { Check, CircleCheck, Info } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
+import { MarcoHoja } from '@/components/ui/MarcoHoja';
 import { formatCurrency } from '@/lib/formatCurrency';
 import { CloseEventSummary } from './CloseEventSummary';
 import { TransferAnimation } from './TransferAnimation';
@@ -38,12 +39,8 @@ export function CloseEventModal(props: CloseEventModalProps) {
   if (!props.isOpen) return null;
 
   return (
-    <div className="hoja-marco">
-      <button type="button" aria-label="Cancelar cierre" onClick={props.onCancel}
-        className="absolute inset-0 bg-black/70 backdrop-blur-[1.5px]" />
-      <div role="dialog" aria-modal="true" aria-labelledby="close-event-title"
-        className="hoja-panel max-h-full overflow-y-auto px-5 pb-6 pt-2 md:pt-5">
-        <div aria-hidden className="mx-auto mb-3.5 h-[5px] w-11 rounded-full bg-line md:hidden" />
+    <MarcoHoja onCerrar={props.isClosing ? () => undefined : props.onCancel} etiquetaCerrar="Cancelar cierre"
+      tituloId="close-event-title" clasePanel="max-h-full">
         <ModalTitle eventName={props.eventName} />
         <CloseEventSummary planned={props.planned} actual={props.actual} />
         <div className="mt-2.5 rounded-[22px] bg-surface px-4 py-3.5 shadow-card">
@@ -61,8 +58,7 @@ export function CloseEventModal(props: CloseEventModalProps) {
         </p>
         {props.error && <p role="alert" className="mt-2 text-center text-xs font-bold text-gold-dark">{props.error}</p>}
         <ModalActions isClosing={props.isClosing} onConfirm={props.onConfirm} onCancel={props.onCancel} />
-      </div>
-    </div>
+    </MarcoHoja>
   );
 }
 

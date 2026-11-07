@@ -18,6 +18,7 @@ import { Button } from '@/components/ui/Button';
 import { CampoMonto } from '@/components/ui/CampoMonto';
 import { Hoja } from '@/components/ui/Hoja';
 import { Input } from '@/components/ui/Input';
+import { useFocoConFlechas } from '@/hooks/useFocoConFlechas';
 import { cn } from '@/lib/cn';
 import { leerMonto } from '@/lib/formatCurrency';
 import { NOMBRE_CUENTA_MAX, TIPOS_DE_CUENTA, type AccountKind, type NuevaCuenta } from '@/types/account';
@@ -30,6 +31,7 @@ interface HojaNuevaCuentaProps {
 }
 
 export function HojaNuevaCuenta({ guardando, error, onCrear, onCerrar }: HojaNuevaCuentaProps) {
+  const tipos = useFocoConFlechas<HTMLDivElement>();
   const [nombre, setNombre] = useState('');
   const [tipo, setTipo] = useState<AccountKind>('banco');
   const [saldo, setSaldo] = useState('');
@@ -40,8 +42,8 @@ export function HojaNuevaCuenta({ guardando, error, onCrear, onCerrar }: HojaNue
   };
 
   return (
-    <Hoja titulo="Nueva cuenta" subtitulo="Un banco, una billetera digital o donde guardés dinero." onCerrar={onCerrar}>
-      <div role="radiogroup" aria-label="Tipo de cuenta" className="grid grid-cols-2 gap-2">
+    <Hoja titulo="Nueva cuenta" subtitulo="Un banco, una billetera digital o donde guardés dinero." onCerrar={onCerrar} onEnviar={crear}>
+      <div ref={tipos} role="radiogroup" aria-label="Tipo de cuenta" className="grid grid-cols-2 gap-2">
         {TIPOS_DE_CUENTA.map((t) => (
           <button key={t.tipo} type="button" role="radio" aria-checked={tipo === t.tipo} onClick={() => setTipo(t.tipo)}
             className={cn('flex items-center gap-2 rounded-tile px-3 py-3 text-sm font-extrabold transition active:scale-95',
@@ -55,7 +57,7 @@ export function HojaNuevaCuenta({ guardando, error, onCrear, onCerrar }: HojaNue
       <CampoMonto etiqueta="¿Cuánto tenés ahí hoy?" valor={saldo} onCambiar={setSaldo} />
       <p className="text-xs font-bold text-muted-soft">No cuenta como ingreso: es tu punto de partida.</p>
       <FormAlert message={monto === null ? 'Escribí un monto válido, por ejemplo 1250.50' : error} />
-      <Button variant="mint" size="lg" fullWidth disabled={guardando || nombre.trim() === '' || monto === null} onClick={crear}>
+      <Button variant="mint" size="lg" fullWidth type="submit" disabled={guardando || nombre.trim() === '' || monto === null}>
         {guardando ? 'Creando…' : 'Crear cuenta'}
       </Button>
     </Hoja>

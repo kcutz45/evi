@@ -13,6 +13,7 @@
 import type { ReactNode } from 'react';
 import { Plus, Sparkles } from 'lucide-react';
 import { AppIcon } from '@/components/ui/AppIcon';
+import { useFocoConFlechas } from '@/hooks/useFocoConFlechas';
 import { ordenarPorFrecuencia } from '@/lib/categoryRanking';
 import { cn } from '@/lib/cn';
 import type { Category } from '@/types/category';
@@ -28,13 +29,15 @@ interface PasoCategoriaProps {
 
 export function PasoCategoria({ categorias, usos, seleccionadaId, onElegir, onNueva }: PasoCategoriaProps) {
   const { frecuentes, resto } = ordenarPorFrecuencia(categorias, usos);
+  const zona = useFocoConFlechas<HTMLDivElement>({ enfocar: true, clave: categorias.length });
 
   if (categorias.length === 0) {
     return <p className="px-5 text-sm font-semibold text-muted">Cargando categorías…</p>;
   }
 
   return (
-    <div className="flex min-h-0 flex-1 animate-step-in flex-col gap-5 overflow-y-auto px-5 pb-6 motion-reduce:animate-none">
+    <div ref={zona} className="flex min-h-0 flex-1 animate-step-in flex-col gap-5 overflow-y-auto px-5 pb-6 motion-reduce:animate-none">
+      <p className="hidden text-xs font-bold text-muted-soft mouse:block">Escribí las primeras letras o usá las flechas · Enter elige · Esc vuelve</p>
       {frecuentes.length > 0 && (
         <Grupo titulo="Tus frecuentes" icono>
           {frecuentes.map((c) => (

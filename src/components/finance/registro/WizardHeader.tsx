@@ -8,7 +8,10 @@
  *            un flujo por pasos se sienta controlado y no un laberinto.
  * ---------------------------------------------------------------
  */
+'use client';
+
 import { ArrowLeft, X } from 'lucide-react';
+import { useTeclaEsc } from '@/hooks/useTeclaEsc';
 import { cn } from '@/lib/cn';
 
 interface WizardHeaderProps {
@@ -23,6 +26,8 @@ interface WizardHeaderProps {
 
 export function WizardHeader(props: WizardHeaderProps) {
   const puedeVolver = props.onVolver !== null;
+  // Esc hace lo mismo que el botón de arriba a la izquierda.
+  useTeclaEsc(props.onVolver ?? props.onCerrar);
   return (
     <header className="flex flex-col gap-4 px-5 pb-4 pt-4 bajo:gap-1 bajo:pb-2 bajo:pt-2">
       <div className="flex items-center gap-3">

@@ -11,6 +11,7 @@
  */
 import { Check } from 'lucide-react';
 import { AppIcon } from '@/components/ui/AppIcon';
+import { useFocoConFlechas } from '@/hooks/useFocoConFlechas';
 import { cn } from '@/lib/cn';
 import { formatCurrency } from '@/lib/formatCurrency';
 import type { Cuenta } from '@/types/account';
@@ -22,8 +23,9 @@ interface PasoCuentaProps {
 }
 
 export function PasoCuenta({ cuentas, elegidaId, onElegir }: PasoCuentaProps) {
+  const zona = useFocoConFlechas<HTMLDivElement>({ enfocar: true });
   return (
-    <div className="flex min-h-0 flex-1 animate-step-in flex-col gap-2.5 overflow-y-auto px-5 pb-5 motion-reduce:animate-none">
+    <div ref={zona} className="flex min-h-0 flex-1 animate-step-in flex-col gap-2.5 overflow-y-auto px-5 pb-5 motion-reduce:animate-none">
       {cuentas.map((c) => (
         <Opcion key={c.id} elegida={c.id === elegidaId} onClick={() => onElegir(c.id)}
           icono={c.icono} titulo={c.nombre} detalle={`Saldo: ${formatCurrency(c.saldo)}`} />

@@ -12,7 +12,7 @@ import { CalculatorKeypad } from '@/components/finance/registro/CalculatorKeypad
 import type { useCalculator } from '@/hooks/useCalculator';
 import { cn } from '@/lib/cn';
 
-export function PasoPresupuesto({ calc }: { calc: ReturnType<typeof useCalculator> }) {
+export function PasoPresupuesto({ calc, onEnter }: { calc: ReturnType<typeof useCalculator>; onEnter: () => void }) {
   return (
     <div className="flex min-h-0 flex-1 flex-col justify-between gap-3 overflow-y-auto px-4 bajo:flex-row bajo:items-center">
       <div className="flex flex-1 flex-col items-center justify-center" aria-live="polite">
@@ -21,7 +21,7 @@ export function PasoPresupuesto({ calc }: { calc: ReturnType<typeof useCalculato
           {calc.total}
         </output>
       </div>
-      <CalculatorKeypad onTecla={calc.presionar} />
+      <CalculatorKeypad onTecla={calc.presionar} onEnter={onEnter} ayuda="Escribí con tu teclado · Enter crea el evento · Esc vuelve" />
     </div>
   );
 }

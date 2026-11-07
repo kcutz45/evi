@@ -12,27 +12,29 @@
  */
 'use client';
 
-import { useId, type ReactNode } from 'react';
+import { useId, type FormEvent, type ReactNode } from 'react';
+import { MarcoHoja } from './MarcoHoja';
 
 interface HojaProps {
   titulo: string;
   subtitulo?: string;
   onCerrar: () => void;
+  // Enter: si viene, el contenido es un formulario y su botón es type="submit".
+  onEnviar?: () => void;
   children: ReactNode;
 }
 
-export function Hoja({ titulo, subtitulo, onCerrar, children }: HojaProps) {
+export function Hoja({ titulo, subtitulo, onCerrar, onEnviar, children }: HojaProps) {
   const idTitulo = useId();
+  const enviar = (e: FormEvent) => {
+    e.preventDefault();
+    onEnviar?.();
+  };
   return (
-    <div className="hoja-marco">
-      <button type="button" aria-label="Cerrar" onClick={onCerrar} className="absolute inset-0 bg-black/60" />
-      <div role="dialog" aria-modal="true" aria-labelledby={idTitulo}
-        className="hoja-panel max-h-[88dvh] overflow-y-auto px-5 pb-6 pt-2 md:pt-5">
-        <div aria-hidden className="mx-auto mb-3.5 h-[5px] w-11 rounded-full bg-line md:hidden" />
-        <h2 id={idTitulo} className="text-xl font-black tracking-tight">{titulo}</h2>
-        {subtitulo && <p className="mt-0.5 text-[13px] font-semibold text-muted">{subtitulo}</p>}
-        <div className="mt-4 flex flex-col gap-3">{children}</div>
-      </div>
-    </div>
+    <MarcoHoja onCerrar={onCerrar} tituloId={idTitulo} clasePanel="max-h-[88dvh]">
+      <h2 id={idTitulo} className="text-xl font-black tracking-tight">{titulo}</h2>
+      {subtitulo && <p className="mt-0.5 text-[13px] font-semibold text-muted">{subtitulo}</p>}
+      <form onSubmit={enviar} noValidate className="mt-4 flex flex-col gap-3">{children}</form>
+    </MarcoHoja>
   );
 }

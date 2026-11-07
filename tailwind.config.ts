@@ -23,7 +23,8 @@ const config: Config = {
       // tracking-tight(er) se ven como en la guía en toda la app.
       // bajo: celular acostado. Con tan poca altura, teclado y monto no caben
       // uno sobre otro y se ponen lado a lado.
-      screens: { bajo: { raw: '(max-height: 520px)' } },
+      // mouse: PC con teclado; ahí se muestran las ayudas de teclado.
+      screens: { bajo: { raw: '(max-height: 520px)' }, mouse: { raw: '(hover: hover) and (pointer: fine)' } },
       fontWeight: { black: '800' },
       letterSpacing: { tighter: '-0.03em', tight: '-0.015em' },
       fontFamily: {
